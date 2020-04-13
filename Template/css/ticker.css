@@ -1,0 +1,222 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+div#ticker-content table.ticker {
+    width: 100%;
+}
+
+/* Required to set the width */
+div#ticker-content table.ticker tr span {
+    display: inline-block;
+}
+
+div#ticker-content table.ticker tr.header th {
+    background-color: darkgray;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+div#ticker-content table.ticker tr.header th span.mttable {
+    text-align: right;
+    margin-bottom: 0px;
+    background-color: darkgray;    
+}
+
+div#ticker-content table.ticker tr.header th span.headerline {
+    display: inline;
+}
+
+div#ticker-content table.ticker tr.header th span.headerline span {
+    vertical-align: middle;
+}
+
+div#ticker-content table.ticker tr.header th span.event {
+    width: 20%;
+}
+
+div#ticker-content table.ticker tr.header th span.group {
+    width: 30%;
+}
+
+div#ticker-content table.ticker tr.header th span.round {
+    width: 20%;
+}
+
+div#ticker-content table.ticker tr.header th span.time {
+    width: 15%;
+}
+
+div#ticker-content table.ticker tr.header th span.mttable {
+    width: 15%;
+}
+
+div#ticker-content table.ticker tr.match td.name span.flag {
+    padding-right: 5px;
+}
+
+div#ticker-content table.ticker tr.match span.flag img {
+    border: 1px black solid;
+    height: 1em;
+}
+
+div#ticker-content table.ticker tr.match span.flag img[src=""] {
+    display: none;
+}
+
+div#ticker-content table.ticker tr.match td.name span.assoc:before {
+    content: "\a0 ("; /* &nbsp;( */
+}
+
+div#ticker-content table.ticker tr.match td.name span.assoc:after {
+    content: ")";
+}
+
+/* Smartphone Portrait: display header in 2 rows */
+@media screen and (max-width: 767.98px) {
+    div#ticker-content table.ticker tr.header th  span.headerline {
+        display: block;
+    }
+    
+    div#ticker-content table.ticker tr.header th  span.event {
+        width: 50%;
+        text-align: left; 
+    }
+
+    div#ticker-content table.ticker tr.header th  span.group {
+        width: 50%;
+        text-align: left;
+    }
+
+    div#ticker-content table.ticker tr.header th  span.round {
+        width: 50%;
+        text-align: left;
+    }
+
+    div#ticker-content table.ticker tr.header th  span.time {
+        width: 20%;
+        text-align: left;
+    }
+    
+    div#ticker-content table.ticker tr.header th  span.mttable {
+        width: 30%;
+        text-align: right;
+    }
+}
+
+
+div#ticker-content table.ticker tr.team td {
+    font-weight: bold;
+    background-color: lightgray;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+div#ticker-content table.ticker tr.team td span.names {
+    width: 85%;
+}
+
+div#ticker-content table.ticker tr.team td span.names span.left {
+    width: 40%;
+    text-align: right;
+}
+
+div#ticker-content table.ticker tr.team td span.names span.center {
+    width: 5%;
+    text-align: center;
+}
+
+div#ticker-content table.ticker tr.team td span.names span.right {
+    width: 40%;
+    text-align: left;
+}
+
+div#ticker-content table.ticker tr.team td span.result {
+    width: 15%;
+    text-align: right;
+}
+
+div#ticker-content table.ticker tr.match td {
+    padding: 5px;
+    border-style: inset;	
+    border-width: 1px;
+}
+
+div#ticker-content table.ticker tr.match td.name {
+    width: 52%;
+}
+
+div#ticker-content table.ticker tr.match td.name span {
+    display: table-cell;
+}
+
+div#ticker-content table.ticker tr.match td.name span.playerservice {
+    width: 10px;
+    display: table-cell;
+    min-width: 10px;
+    max-width: 10px;
+}
+
+div#ticker-content table.ticker tr.match td.name span.playerservice.service div {
+    /* The service column */  
+    /* Draw a small yellow circle which resembles sometimes a table tennis ball ;) */
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: lightgray;
+}
+
+div#ticker-content table.ticker tr.match td.name span.player {
+    padding-left: 5px;
+}
+
+div#ticker-content table.ticker tr.match td.result {
+    font-weight: bold;
+}
+
+div#ticker-content table.ticker tr.match td.result {
+    width: 6%;
+    text-align: center;
+}
+
+div#ticker-content table.ticker tr.match td.game {
+    width: 6%;
+    text-align: center;
+}
+
+div#ticker-content table.ticker tr.match td.game[colspan="2"] {
+    width: 12%;
+}
+
+div#ticker-content table.ticker tr.match td.game[colspan="3"] {
+    width: 18%;
+}
+
+div#ticker-content table.ticker tr.match td.game[colspan="4"] {
+    width: 24%;
+}
+
+div#ticker-content table.ticker tr.match td.game[colspan="5"] {
+    width: 30%;
+}
+
+div#ticker-content table.ticker tr.match td.game[colspan="6"] {
+    width: 36%;
+}
+
+div#ticker-content table.ticker tr.match td.game[colspan="7"] {
+    width: 24%;
+}
+
+
+@media screen and (max-width: 767.98px) {
+    div#ticker-content table.ticker tr.match:not(.alternate) td.game:not(.current) {
+        display: none;
+    }
+
+    div#ticker-content table.ticker tr.match.alternate td.game {
+        display: table-cell;
+    }
+
+    div#ticker-content table.ticker tr.match.alternate td.name {
+        display: none;
+    }
+}

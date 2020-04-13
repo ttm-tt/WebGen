@@ -1,0 +1,289 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+div#content > h4 {
+    margin-bottom: 1.0em;
+    width: 100%;
+    text-align: center;    
+}
+
+/* Both tables in the page */
+.rr table.rr {
+    width: 100%;
+}
+
+/* The table with the draw **/
+table.rr.draw {
+    empty-cells: show;
+    width: 100%;
+    padding: 5px;
+    border-collapse: collapse;
+    border-style: outset;
+    border-spacing: 0px;
+    border-width: 1px;  
+}
+
+/* Draw table: header name column (include td.pos and td.name) */
+.rr.draw th.name {
+    width: 50%;
+}
+
+/* Draw table: vertical align all texts in body cells */
+.rr.draw td {
+    vertical-align: middle;
+    line-height: 1.0;
+}
+
+/* Draw table: body position cell */
+.rr.draw td.pos {
+    width: 2%;
+    text-align: center;
+}
+
+/* Draw table: body name cell */
+.rr.draw td.name {
+    width: 48%;
+}    
+
+.rr.draw td.name span {
+    display: table-cell;
+}
+
+.rr.draw td.name span.flag {
+    padding-right: 5px;
+}
+
+.rr.draw td.name span.flag img {
+    border: 1px black solid;
+    height: 1em;
+}
+
+.rr.draw td.name span.flag img[src=""] {
+    display: none;
+}
+
+.rr.draw td.name span.plnr {
+    text-align: right;
+    padding-right: 5px;
+    width: 3em;
+}
+
+.rr.draw td.name span.assoc:before {
+    content: "\a0 (";  /* &nbsp;( */
+}
+
+.rr.draw td.name span.assoc:after {
+    content: ")";
+}
+
+
+/* Draw table: cell with the result in the "square" */
+.rr.draw td.result {
+    text-align: center;
+}
+
+/* Draw table: the cells in the square's diagonal with no result */
+.rr.draw td.no-result {
+    background-color: #c0c0c0;            
+}
+
+/* Draw table: header and body cell with the match points */
+.rr.draw th.points, .rr.draw td.points {
+    text-align: center;
+}
+
+/* Draw table: header and cell with the result of played games (or matches) */
+.rr.draw th.games, .rr.draw td.games {
+    text-align: center;
+}
+
+/* Draw table: header and cell with the final standing */
+.rr.draw th.standing, .rr.draw td.standing {
+    text-align: center;
+}
+
+
+/* popover with details results */
+table.rr.draw div.popover {
+    max-width: none;
+}
+
+/* Notes to the group */
+div.rr.notes {
+    margin-bottom: 1em;
+}
+
+/* The table with the matches */
+table.rr.matches {
+    empty-cells: show;
+    width: 100%;
+    padding: 5px;
+    border-collapse: collapse;
+    border-style: outset;
+    border-spacing: 0px;
+    border-width: 1px;
+    table-layout: fixed;
+}
+
+/* The header row */
+table.rr.matches th {
+    padding: 5px;
+    border-style: inset;	
+    border-width: 1px;
+}
+
+
+/* The body rows */
+table.rr.matches td {
+    padding: 5px;
+    border-style: inset;	
+    border-width: 1px;
+}    
+
+.rr.matches tr[data-toggle=collapse] {
+    cursor: pointer;
+    border-top: 1px solid black;
+}
+
+.rr.matches div.left {
+    padding-bottom: 5px;
+    height: 50%;
+}
+
+.rr.matches div.right {
+    padding-top: 5px;
+    height: 50%;
+}
+
+.rr.matches div.winner {
+    font-weight: bold;
+}
+
+.rr.matches td.result {
+    font-weight: bold;
+}
+
+.rr.matches td.result div {
+    font-size: 100%;
+}
+
+.rr.matches td.game {
+}
+
+.rr.matches tr.individual td {
+    border-top-color: lightgray;
+    font-size: 80%;
+}
+
+/* Matches table: The cell with the name */
+.rr.matches td.name {
+    width: 50%;
+}
+
+.rr.matches td.name span {
+    display: table-cell;
+}
+
+.rr.matches td.name span.flag {
+    padding-right: 5px;
+}
+
+.rr.matches td.name span.flag img {
+    border: 1px black solid;
+    margin-right: 5px;
+    height: 1em;
+}
+
+.rr.matches td.name span.flag img[src=""] {
+    display: none;
+}
+
+.rr.matches td.name span.plnr {
+    text-align: right;
+    padding-right: 5px;
+    width: 3em;
+}
+
+.rr.matches td.name span.assoc:before {
+    content: "\a0 (";  /* &nbsp;( */
+}
+
+.rr.matches td.name span.assoc:after {
+    content: ")";
+}
+
+/* Matches table: The cell with the name of the first player */
+.rr.matches td.name.left {
+    border-right-width: 0px;
+}
+
+/* Matches table: The cell with the name of the second player */
+.rr.matches td.name.right {
+    border-left-width: 0px;
+}    
+
+/* Matches table: The cell with the result of that match */
+.rr.matches td.result {
+    text-align: center;
+    vertical-align: middle;
+    width: 6%;
+    font-weight: bold;
+}   
+
+/* Matches table: The cells with the result of the individual games */
+.rr.matches td.game {
+    text-align: center;
+    vertical-align: middle;
+    width: 6%;
+}
+
+.rr.matches td.game[colspan="2"] {
+    width: 12%;
+}
+
+.rr.matches td.game[colspan="3"] {
+    width: 18%;
+}
+
+.rr.matches td.game[colspan="4"] {
+    width: 24%;
+}
+
+.rr.matches td.game[colspan="5"] {
+    width: 30%;
+}
+
+.rr.matches td.game[colspan="6"] {
+    width: 36%;
+}
+
+.rr.matches td.game[colspan="7"] {
+    width: 42%;
+}
+
+/* Matches table: The cell with the schedule of that match */
+.rr.matches td.schedule span + span {
+    padding-left: 0.5em;
+}
+
+/* Hide games on small screens */
+@media screen and (max-width: 767.98px) {
+    .rr.draw .games {
+        display: none;
+    }
+    
+    .rr.matches tr .game {
+        display: none;
+    }
+    
+    .rr.matches tr .name {
+        display: table-cell;
+    }
+    
+    .rr.matches tr.alternate .game {
+        display: table-cell;
+    }
+    
+    .rr.matches tr.alternate .name {
+        display: none;
+    }
+}

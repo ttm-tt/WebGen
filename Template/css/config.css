@@ -1,0 +1,52 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+/* Special settings HERE */
+
+.plnr.remove-me {
+    display: none !important;
+}
+
+header div.logo.remove-me {
+    height: 80px;
+    width: 100%;    
+    background-image: url('../img/logo.jpg'); /* Path is relative to location of stylesheet */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;    
+}
+
+
+footer div.sponsor.remove-me {
+    height: 80px;
+    width: 100%;    
+    background-image: url('../img/sponsor.jpg'); /* Path is relative to location of stylesheet */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;    
+}
+
+
+div#content.remove-me {
+    min-height: 400px;
+}
+
+@media screen and (max-device-width: 767px) {
+    header div.logo {
+        display: none;
+    }
+    
+    footer div.sponsor {
+        display: none;
+    }
+}
+
+
+@media screen and (max-device-height: 767px) {
+    header div.logo {
+        display: none;
+    }
+    
+    footer div.sponsor {
+        display: none;
+    }
+}

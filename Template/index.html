@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>WebGen</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0 user-scalable=yes">
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.css" rel="stylesheet">
+        <link href="css/open-iconic-bootstrap.css" rel="stylesheet">
+        <link href="css/webgen.css" rel="stylesheet">
+        <link href="css/rr.css" rel="stylesheet">
+        <link href="css/ko.css" rel="stylesheet">
+        <link href="css/dates.css" rel="stylesheet">
+        <link href="css/reports.css" rel="stylesheet">
+        <link href="css/ticker.css" rel="stylesheet">
+        <link href="css/news.css" rel="stylesheet">
+        <link href="css/config.css" rel="stylesheet">
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+          <script type="text/javascript" src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+          <script type="text/javascript" src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+        <![endif]-->
+
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script type="text/javascript" src="js/bootstrap.bundle.js"></script>
+        <!-- I18N -->
+        <script type="text/javascript" src="js/i18next.js"></script>
+        <!--- Translations -->
+        <script type="text/javascript" src="js/translations.js" charset="UTF-8"></script>
+        <!-- Sort table -->
+        <script type="text/javascript" src="js/jquery.sortElements.js"></script>
+        <!-- Common utilities -->
+        <script type="text/javascript" src="js/common.js"></script>
+        <!--- Configuration -->
+        <script type="text/javascript" src="js/config.js"></script>
+        <!-- The business logic -->
+        <script type="text/javascript" src="js/webgen.js"></script>
+        <!-- Liveticker -->
+        <script type="text/javascript" src="js/ticker.js"></script>
+    </head>
+    <body>
+        <header>
+            <div class="logo"></div>
+        </header>
+        <!-- Fixed navbar -->
+        <div class="navbar navbar-expand-md navbar-light bg-light mb-4">
+            <a class="navbar-brand" id="title" href="#"></a>
+            <!-- Hamburger menu -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navbar menu items -->
+            <div class="navbar-collapse collapse" id="navbar" role="navigation">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="events" data-i18n="nav.draw"></a>
+                    </li>                        
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#" id="dates" data-i18n="nav.matches"></a>
+                    </li>                        
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="reports" data-i18n="nav.players"></a>
+                    </li>                        
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="liveticker" data-target="#content" data-i18n="nav.liveticker"></a>
+                    </li>                        
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="news" data-target="#content" data-i18n="nav.news"></a>
+                    </li>                        
+                </ul>
+            </div>
+            <!-- Refresh button -->
+            <button type="button" class="btn btn-outline-dark refresh d-none d-lg-block" onClick="refresh();">
+                <span class="oi oi-reload"></span>                        
+            </button>
+        </div>
+
+        <!-- Toggle content nav button -->
+        <div class="container ml-4 pl-0 d-lg-none">
+            <button type="button" role="button" id="offcanvas-toggle-button" class="btn btn-sm btn-primary mt-2 mb-4 ml-2" data-toggle="offcanvas" data-i18n="nav.show-nav"></button>
+        </div>
+        <div class="container pl-0">    
+            <div class="row row-offcanvas row-offcanvas-left">
+                <!-- Subnavigation -->
+                <div class="col-9 col-lg-3 sidebar-offcanvas" id="sidebar" role="navigation">
+                    
+                </div>
+                <!-- Content-->
+                <div class="col-12 col-lg-9 pl-4">
+                    <div class="row ml-0" id="content">
+                        
+                    </div>
+                </div>
+            </div>
+        </div> <!-- /container -->
+            
+        <footer>
+            <div class="sponsor"></div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,15 @@
+// Implement a class WebGenPrivate as below
+package de.webgen;
+
+public class WebGenPrivate  {
+    // Encrypt the password and return it as a (base64 encoded) string
+    public static String encryptPassword(WebGen webgen, String pwd) {
+        return pwd;
+    }
+    
+    // Decrypt a (base64 encoded) encrypted password and return it as a string
+    public static String decryptPassword(WebGen webgen, String pwd) {
+        return pwd;
+    }
+}
+

@@ -1,0 +1,199 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+/* Scroll large lists */
+div#times div.panel-collapse.in {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 50em;
+    -ms-overflow-style: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+div#times table.matches {
+    width: 100%;
+    empty-cells: show;  
+}
+
+div#times table.matches tr {
+    border-collapse:  collapse;
+}
+
+div#times table.matches td {
+    padding: 5px;
+    border-style: inset;	
+    border-width: 1px;
+}    
+
+div#times table.matches tr[data-toggle=collapse] {
+    cursor: pointer;
+}
+
+div#times table.matches tr.individual {
+    border-top: 1px solid lightgray;
+    border-bottom: 1px solid lightgray;
+}
+
+div#times table.matches tr.individual td {
+    font-size: 80%;
+}
+
+div#times table.matches th {
+    background: lightgray;
+}
+
+div#times table.matches th span {
+    /* Required so we can set the width of the header parts */
+    display: inline-block;    
+}
+
+div#times table.matches th .event {
+    width: 20%;
+}
+
+div#times table.matches th .group {
+    width: 45%;
+}
+
+div#times table.matches th .round {
+    width: 20%;
+}
+
+div#times table.matches th .mttable {
+    width: 10%;
+    text-align: right;
+    margin-bottom: 0px;
+}
+
+div#times table.matches tbody.filtered {
+    display: none;
+}
+
+div#times table.matches td div.left {
+    padding-bottom: 5px;
+}
+
+div#times table.matches td div.right {
+    padding-top: 5px;
+}
+
+/* Matches table: The cell with the name */
+div#times table.matches td.name {
+    width: 50%;
+}
+
+div#times table.matches td.name span {
+    display: table-cell;
+}
+
+div#times table.matches td.name span.flag {
+    padding-right: 5px;
+}
+
+div#times table.matches td.name span.flag img {
+    border: 1px black solid;
+    height: 1em;
+}
+
+div#times table.matches td.name span.flag img[src=""] {
+    display: none;
+}
+
+div#times table.matches td.name span.plnr {
+    text-align: right;
+    padding-right: 5px;
+    width: 3em;
+}
+
+div#times table.matches td.name span.assoc:before {
+    content: "\a0 ("; /* &nbsp;( */
+}
+
+div#times table.matches td.name span.assoc:after {
+    content: ")";
+}
+
+/* Matches table: The cell with the name of the first player */
+div#times table.matches td.name div.left {
+    border-right-width: 0px;
+}
+
+/* Matches table: The cell with the name of the second player */
+div#times table.matches td.name div.right {
+    border-left-width: 0px;
+}    
+
+/* Matches table: Winners in bolde */
+div#times table.matches td.name div.winner {
+    font-weight: bold;
+}
+
+/* Matches table: The cell with the result of that match */
+div#times table.matches td.result {
+    text-align: center;
+    vertical-align: middle;    
+    font-weight: 900;
+    font-size: 110%;
+    width: 6%;
+}  
+
+/* Matches table: The cells with the result of the individual games */
+div#times table.matches td.game {
+    text-align: center;
+    vertical-align: middle;    
+    width: 6%;
+}
+
+/* Matches table: Winner bolder */
+div#times table.matches td.game div.winner {
+    font-weight: bold;
+}
+
+div#times table.matches td.game[colspan="2"] {
+    width: 12%;
+}
+
+div#times table.matches td.game[colspan="3"] {
+    width: 18%;
+}
+
+div#times table.matches td.game[colspan="4"] {
+    width: 24%;
+}
+
+div#times table.matches td.game[colspan="5"] {
+    width: 30%;
+}
+
+div#times table.matches td.game[colspan="6"] {
+    width: 36%;
+}
+
+div#times table.matches td.game[colspan="7"] {
+    width: 42%;
+}
+
+@media screen and (max-width: 767.98px) {
+    div#times table.matches tr td.game {
+        display: none;
+    }
+    
+    div#times table.matches tr td.name {
+        display: table-cell;
+    }
+    
+    div#times table.matches tr.alternate td.game {
+        display: table-cell;
+    }
+    
+    div#times table.matches tr.alternate td.name {
+        display: none;
+    }
+}
+
+@media print {
+    div#times table.matches tbody {
+        /* Doesn't work on most browsers because tbody is not a block element */
+        page-break-inside: avoid;
+    }
+}
+

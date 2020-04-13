@@ -1,0 +1,15 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+div#news-content article span.author:before {
+    content: ' | ';
+}
+
+div#news-content article div.description {
+    display: block;    
+    cursor: pointer;
+}
+
+div#news-content article div.content {
+    display: none;
+    cursor: pointer;
+}

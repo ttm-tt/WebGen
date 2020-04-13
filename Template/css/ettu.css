@@ -1,0 +1,29 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+/* Overload definition of glyphicon fonts */
+@font-face {
+  font-family: 'Glyphicons Halflings';
+
+  src: url('../fonts/glyphicons-halflings-regular.eot');
+  src: 
+       url('/?proxy=fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), 
+       url('/?proxy=fonts/glyphicons-halflings-regular.woff') format('woff'), 
+       url('/?proxy=fonts/glyphicons-halflings-regular.ttf') format('truetype'), 
+       url('/?proxy=fonts/glyphicons-halflings-regular.svg#glyphicons_halflingsregular') format('svg')
+  ;
+}
+
+/* Select font of ETTU page */
+* {
+  font-family: 'Open Sans Condensed', sans-serif;
+}
+
+/* Force width to whatever is provided */
+.container {
+  width: 100% !important;
+}
+
+/* Add scrollbar to e.g. KO draws */
+div#content {
+  overflow-x: auto;
+}

@@ -1,0 +1,374 @@
+/* Copyright (C) 2020 Christoph Theis */
+
+div#ko-nav + h4 {
+    margin-top: 1.0em;
+    margin-bottom: 1.0em;
+    width: 100%;
+    text-align: center;
+}
+
+div.ko-nav-rounds li > a {
+    margin-right: 0.5em;
+}
+
+/* Navigation: Override bootstrap rule for :hover */
+div#ko-nav-rounds .pager a.disabled:hover {
+    background-color: inherit;
+    color: inherit;
+}
+
+div.ko table.draw {
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+div.ko-content div.item {
+    display: none;
+}
+
+div.ko-content div.item.active {
+    display: block;
+}
+
+div.ko {
+    /* overflow-x: auto; */
+}
+
+div.ko table.draw tbody + tbody {
+    margin-top: 3em;
+}
+
+div.ko table.draw td span {
+    display: table-cell;
+}
+
+div.ko table.draw span.label {
+    vertical-align: middle;
+    font-size: 105%;
+}
+
+div.ko table.ko.draw td span.flag {
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+div.ko table.ko.draw td span.flag img {
+    border: 1px black solid;
+    height: 1em;
+}
+
+div.ko table.ko.draw td span.flag img[src=""] {
+    display: none;
+}
+
+div.ko table.ko.draw td span.plnr {
+    text-align: right;
+    padding-left: 5px;
+    width: 3em;
+}
+
+/* Make badges original size and center vertically */
+div.ko table.ko.draw td span.badge {
+    font-size: 100%;
+    vertical-align: middle;
+    background-color: #e9ecef; /* gray-200 */
+}
+
+div.ko table.ko.draw td span.name {
+    padding-left: 5px;
+}
+
+/* Hover over entry */
+div.ko table.ko.draw td span.ko-entry.kopath {
+    font-weight: bolder;
+}
+
+div.ko table.ko.draw td span.assoc:before {
+    content: "\a0 (";  /* &nbsp;( */
+}
+
+div.ko table.ko.draw td span.assoc:after {
+    content: ")";
+}
+
+div.ko table.draw td span {
+    display: table-cell;
+}
+
+
+div.ko table.draw {
+    empty-cells: show;
+    font-size: 0.9rem;
+    border-collapse: collapse;
+}
+
+/* Round captions */
+div.ko table.draw th {
+    font-size: 1.0rem;
+}
+
+div.ko table.draw th span {
+    /* Text centered */
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+}
+
+div.ko table.draw td span.result {
+    padding-left: 5px;
+    font-weight: bold;
+}
+
+/* Results of team matches are plain links and not bold */
+div.ko table.draw td a span.result {
+    font-weight: normal;
+}
+
+div.ko table.draw td span.games {
+
+}
+
+div.ko table.draw td span.games:before {
+    content: "\a0 (";  /* &nbsp;( */
+}
+
+div.ko table.draw td span.games:after {
+    content: ")";
+}
+
+
+div.ko table.draw td {
+    width: 180px;
+    border-width: 1px;
+    padding: 2px;
+    border-style: solid;
+    white-space: nowrap;
+}
+
+div.ko table.draw td span {
+    padding-right: 5px;
+}
+
+div.ko table.draw td.none {
+    border-top-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+}
+
+div.ko table.draw td.bottom {
+    border-top-width: 0px;
+    border-bottom-width: 1px;
+    border-left-width: 0px;
+    border-right-width: 0px;
+}
+
+div.ko table.draw td.right {
+    border-top-width: 0px;
+    border-bottom-width: 0px;
+    border-left-width: 0px;
+    border-right-width: 1px;
+}
+
+div.ko table.draw td.bottomright {
+    border-top-width: 0px;
+    border-bottom-width: 1px;
+    border-left-width: 0px;
+    border-right-width: 1px;
+}
+
+/* Notes to the group */
+div.ko.notes {
+    margin-left: 2em;   /* See table.draw */
+    margin-right: 2em;  /* See table.draw */  
+}
+
+/* Individual matches */
+div.ko table.ko.matches {
+    empty-cells: show;
+    width: 100%;
+    padding: 5px;
+    border-collapse: collapse;
+    border-style: outset;
+    border-spacing: 0px;
+    border-width: 1px;
+}
+
+/* The header row */
+div.ko table.ko.matches th {
+    padding: 5px;
+    border-style: inset;	
+    border-width: 1px;
+}
+
+
+/* The body rows */
+div.ko table.ko.matches td {
+    padding: 5px;
+    border-style: inset;	
+    border-width: 1px;
+}    
+
+div.ko table.ko.matches tr[data-toggle=collapse] {
+    cursor: pointer;
+    border-top: 1px solid black;
+}
+
+div.ko table.ko.matches div.left {
+    padding-bottom: 5px;
+    height: 50%;
+}
+
+div.ko table.ko.matches div.right {
+    padding-top: 5px;
+    height: 50%;
+}
+
+div.ko table.ko.matches div.winner {
+    font-weight: bold;
+}
+
+div.ko table.ko.matches td.result {
+    font-weight: bold;
+}
+
+div ko.table ko.matches td.result div {
+    font-size: 100%;
+}
+
+div.ko table.ko.matches td.game {
+}
+
+div.ko table.ko.matches tr.individual td {
+    border-top-color: lightgray;
+    font-size: 80%;
+}
+
+/* Matches table: The cell with the name */
+div.ko table.ko.matches td.name {
+    width: 50%;
+}
+
+div.ko table.ko.matches td.name span {
+    display: table-cell;
+}
+
+div.ko table.ko.matches td span.flag {
+    padding-right: 5px;
+}
+
+div.ko table.ko.matches td span.flag img {
+    border: 1px black solid;
+    height: 1em;
+}
+
+div.ko table.ko.matches td span.flag img[src=""] {
+    display: none;
+}
+
+div.ko table.ko.matches td.name span.plnr {
+    text-align: right;
+    padding-right: 5px;
+    width: 3em;
+}
+
+div.ko table.ko.matches td.name span.assoc:before {
+    content: "\a0 (";  /* &nbsp;( */
+}
+
+div.ko table.ko.matches td.name span.assoc:after {
+    content: ")";
+}
+
+/* Matches table: The cell with the name of the first player */
+div.ko table.ko.matches td.name.left {
+    border-right-width: 0px;
+}
+
+/* Matches table: The cell with the name of the second player */
+div.ko table.ko.matches td.name.right {
+    border-left-width: 0px;
+}    
+
+/* Matches table: The cell with the result of that match */
+div.ko table.ko.matches td.result {
+    text-align: center;
+    vertical-align: middle;
+    width: 6%;
+}   
+
+
+/* Matches table: The cells with the result of the individual games */
+div.ko table.ko.matches td.game {
+    text-align: center;
+    vertical-align: middle;
+    width: 6%;
+}
+
+div.ko table.ko.matches td.game[colspan="2"] {
+    width: 12%;
+}
+
+div.ko table.ko.matches td.game[colspan="3"] {
+    width: 18%;
+}
+
+div.ko table.ko.matches td.game[colspan="4"] {
+    width: 24%;
+}
+
+div.ko table.ko.matches td.game[colspan="5"] {
+    width: 30%;
+}
+
+div.ko table.ko.matches td.game[colspan="6"] {
+    width: 36%;
+}
+
+div.ko table.ko.matches td.game[colspan="7"] {
+    width: 42%;
+}
+
+/* Matches table: The cell with the schedule of that match */
+div.ko table.ko.matches td.schedule span + span {
+    padding-left: 0.5em;
+}
+
+/* popover with details results */
+div.ko div.popover {
+    max-width: none;
+}
+
+/* Special settings for small screens */
+@media screen and (max-width: 767.98px) {
+    /* Hide games on small screens */
+    div.ko table.ko.matches tr .game {
+        display: none;
+    }
+    
+    div.ko table.ko.matches tr .name {
+        display: table-cell;
+    }
+    
+    /* Toggle between name and games */
+    div.ko table.ko.matches tr.alternate .name {
+        display: none;
+    }
+    
+    div.ko table.ko.matches tr.alternate .game {
+        display: table-cell;
+    }
+}
+
+/* Special settings for xs screens */
+@media screen and (max-width: 575.98px) {    
+    /* Hide player number in one-round ko draw */
+    div#one-round-content table.ko.draw td span.plnr {
+        display: none;
+    }
+    
+    /* Hide association for winner in one-round ko draw */
+    div#one-round-content table.ko.draw td + td span.assoc {
+        display: none;
+    }    
+}
