@@ -1,0 +1,28 @@
+
+# /
+/_SYNCAPP
+/Output
+/build
+/dist
+/SQL JDBC
+/.classpath
+/.project
+
+# /Template/
+/Template/index.html.bak
+
+# /Template/css/
+/Template/css/*.bak
+
+# /Template/js/
+/Template/js/*.bak
+
+# /lib/
+/lib/nblibraries-private.properties
+
+# /nbproject/
+/nbproject/private
+/nbproject/genfiles.properties
+
+# /src/de/webgen/
+/src/de/webgen/WebGenPrivate.java
