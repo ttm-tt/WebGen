@@ -3,6 +3,7 @@
 package de.webgen.gui;
 
 import de.webgen.WebGen;
+import de.webgen.database.Database;
 import java.awt.Color;
 import java.awt.Component;
 import java.io.File;
@@ -86,9 +87,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             if (record.getMessage() != null)
                 message = (new java.util.logging.SimpleFormatter()).formatMessage(record);
-            else
+            else if (record.getThrown() != null)
                 message = record.getThrown().getClass().getName() + ": " + record.getThrown().getLocalizedMessage();
-
+            else
+                message = record.toString();
+            
             String server = "";
             
             if (jServerPane.getTabCount() > 0) {
@@ -96,11 +99,11 @@ public class MainFrame extends javax.swing.JFrame {
                     server = WebGen.threadIdMap.get(threadId).getServer();
                 else
                     server = "All";
-                
-                server += ": ";
+            } else {
+                server = "All";
             }
             
-            return server + "[" + date + "] " + message;
+            return server + ": [" + date + "] " + message;
         }
     }
 
@@ -109,6 +112,9 @@ public class MainFrame extends javax.swing.JFrame {
     /** Creates new form MainFrame */
     public MainFrame() throws IOException {
         initComponents();
+        
+        jMenuItemOpen.setEnabled(haveTournaments());
+        jMenuItemServer.setEnabled(tournament != null && !tournament.isEmpty());
         
         javax.swing.JLabel label = new javax.swing.JLabel(bundle.getString("Open a tournament first"));
         label.setFont(label.getFont().deriveFont(36.f));
@@ -206,7 +212,7 @@ public class MainFrame extends javax.swing.JFrame {
     // Oeffnet ein Turnier und initialisiert die Tabs
     private void openTournament(String tournament) throws IOException {
         this.tournament = tournament;
-
+        
         jServerPane.removeAll();
 
         if (tournament != null && !tournament.isEmpty()) {
@@ -238,11 +244,19 @@ public class MainFrame extends javax.swing.JFrame {
                 label.setHorizontalAlignment(javax.swing.JLabel.CENTER);
                 jServerPane.add(bundle.getString("<new>"), label);
             }
+                
+            setTitle(MessageFormat.format(bundle.getString("WebGenerator - {0}"), tournament));
+            
+            jMenuItemServer.setEnabled(true);
+            
+            // Change last opened tournament to this one
+            Ini ini = new Ini(WebGen.iniFile);
+            ini.remove("Open", "Last");
+            ini.add("Open", "Last", this.tournament);
+            ini.store();            
         }
 
         pack();
-
-        setTitle(MessageFormat.format(bundle.getString("WebGenerator - {0}"), tournament));
     }
 
 
@@ -279,10 +293,24 @@ public class MainFrame extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jPanelAddTournament = new javax.swing.JPanel();
+        serverLabel = new javax.swing.JLabel();
+        serverTextField = new javax.swing.JTextField();
+        databaseLabel = new javax.swing.JLabel();
+        databaseTextField = new javax.swing.JTextField();
+        authtypeCheckBox = new javax.swing.JCheckBox();
+        userLabel = new javax.swing.JLabel();
+        userTextField = new javax.swing.JTextField();
+        pwdLabel = new javax.swing.JLabel();
+        pwdTextField = new javax.swing.JPasswordField();
+        testConnectionButton = new javax.swing.JButton();
+        tournamentLabel = new javax.swing.JLabel();
+        tournamentTextField = new javax.swing.JTextField();
         jServerPane = new javax.swing.JTabbedPane();
         jComboBoxLogging = new javax.swing.JComboBox();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuTournment = new javax.swing.JMenu();
+        jMenuItemAdd = new javax.swing.JMenuItem();
         jMenuItemOpen = new javax.swing.JMenuItem();
         jMenuItemServer = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
@@ -293,6 +321,116 @@ public class MainFrame extends javax.swing.JFrame {
         jMenuItemCheckUpdate = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         jMenuItemAbout = new javax.swing.JMenuItem();
+
+        jPanelAddTournament.addAncestorListener(new javax.swing.event.AncestorListener() {
+            public void ancestorAdded(javax.swing.event.AncestorEvent evt) {
+                jPanelAddTournamentAncestorAdded(evt);
+            }
+            public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
+            }
+            public void ancestorRemoved(javax.swing.event.AncestorEvent evt) {
+            }
+        });
+
+        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
+        serverLabel.setText(bundle.getString("MainFrame.serverLabel.text")); // NOI18N
+
+        databaseLabel.setText(bundle.getString("MainFrame.databaseLabel.text")); // NOI18N
+
+        authtypeCheckBox.setSelected(true);
+        authtypeCheckBox.setText(bundle.getString("MainFrame.authtypeCheckBox.text")); // NOI18N
+        authtypeCheckBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        authtypeCheckBox.setMargin(new java.awt.Insets(0, 0, 0, 0));
+        authtypeCheckBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                authtypeCheckBoxActionPerformed(evt);
+            }
+        });
+
+        userLabel.setText(bundle.getString("MainFrame.userLabel.text")); // NOI18N
+
+        pwdLabel.setText(bundle.getString("MainFrame.pwdLabel.text")); // NOI18N
+
+        testConnectionButton.setText(bundle.getString("MainFrame.testConnectionButton.text")); // NOI18N
+        testConnectionButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                testConnectionButtonActionPerformed(evt);
+            }
+        });
+
+        tournamentLabel.setText(bundle.getString("MainFrame.tournamentLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout jPanelAddTournamentLayout = new javax.swing.GroupLayout(jPanelAddTournament);
+        jPanelAddTournament.setLayout(jPanelAddTournamentLayout);
+        jPanelAddTournamentLayout.setHorizontalGroup(
+            jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                        .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(tournamentLabel))
+                            .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                                .addGap(10, 10, 10)
+                                .addComponent(serverLabel))
+                            .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(databaseLabel)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(pwdLabel)
+                            .addComponent(userLabel))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(userTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)
+                            .addComponent(pwdTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 151, Short.MAX_VALUE)))
+                    .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(testConnectionButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                        .addGap(79, 79, 79)
+                        .addComponent(databaseTextField))
+                    .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                        .addGap(79, 79, 79)
+                        .addComponent(serverTextField))
+                    .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                        .addGap(79, 79, 79)
+                        .addComponent(tournamentTextField))
+                    .addGroup(jPanelAddTournamentLayout.createSequentialGroup()
+                        .addGap(79, 79, 79)
+                        .addComponent(authtypeCheckBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        jPanelAddTournamentLayout.setVerticalGroup(
+            jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelAddTournamentLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(tournamentLabel)
+                    .addComponent(tournamentTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(serverLabel)
+                    .addComponent(serverTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(databaseLabel)
+                    .addComponent(databaseTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(16, 16, 16)
+                .addComponent(authtypeCheckBox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(userLabel)
+                    .addComponent(userTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelAddTournamentLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(pwdLabel)
+                    .addComponent(pwdTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
+                .addComponent(testConnectionButton)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addWindowListener(new java.awt.event.WindowAdapter() {
@@ -307,10 +445,18 @@ public class MainFrame extends javax.swing.JFrame {
             }
         });
 
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
         jMenuTournment.setText(bundle.getString("MainFrame.jMenuTournment.text")); // NOI18N
 
+        jMenuItemAdd.setText(bundle.getString("MainFrame.jMenuItemAdd.text")); // NOI18N
+        jMenuItemAdd.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItemAddActionPerformed(evt);
+            }
+        });
+        jMenuTournment.add(jMenuItemAdd);
+
         jMenuItemOpen.setText(bundle.getString("MainFrame.jMenuItemOpen.text")); // NOI18N
+        jMenuItemOpen.setEnabled(false);
         jMenuItemOpen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemOpenActionPerformed(evt);
@@ -319,6 +465,7 @@ public class MainFrame extends javax.swing.JFrame {
         jMenuTournment.add(jMenuItemOpen);
 
         jMenuItemServer.setText(bundle.getString("MainFrame.jMenuItemServer.text")); // NOI18N
+        jMenuItemServer.setEnabled(false);
         jMenuItemServer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jMenuItemServerActionPerformed(evt);
@@ -542,6 +689,114 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jServerPaneStateChanged
 
+    private void jMenuItemAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAddActionPerformed
+        // Add a tournament to the local ini file. 
+
+        int ret = JOptionPane.showConfirmDialog(
+                        this, jPanelAddTournament, bundle.getString("Add Tournament"), 
+                        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+        
+        if (ret != JOptionPane.OK_OPTION)
+            return;
+
+        String tournamentName = tournamentTextField.getText();
+        String connectString = buildConnectString();
+        
+        try {
+            Ini ini = new Ini(WebGen.iniFile);
+            if (ini.get("Tournaments", tournamentName) != null) {
+                JOptionPane.showMessageDialog(
+                    this, bundle.getString("Tournament already exists"), 
+                    bundle.getString("Add Tournament"), JOptionPane.ERROR_MESSAGE);
+                
+                return;
+            }
+            
+            ini.add("Tournaments", tournamentName, connectString);
+            ini.add(tournamentName, "Path", databaseTextField.getText());
+            ini.store();
+            
+            (new File(WebGen.iniFile.getParent(), databaseTextField.getText())).mkdirs();
+            
+            jMenuItemOpen.setEnabled(true);
+            
+            openTournament(tournamentName);
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_jMenuItemAddActionPerformed
+
+    private void authtypeCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_authtypeCheckBoxActionPerformed
+        // Enable / Disable user and pwd according to authentication type
+        if ( authtypeCheckBox.isSelected() ) {
+            userTextField.setEnabled(false);
+            pwdTextField.setEnabled(false);
+        } else {
+            userTextField.setEnabled(true);
+            pwdTextField.setEnabled(true);
+        }
+    }//GEN-LAST:event_authtypeCheckBoxActionPerformed
+
+    private String buildConnectString() {
+        String server = serverTextField.getText();
+        String dbName = databaseTextField.getText();
+        boolean windowsAuth = authtypeCheckBox.isSelected();
+        String user = userTextField.getText();
+        String pwd = new String(pwdTextField.getPassword());
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("DATABASE=").append(dbName).append(";");
+        sb.append("DRIVER=SQL Server;");
+        sb.append("SERVER=");
+        if (server.equals("(local)"))
+            sb.append("localhost");
+        else
+            sb.append(server);
+        sb.append(";");
+        
+        if (windowsAuth)
+            sb.append("Trusted_Connection=Yes;");
+        else
+            sb.append("Trusted_Connection=No;")
+                    .append("UID=").append(user).append(";")
+                    .append("PWD=").append(pwd).append(";");
+        
+        String connectionString = sb.toString();
+
+        return connectionString;
+    }
+    
+    private void testConnectionButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_testConnectionButtonActionPerformed
+        String connectString = buildConnectString();
+        Database db = new Database(connectString);
+        
+        if (db.testConnection()) {
+            JOptionPane.showMessageDialog(
+                this, "Database connection test successfull", "Connection Successful", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(
+                this, "Database connection test failed", "Connection Failure", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_testConnectionButtonActionPerformed
+
+    private void jPanelAddTournamentAncestorAdded(javax.swing.event.AncestorEvent evt) {//GEN-FIRST:event_jPanelAddTournamentAncestorAdded
+        // Start with focus on tournamnet input, not button
+        tournamentTextField.requestFocus();
+    }//GEN-LAST:event_jPanelAddTournamentAncestorAdded
+
+    private boolean haveTournaments() {
+        try {
+            Ini ini = new Ini(WebGen.iniFile);
+            return 
+                ini.containsKey("Tournaments") &&
+                !ini.getAll("Tournaments").isEmpty()
+            ;
+        } catch (IOException ex) {
+            return false;
+        }    
+    }
+    
+    
     @Override
     public List<java.awt.Image> getIconImages() {
         // Icon from http://www.comfi.com/telecom-icons/
@@ -574,18 +829,9 @@ public class MainFrame extends javax.swing.JFrame {
         }
 
         try {
-            // Init enthaelt u.U, Pfade wir "F: \ cht \ user \ TTM", per default wird aber \ u als Beginn
-            // einer Unicode sequence interpretiert und das ergibt einen Parsefehler.
-            // Ich muss sogar im Kommentar Leerzeichen nach dem \ einfuegen ...
             System.setProperty(org.ini4j.Config.KEY_PREFIX + org.ini4j.Config.PROP_ESCAPE, Boolean.FALSE.toString());
-
-            if ( (new Ini(WebGen.iniFile)).get("Tournaments").keySet().isEmpty()) {
-                JOptionPane.showMessageDialog(null, bundle.getString("No tournaments found"), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
-            }            
         } catch (Throwable t) {
-            // IOException, ParseError, etc.
-            JOptionPane.showMessageDialog(null, t.getLocalizedMessage());
+            JOptionPane.showMessageDialog(null, "Could not initialze org.ini4j: " + t.getLocalizedMessage(), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);            
         }
         
         java.awt.EventQueue.invokeLater(new Runnable() {
@@ -611,20 +857,34 @@ public class MainFrame extends javax.swing.JFrame {
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox authtypeCheckBox;
+    private javax.swing.JLabel databaseLabel;
+    private javax.swing.JTextField databaseTextField;
     private javax.swing.JComboBox jComboBoxLogging;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuHelp;
     private javax.swing.JMenuItem jMenuItemAbout;
+    private javax.swing.JMenuItem jMenuItemAdd;
     private javax.swing.JMenuItem jMenuItemCheckUpdate;
     private javax.swing.JCheckBoxMenuItem jMenuItemDebug;
     private javax.swing.JMenuItem jMenuItemExit;
     private javax.swing.JMenuItem jMenuItemOpen;
     private javax.swing.JMenuItem jMenuItemServer;
     private javax.swing.JMenu jMenuTournment;
+    private javax.swing.JPanel jPanelAddTournament;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JTabbedPane jServerPane;
+    private javax.swing.JLabel pwdLabel;
+    private javax.swing.JPasswordField pwdTextField;
+    private javax.swing.JLabel serverLabel;
+    private javax.swing.JTextField serverTextField;
+    private javax.swing.JButton testConnectionButton;
+    private javax.swing.JLabel tournamentLabel;
+    private javax.swing.JTextField tournamentTextField;
+    private javax.swing.JLabel userLabel;
+    private javax.swing.JTextField userTextField;
     // End of variables declaration//GEN-END:variables
 
     private javax.swing.JButton jButtonHelpText;

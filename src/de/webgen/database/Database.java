@@ -78,6 +78,16 @@ public class Database {
     }
 
 
+    public boolean testConnection() {
+        try (Connection conn = java.sql.DriverManager.getConnection(connectionString);) {
+            return conn != null;
+        } catch (Exception ex) {
+            Logger.getLogger(getClass().getName()).log(Level.INFO, null, ex);
+        }
+        
+        return false;
+    }
+
     public Association[] readAssociations() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
