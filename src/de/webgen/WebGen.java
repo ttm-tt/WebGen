@@ -20,6 +20,7 @@ import de.webgen.generator.PKOGenerator;
 import de.webgen.generator.PlayersMatchesGenerator;
 import de.webgen.generator.RRGenerator;
 import de.webgen.generator.ReportGenerator;
+import de.webgen.prefs.PasswordCrypto;
 import de.webgen.xml.XmlDate;
 import de.webgen.xml.XmlGroup;
 import de.webgen.xml.XmlProperties;
@@ -163,10 +164,6 @@ public class WebGen {
         None,
         Nation,
         Region       
-    }
-
-    public static java.util.Locale[] getOutputLocales() {
-        return outputLocales;
     }
 
     public static boolean isITTF() {
@@ -1816,70 +1813,14 @@ public class WebGen {
 
 
     private String encryptPassword(String pwd) {
-        if (pwd == null)
-            return null;
-        else if (pwd.isEmpty())
-            return "";
-        
-        try {
-            return Class.forName("de.webgen.WebGenPrivate").getMethod("encryptPassword", WebGen.class, String.class).invoke(null, this, pwd).toString();
-        } catch (Exception ex) {
-            
-        }
-        
-        // In case of an error return the password to encrypt itself
-        return pwd;
+        return PasswordCrypto.encryptPassword(pwd);
     }
 
 
     private String decryptPassword(String pwd) {
-        if (pwd == null)
-            return null;
-        else if (pwd.isEmpty())
-            return "";
-
-        try {
-            return Class.forName("de.webgen.WebGenPrivate").getMethod("decryptPassword", WebGen.class, String.class).invoke(null, this, pwd).toString();
-        } catch (Exception ex) {
-
-        }
-        
-        // In case of an error return the password to decrypt itself
-        return pwd;
+        return PasswordCrypto.decryptPassword(pwd);
     }
 
-
-    private String replaceKeyword(String source, String keyword, String value) {
-        int insertPos = source.indexOf(keyword);
-        if (insertPos == -1) {
-            return source;
-        }
-        String output = source.substring(0, insertPos);
-        output = output + value + source.substring(insertPos + keyword.length());
-        return output;
-    }
-
-
-    private String readTemplate(String what) throws FileNotFoundException, IOException {
-        File file = new File(path + File.separator + "template" + File.separator + what);
-
-        StringBuilder sb;
-        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
-            String line;
-            sb = new StringBuilder();
-            while ( (line = br.readLine()) != null) {
-                sb.append(line);
-                sb.append("\n");
-            }
-        }
-
-        return sb.toString();
-    }
-
-    private static final java.util.Locale[] outputLocales = {
-        java.util.Locale.GERMAN,
-        java.util.Locale.ENGLISH
-    };
 
     private static int tableType = 1;
 

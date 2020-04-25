@@ -4,6 +4,7 @@ package de.webgen.gui;
 
 import de.webgen.WebGen;
 import de.webgen.database.Database;
+import de.webgen.prefs.Properties;
 import java.awt.Color;
 import java.awt.Component;
 import java.io.File;
@@ -31,42 +32,18 @@ public class MainFrame extends javax.swing.JFrame {
     private static final ResourceBundle bundle = ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
     private String tournament = null;
 
-    // Verzeichnisse in einer vorgegeben Reihenfolge suchen:
-    // - aktuelles Verzeichnis
-    // - user app data
-    // - all app data
-    private static File findPath(String what) {
-        File file = null;
-
-        file = new File(System.getProperty("user.dir") + File.separator + what);
-
-        if (!file.exists())
-            file = new File(System.getenv("ALLUSERSPROFILE") + File.separator + "TTM" + File.separator + what);
-
-        if (!file.exists())
-            file = new File(System.getenv("APPDATA") + File.separator + "TTM" + File.separator + what);
-
-        if (!file.exists())
-            file = new File(System.getenv("LOCALAPPDATA") + File.separator + "TTM" + File.separator + what);
-
-        if (!file.exists())
-            return null;
-
-        return file;
-    }
-
     private static void initPaths() {
         // tt32.ini
-        File tt32 = findPath("tt32.ini");
+        File tt32 = Properties.findPath("tt32.ini");
         if (tt32 != null) {
             WebGen.iniFile = tt32;
             WebGen.baseDir = tt32.getParent();
         }
 
         // template
-        File template = findPath("WebGen" + File.separator + "Template");
+        File template = Properties.findPath("WebGen" + File.separator + "Template");
         if (template == null)
-            template = findPath("Template");
+            template = Properties.findPath("Template");
         if (template != null)
             WebGen.templateDir = template.getPath();
     }
