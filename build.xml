@@ -7,7 +7,7 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="WebGen2" default="default" basedir=".">
+<project name="WebGen2" default="default" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
     <description>Builds, tests, and runs the project WebGen2.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
@@ -71,16 +71,54 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <!-- Download ivy -->
+    <property name="ivy.install.version" value="2.5.0" />
+    <condition property="ivy.home" value="${env.IVY_HOME}">
+      <isset property="env.IVY_HOME" />
+    </condition>
+    <property name="ivy.home" value="${user.home}/.ant" />
+    <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+    <target name="download-ivy" unless="offline">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <!-- download Ivy from web site so that it can be used even without any special installation -->
+        <get src="https://repo1.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" 
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>    
+    <target name="init-ivy" depends="download-ivy">
+      <!-- try to load ivy here from ivy home, in case the user has not already dropped
+              it into ant's lib dir (note that the latter copy will always take precedence).
+              We will not fail as long as local lib dir exists (it may be empty) and
+              ivy is in at least one of ant's lib dir or the local lib dir. -->
+        <path id="ivy.lib.path">
+            <fileset dir="${ivy.jar.dir}" includes="*.jar"/>
+        </path>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                 uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+
+        <ivy:settings file="ivysettings.xml"/>
+
+    </target>    
+
+    <target name="-pre-init" depends="init-ivy"/>    
+    
+    <!-- Automatically retrieve dependencies using ivy -->
+    <target name="-pre-compile">
+        <ivy:retrieve />
+        <ivy:dependencytree />
+        <ivy:checkdepsupdate conf="compile" />
+    </target>    
+    
     <target name="-post-compile">
         <!-- Native authentication only with 64 bit, 32 bit have to use SQL authentication
             <copy file="lib/x86/sqljdbc_auth.dll" todir="${dist.dir}/x86"/> 
         -->
-        <copy file="lib/mssql-jdbc_auth-8.2.0.x64.dll" todir="${dist.dir}"/>
+        <copy file="lib/mssql-jdbc_auth-8.2.2.x64.dll" todir="${dist.dir}"/>
 
         <copy file="WebGen.ico" todir="${dist.dir}"/>
 
         <!-- Also to cwd for debugging -->        
-        <copy file="lib/mssql-jdbc_auth-8.2.0.x64.dll" todir="${work.dir}"/>
+        <copy file="lib/mssql-jdbc_auth-8.2.2.x64.dll" todir="${work.dir}"/>
     </target>
     
 </project>
