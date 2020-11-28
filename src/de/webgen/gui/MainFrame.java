@@ -27,7 +27,7 @@ import org.ini4j.Ini;
 
 public class MainFrame extends javax.swing.JFrame {
 
-    private static final String versionNumber = "5.0.4";
+    private static final String versionNumber = "20.11";
     
     private static final ResourceBundle bundle = ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
     private String tournament = null;
