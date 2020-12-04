@@ -83,7 +83,7 @@ function restoreData() {
 
         if (filterStartNo !== undefined) {
             webgen.lastFilter[webgen.lastNav] = {};
-            webgen.lastFilter[webgen.lastNav].startno = filterExtId;
+            webgen.lastFilter[webgen.lastNav].startno = filterStartNo;
         }
 
         if (filterExtId !== undefined) {
