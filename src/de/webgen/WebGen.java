@@ -241,7 +241,7 @@ public class WebGen {
                     return false;
                 
                 // Exclude backup files
-                if (name.endsWith(".swp") || name.endsWith(".bak"))
+                if (name.endsWith(".swp") || name.endsWith(".bak") || name.endsWith("~"))
                     return false;
                 
                 return ext == null || name.toLowerCase().endsWith(ext);
