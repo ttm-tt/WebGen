@@ -131,13 +131,13 @@ ticker.formatRow = function(data) {
     
     detail += '<td class="name">';
     detail += '<div class="left">';
-    detail += '<div class="playerservice ' + serviceLeft + '"><div></div>';
+    detail += '<span class="playerservice ' + serviceLeft + '"><div></div></span>';
     detail += ticker.formatPlayers(data.plA, data.plB, hasTeam, data.tmA);
-    detail += '</div>';
+    detail += '</div>'; // left
     detail += '<div class="right">';
-    detail += '<div class="playerservice ' + serviceRight + '"><div></div>';
+    detail += '<span class="playerservice ' + serviceRight + '"><div></div></span>';
     detail += ticker.formatPlayers(data.plX, data.plY, hasTeam, data.tmX);
-    detail += '</div>';
+    detail += '</div>'; // right
     detail += '</td>';
     
     detail += '<td class="result">';
@@ -163,21 +163,21 @@ ticker.formatPlayers = function(plA, plB, isTeam, tm) {
     if (plA == null || plA.plNr == 0) {
         if (isTeam && tm !== undefined && tm !== null && tm.tmDesc !== undefined)
             return tm.tmDesc;
-        return '<div class="player"></div>';
+        return '<span class="player"></span>';
     }
 
-    var s = '<div class="player">';
+    var s = '<span class="player">';
     if (config.flagtype === 1)
         s += '<span class="flag"><img src="flags/' + plA.naName + '.png"></span>';    
     else
-        s += '<span class="flag"></flag>';
+        s += '<span class="flag"></span>';
     s += '<span class="name">' + plA.psLast + ',&nbsp;' + plA.psFirst + '</span>';
     if (!isTeam)
         s += '<span class="assoc">' + plA.naName + '</span>';
-    s += '</div>';
+    s += '</span>';
     
     if (plB !== undefined && plB !== null && plB.plNr > 0) {
-        s += '<div class="player">';
+        s += '<span class="player">';
         if (config.flagtype === 1)
             s += '<span class="flag"><img src="flags/' + plB.naName + '.png"></span>';    
         else
@@ -185,7 +185,7 @@ ticker.formatPlayers = function(plA, plB, isTeam, tm) {
         s += '<span class="name">' + plB.psLast + ',&nbsp;' + plB.psFirst + '</span>';
         if (!isTeam)
             s += '<span class="assoc">' + plB.naName + '</span>';
-        s += '</div>';
+        s += '</span>';
     }
 
     return s;
