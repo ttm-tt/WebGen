@@ -161,14 +161,28 @@ ticker.formatTeam = function(tm) {
 
 ticker.formatPlayers = function(plA, plB, isTeam, tm) {
     if (plA == null || plA.plNr == 0) {
-        if (isTeam && tm !== undefined && tm !== null && tm.tmDesc !== undefined)
-            return tm.tmDesc;
-        return '<span class="player"></span>';
+        var s = '<span class="player">';
+        
+        if (isTeam && tm !== undefined && tm !== null && tm.tmDesc !== undefined){
+            if (config.flagtype === 1)
+                s += '<span class="flag"><img src="flags/' + tm.naName + '.png"></span>';    
+            else if (config.flagtype === 2)
+                s += '<span class="flag"><img src="flags/' + tm.naRegion + '.png"></span>';    
+            else
+                s += '<span class="flag"></span>';
+            
+            s += '<span class="name">' + tm.tmDesc + '</span>';
+        }
+        s += '</span>';
+        
+        return s;
     }
 
     var s = '<span class="player">';
     if (config.flagtype === 1)
         s += '<span class="flag"><img src="flags/' + plA.naName + '.png"></span>';    
+    else if (config.flagtype === 2)
+        s += '<span class="flag"><img src="flags/' + plA.naRegion + '.png"></span>';    
     else
         s += '<span class="flag"></span>';
     s += '<span class="name">' + plA.psLast + ',&nbsp;' + plA.psFirst + '</span>';
@@ -180,6 +194,8 @@ ticker.formatPlayers = function(plA, plB, isTeam, tm) {
         s += '<span class="player">';
         if (config.flagtype === 1)
             s += '<span class="flag"><img src="flags/' + plB.naName + '.png"></span>';    
+        else if (config.flagtype === 2)
+            s += '<span class="flag"><img src="flags/' + plB.naRegion + '.png"></span>';    
         else
             s += '<span class="flag"></span>';
         s += '<span class="name">' + plB.psLast + ',&nbsp;' + plB.psFirst + '</span>';
