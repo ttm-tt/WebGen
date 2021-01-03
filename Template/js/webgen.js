@@ -471,6 +471,7 @@ this.events = function () {
             $('[data-toggle="popover"]')
                     .popover({
                         html: true,
+                        sanitize: false, // We trust our own content
                         trigger: 'click',
                         // container: 'body',
                         placement: 'bottom',
