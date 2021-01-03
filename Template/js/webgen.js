@@ -843,7 +843,9 @@ this.reports = function () {
             $('div#report-nav li a').first().click();
 
             // value of extern id, can only be set by quuery string
-            var extid = webgen.lastFilter.reports.extid;
+            // We define property 'reports' if it does not exist, but not 'extid'
+            // So we have to access it as an array member (or ?? operator, but does it exist?)
+            var extid = webgen.lastFilter.reports['extid'];
 
             // filter by event
             $('#content .filter select#events').change(function () {
