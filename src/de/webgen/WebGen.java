@@ -654,7 +654,6 @@ public class WebGen {
         
         // Liste mit Gruppen und Datum
         List<XmlGroup> groupList = xmlProperties.getGroups();
-        List<XmlDate> datesList = xmlProperties.getDates();
         
         // Liste der Gruppen, die spielen, sind automatisch published
         Set<Integer> includedGroups = new java.util.HashSet<>();
@@ -701,10 +700,22 @@ public class WebGen {
                 }
                 
                 XmlGroup xmlGroup = xmlProperties.getGroup(gr);
-                if (xmlGroup != null && !xmlGroup.grStage.equals(gr.grStage)) {
-                    xmlGroup.grStage = gr.grStage;
-                    updateEventsFile = true;
-                }   
+                if (xmlGroup != null) {
+                    if (    // Category
+                            (xmlGroup.cpCategory == null && gr.cp.cpCategory != null) ||
+                            (xmlGroup.cpCategory != null && gr.cp.cpCategory == null) ||
+                            (xmlGroup.cpCategory != null && !xmlGroup.cpCategory.equals(gr.cp.cpCategory)) ||
+                            // Sort order
+                            (xmlGroup.grSortOrder != gr.grSortOrder) ||
+                            // Stage
+                            (!xmlGroup.grStage.equals(gr.grStage)) 
+                    ) {
+                        xmlGroup.cpCategory = gr.cp.cpCategory;
+                        xmlGroup.grSortOrder = gr.grSortOrder;
+                        xmlGroup.grStage = gr.grStage;
+                        updateEventsFile = true;
+                    }
+                }
                 
                 // Dates aktualisieren
                 for (Timestamp ts : database.getMatchDates(gr)) {
@@ -830,13 +841,47 @@ public class WebGen {
         return path + File.separator + "events.html";
     }
     
+    
+/*
+<div class="row">
+    <ul class ="list-group col-12">
+        <li class="list-group-item list-group-action bg-light p-0" data-toggle="collapse" data-target="[data-webgen-category=&quot;Cadet&quot;]">
+            <span class="btn list-group-item bg-light text-left w-100 border-0"><span>Cadets</span></span>
+            <ul class="collapse list-group col-12 pr-0" data-webgen-category="Cadet">
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CBC.html"><span>Cadet Boys Consolation</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CBD.html"><span>Cadet Boys Doubles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CBS.html"><span>Cadet Boys Singles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CBT.html"><span>Cadet Boys Teams</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CGC.html"><span>Cadet Girls Consolation</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CGD.html"><span>Cadet Girls Doubles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CGS.html"><span>Cadet Girls Singles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="CGT.html"><span>Cadet Girls Teams</span></a></span></li>
+            </ul>
+        </li>
+        <li class="list-group-item list-group-action bg-light p-0" data-toggle="collapse" data-target="[data-webgen-category=&quot;Junior&quot;]">
+            <span class="btn list-group-item bg-light text-left w-100 border-0">Juniors</span>
+            <ul class="collapse list-group col-12 pr-0" data-webgen-category="Junior">
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JBC.html"><span>Junior Boys Consolation</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JBD.html"><span>Junior Boys Doubles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JBS.html"><span>Junior Boys Singles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JBT.html"><span>Junior Boys Teams</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JGC.html"><span>Junior Girls Consolation</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JGD.html"><span>Junior Girls Doubles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JGS.html"><span>Junior Girls Singles</span></a></span></li>
+                <li class="list-group-item list-group-action border-left-0 border-right-0"><span class="cpname pr-1"><a href="JGT.html"><span>Junior Girls Teams</span></a></span></li>
+            </ul>
+        </li>
+        <li class="list-group-item list-group-action bg-light"><span class="cpname pr-1"><a href="CXD.html"><span>Cadet Mixed Doubles</span></a></span></li>
+        <li class="list-group-item list-group-action bg-light"><span class="cpname pr-1"><a href="JXD.html"><span>Junior Mixed Doubles</span></a></span></li>
+    </ul>
+</div>    
+ */    
     private void createEventsFile() throws IOException, SQLException {
         String SEP = de.webgen.generator.Generator.SEP;
         
         List<XmlGroup> xmlGroups = xmlProperties.getGroups();
 
         xmlGroups.sort(new java.util.Comparator<XmlGroup>() {
-
             @Override
             public int compare(XmlGroup o1, XmlGroup o2) {
                 return o1.compare(o2);
@@ -849,11 +894,12 @@ public class WebGen {
         buf.append("<div class=\"row\">").append(SEP);
         buf.append("<ul class=\"list-group col-12\">").append(SEP);
         
-        Competition cp = null;
-
         // Marker, wenn ein neuer WB kommt
         Set<String> cpSet = new java.util.HashSet<>();
         List<Group> grList = new java.util.ArrayList<>();
+        
+        Competition lastCp = null;
+        Competition cp = null;
         
         for (XmlGroup xmlGroup : xmlGroups) {  
             String cpName = xmlGroup.cpName;
@@ -880,12 +926,38 @@ public class WebGen {
                     continue;
                 }
                 
+                // Close last category
+                if (lastCp != null && lastCp.cpCategory != null && !lastCp.cpCategory.equals(cp.cpCategory)) {
+                    buf.append("</ul>").append(SEP);
+                    buf.append("</li>").append(SEP);
+                }
+                
+                // Open next category
+                if (cp.cpCategory != null && !cp.cpCategory.equals(lastCp == null ? null : lastCp.cpCategory)) {
+                    buf
+                            .append("<li class=\"list-group-item list-group-action bg-light p-0\" data-toggle=\"collapse\" ")
+                            .append("data-target=\"[data-webgen-category=&quot;").append(cp.cpCategory).append("&quot;]\">")
+                    ;
+                    buf
+                            .append("<span class=\"btn list-group-item bg-light text-left w-100 border-0 cpcateory\">")
+                            .append("<span>").append(cp.cpCategory).append("</span></span>")
+                    ;
+                    buf
+                            .append("<ul class=\"collapse list-group col-12 pr-0\" data-webgen-category=\"").append(cp.cpCategory).append("\">")
+                            .append(SEP)
+                    ;
+                }
+                
+                lastCp = cp;
+                
                 cpSet.add(cp.cpName);
                 
                 grFile = new FileWriter(new File(path, cp.getFileName() + ".html"));
 
                 buf
-                        .append("<li class=\"list-group-item list-group-action bg-light\">")
+                        .append("<li class=\"list-group-item list-group-action")
+                        .append(cp.cpCategory != null ? " border-left-0 border-right-0" : " bg-light")
+                        .append("\"/>")
                 ;
                 
                 buf
@@ -931,6 +1003,10 @@ public class WebGen {
         grList.clear();
                 
         // Und schliessen
+        if (lastCp != null && lastCp.cpCategory != null) {
+            buf.append("</ul>").append(SEP);
+            buf.append("</li>").append(SEP);
+        }
         buf.append("</ul>").append(Generator.SEP);
         buf.append("</div>").append(Generator.SEP);
 

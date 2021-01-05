@@ -8,7 +8,9 @@ import org.w3c.dom.Element;
 
 
 public class XmlGroup {
+    public String cpCategory;
     public String cpName;
+    public int    grSortOrder;
     public String grStage;
     public String grName;
     // We need both because "!enabled" is not "disabled"
@@ -25,13 +27,16 @@ public class XmlGroup {
     }
     
     public XmlGroup(Group gr) {
+        cpCategory = gr.cp.cpCategory;
         cpName = gr.cp.cpName;
+        grSortOrder = gr.grSortOrder;
         grStage = gr.grStage;
         grName = gr.grName;
         published = gr.grPublished;      
     }
     
     public void read(Element el) {
+        cpCategory = el.getAttribute(ATTRIBUTE_CPATEGORY);
         cpName = el.getAttribute(ATTRIBUTE_CPNAME);
         grStage = el.getAttribute(ATTRIBUTE_GRSTAGE);
         grName = el.getAttribute(ATTRIBUTE_GRNAME);
@@ -52,6 +57,7 @@ public class XmlGroup {
     }
     
     public Element write(Element el) {
+        el.setAttribute(ATTRIBUTE_CPATEGORY, cpCategory);
         el.setAttribute(ATTRIBUTE_CPNAME, cpName);
         el.setAttribute(ATTRIBUTE_GRSTAGE, grStage);
         el.setAttribute(ATTRIBUTE_GRNAME, grName);
@@ -67,7 +73,19 @@ public class XmlGroup {
     }
     
     public int compare(XmlGroup gr) {
-        int ret = cpName.compareTo(gr.cpName);
+        int ret = 0;
+
+        if (cpCategory == null && gr.cpCategory != null)
+            return +1;
+        if (cpCategory != null && gr.cpCategory == null)
+            return -1;
+
+        if (cpCategory != null && gr.cpCategory != null)
+            ret = cpCategory.compareTo(gr.cpCategory);
+        if (ret == 0)
+            ret = cpName.compareTo(gr.cpName);
+        if (ret == 0)
+            ret = grSortOrder - gr.grSortOrder;
         if (ret == 0)
             ret = grStage.compareTo(gr.grStage);
         if (ret == 0)
@@ -77,8 +95,10 @@ public class XmlGroup {
     }
     
     private static final String ATTRIBUTE_GRNAME = "GRNAME";
+    private static final String ATTRIBUTE_GRSORT = "GRSORTORDER";
     private static final String ATTRIBUTE_GRSTAGE ="GRSTAGE";
     private static final String ATTRIBUTE_CPNAME = "CPNAME";
+    private static final String ATTRIBUTE_CPATEGORY = "CPCATEGORY";
     private static final String ATTRIBUTE_ACTIVE = "ACTIVE";
     private static final String ATTRIBUTE_ENABLED = "ENABLED";
     private static final String ATTRIBUTE_DISABLED = "DISABLED";

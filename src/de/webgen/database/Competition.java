@@ -13,7 +13,7 @@ public class Competition {
     public final static int CP_TEAM   = 4;
 
     public static String getSelectString() {
-        return "SELECT cpID, cpName, cpDesc, cpType FROM CpList ";
+        return "SELECT cpID, cpName, cpDesc, cpCategory, cpType FROM CpList ";
     }
     
     public Competition() {
@@ -25,10 +25,21 @@ public class Competition {
         cpID = rs.getInt(++idx);
         cpName = Database.getString(rs, ++idx);
         cpDesc = Database.getString(rs, ++idx);
+        cpCategory = Database.getString(rs, ++idx);
         cpType = rs.getInt(++idx);
     }
 
     public int compareTo(Competition cp) {
+        if (cpCategory == null && cp.cpCategory != null)
+            return +1;
+        if (cpCategory != null && cp.cpCategory == null)
+            return -1;
+        if (cpCategory != null && cp.cpCategory != null) {
+            int ret = cpCategory.compareTo(cp.cpCategory);
+            if (ret != 0)
+                return ret;
+        }
+        
         return cpName.compareTo(cp.cpName);
     }
 
@@ -66,5 +77,6 @@ public class Competition {
     public int    cpID;
     public String cpName;
     public String cpDesc;
+    public String cpCategory;
     public int    cpType;
 }
