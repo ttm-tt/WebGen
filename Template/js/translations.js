@@ -107,7 +107,9 @@ var translations = {
             'format' : {
                 'long' : {
                     'round' : '__round__. Runde',
-                    'qualification' : 'Qualifikation'
+                    'qualification' : 'Qualifikation',
+                    'final' : 'Finale',
+                    'semifinal' : 'Halbfinale'
                 },
                 'short' : {
                     'date' : '$t(date.EEE.__wday__), __day__ $t(date.MMM.__month__)',
@@ -303,7 +305,9 @@ var translations = {
             'format' : {
                 'long' : {
                     'round' : '__round__. Round',                    
-                    'qualification' : 'Qualification'
+                    'qualification' : 'Qualification',
+                    'final' : 'Final',
+                    'semifinal' : 'Semifinal'
                 },
                 'short' : {
                     'date' : '$t(date.EEE.__wday__), __day__ $t(date.MMM.__month__)',

@@ -70,12 +70,12 @@ public class KOGenerator extends Generator {
         List<String> contentList;
         StringBuilder content = new StringBuilder();
         
+        int maxRound = gr.grNofRounds;
+        if (maxRound == 0)
+            maxRound = matchList.size();
+
         // One Round
         if (gr.grNofRounds != 1 && matchList.size() > 1) {
-            int maxRound = gr.grNofRounds;
-            if (maxRound == 0)
-                maxRound = matchList.size();
-
             for (int startRd = 0; startRd < maxRound; startRd++) {
                 if (!matchList.get(startRd).isEmpty()) {
                     Match mt = matchList.get(startRd).get(0);
@@ -99,8 +99,23 @@ public class KOGenerator extends Generator {
 
                     if (mt.mtRound <= mt.gr.grQualRounds)
                         content.append("<span data-i18n=\"ko.format.long.qualification\" />");
-                    else
+                    else if (mt.gr.grNofRounds > 0 || mt.gr.grNofMatches > 0 || mt.gr.grWinner != 1)
                         content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                    else {
+                        switch (maxRound - mt.mtRound + 1) {
+                            case 1 : // Final
+                                content.append("<span data-i18n=\"ko.format.long.final\" />");
+                                break;
+                                
+                            case 2 : // Semifinal
+                                content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                                break;
+                                
+                            default :
+                                content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                                break;
+                        }
+                    }
                 }
                 
                 content.append("</th>");
@@ -200,10 +215,25 @@ public class KOGenerator extends Generator {
 
                 if (mt.gr.grNofRounds > 0 && mt.mtRound > mt.gr.grNofRounds)
                     break;
-                else if(mt.mtRound <= mt.gr.grQualRounds)
+                else if(mt.mtRound <= mt.gr.grQualRounds) 
                     content.append("<span data-i18n=\"ko.format.long.qualification\" />");
-                else
-                    content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");                                
+                else if (mt.gr.grNofRounds > 0 || mt.gr.grNofMatches > 0 || mt.gr.grWinner != 1)
+                    content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                else {
+                    switch (maxRound - mt.mtRound + 1) {
+                        case 1 : // Final
+                            content.append("<span data-i18n=\"ko.format.long.final\" />");
+                            break;
+
+                        case 2 : // Semifinal
+                            content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                            break;
+
+                        default :
+                            content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                            break;
+                    }
+                }
             }
             
             content.append("</th>");
@@ -270,8 +300,23 @@ public class KOGenerator extends Generator {
                         break;
                     else if(mt.mtRound <= mt.gr.grQualRounds)
                         content.append("<span data-i18n=\"ko.format.long.qualification\" />");
-                    else
-                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");                                
+                    else if (mt.gr.grNofRounds > 0 || mt.gr.grNofMatches > 0 || mt.gr.grWinner != 1)
+                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                    else {
+                        switch (maxRound - mt.mtRound+ 1) {
+                            case 1 : // Final
+                                content.append("<span data-i18n=\"ko.format.long.final\" />");
+                                break;
+
+                            case 2 : // Semifinal
+                                content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                                break;
+
+                            default :
+                                content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                                break;
+                        }
+                    }
                 }
                 
                 content.append("</th>");
@@ -320,10 +365,6 @@ public class KOGenerator extends Generator {
         if (gr.cp.isTeam()) {
             content = new StringBuilder();
             
-            int maxRound = gr.grNofRounds;
-            if (maxRound == 0)
-                maxRound = matchList.size();
-
             for (int startRd = 0; startRd < maxRound; startRd++) {
                 if (!matchList.get(startRd).isEmpty()) {
                     Match mt = matchList.get(startRd).get(0);

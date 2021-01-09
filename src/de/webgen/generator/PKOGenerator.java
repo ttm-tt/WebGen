@@ -150,8 +150,24 @@ public class PKOGenerator extends KOGenerator {
                         .append("<tr>")
                         .append("<th class=\"none\">")
                         .append("<span ")
-                        .append("data-i18n=\"pko.format.short.pos\" ")
-                        .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                    ;
+                    
+                    if (gr.grNofRounds > 0 || gr.grNofMatches > 0 || gr.grWinner != 1)
+                        content  
+                                .append("data-i18n=\"pko.format.short.pos\" ")
+                                .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                        ;
+                    else if (startPos == 1 && endPos == 2)
+                        content.append("<span data-i18n=\"ko.format.long.final\" />");
+                    else if (startPos == 1 && endPos == 4)
+                        content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                    else
+                        content
+                                .append("data-i18n=\"pko.format.short.pos\" ")
+                                .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                        ;
+                    
+                    content
                         .append("></span>")
                         .append("</th>")
                         .append("</tr>")
@@ -266,8 +282,24 @@ public class PKOGenerator extends KOGenerator {
                 content
                     .append("<th>")
                     .append("<span ")
-                    .append("data-i18n=\"pko.format.short.pos\" ")
-                    .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                ;
+                
+                if (gr.grNofRounds > 0 || gr.grNofMatches > 0 || gr.grWinner != 1)
+                    content  
+                            .append("data-i18n=\"pko.format.short.pos\" ")
+                            .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                    ;
+                else if (startPos == 1 && endPos == 2)
+                    content.append("<span data-i18n=\"ko.format.long.final\" />");
+                else if (startPos == 1 && endPos == 4)
+                    content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                else
+                    content
+                            .append("data-i18n=\"pko.format.short.pos\" ")
+                            .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                    ;
+                
+                content    
                     .append("></span>")
                     .append("</th>");
             }
@@ -343,8 +375,29 @@ public class PKOGenerator extends KOGenerator {
                         .append("<h6>")
                         .append("<strong>")
                         .append("<span ")
+                    ;
+                    
+                    if (gr.grNofRounds > 0 || gr.grNofMatches > 0 || gr.grWinner != 1)
+                        content  
+                                .append("data-i18n=\"pko.format.short.pos\" ")
+                                .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                        ;
+                    else if (startPos == 1 && endPos == 2)
+                        content.append("<span data-i18n=\"ko.format.long.final\" />");
+                    else if (startPos == 1 && endPos == 4)
+                        content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                    else
+                        content
+                                .append("data-i18n=\"pko.format.short.pos\" ")
+                                .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                        ;
+
+                    content
                         .append("data-i18n=\"pko.format.short.pos\" ")
                         .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
+                    ;
+                    
+                    content
                         .append("></span>")
                         .append("</strong>")
                         .append("</h6>")
