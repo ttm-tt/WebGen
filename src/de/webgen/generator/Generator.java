@@ -4,7 +4,7 @@ package de.webgen.generator;
 
 import de.webgen.database.Association;
 import de.webgen.database.Competition;
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.Group;
 import de.webgen.database.match.Match;
 import de.webgen.generator.report.Report;
@@ -29,11 +29,11 @@ public abstract class Generator {
     public Generator() {
     }
     
-    public abstract String generate(List<List<Match>> matchList, Database database) throws SQLException;
+    public abstract String generate(List<List<Match>> matchList, IDatabase database) throws SQLException;
 
-    public abstract String generate(Report report, Database database) throws SQLException;
+    public abstract String generate(Report report, IDatabase database) throws SQLException;
 
-    protected String generateMatchList(List<Match> matchList, Database database) throws SQLException {
+    static String generateMatchList(List<Match> matchList, IDatabase database) throws SQLException {
         
         if (matchList.isEmpty())
             return "";
@@ -72,7 +72,7 @@ public abstract class Generator {
         return content.toString();        
     }
     
-    protected String generateMatchItem(Match mt, Database database, boolean includeSchedule) throws SQLException {
+    static String generateMatchItem(Match mt, IDatabase database, boolean includeSchedule) throws SQLException {
         if (mt == null)
             return "";
         

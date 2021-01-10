@@ -3,7 +3,7 @@
 package de.webgen.generator;
 
 import de.webgen.WebGen;
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.Group;
 import de.webgen.database.match.Match;
 import de.webgen.database.position.Groupposition;
@@ -19,7 +19,7 @@ public class RRGenerator extends Generator {
 
 
     @Override
-    public String generate(List<List<Match>> matchList, Database database) throws SQLException {
+    public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
         Group gr = matchList.get(0).get(0).gr;
 
         List<Groupposition> groupList = database.readGroupposition(gr);
@@ -203,7 +203,7 @@ public class RRGenerator extends Generator {
         return content.toString();
     }
     
-    protected String generateMatchListTables(List<List<Match>> matchList, Database database) throws SQLException {
+    protected String generateMatchListTables(List<List<Match>> matchList, IDatabase database) throws SQLException {
         if (matchList.isEmpty() || matchList.get(0).isEmpty())
             return "";
         
@@ -237,7 +237,7 @@ public class RRGenerator extends Generator {
     }
 
     @Override
-    public String generate(Report report, Database database) {
+    public String generate(Report report, IDatabase database) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

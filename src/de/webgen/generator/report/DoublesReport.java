@@ -3,7 +3,7 @@
 package de.webgen.generator.report;
 
 import de.webgen.database.Competition;
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.DoublePlayer;
 import de.webgen.generator.Generator;
 import static de.webgen.generator.report.Report.SEP;
@@ -19,12 +19,12 @@ public class DoublesReport extends Report {
     }
     
     @Override
-    public java.sql.Timestamp getTimestamp(Database database) throws SQLException {
+    public java.sql.Timestamp getTimestamp(IDatabase database) throws SQLException {
         return database.getEntryTimestamp(2);
     }
 
     @Override
-    public String generate(Database database) throws SQLException {
+    public String generate(IDatabase database) throws SQLException {
         Competition[] events = database.readEvents();
 
         java.util.ArrayList<DoublePlayer> playersList = new java.util.ArrayList<>();
@@ -39,7 +39,7 @@ public class DoublesReport extends Report {
         return generate(database, playersList);
     }
     
-    protected String generate(Database database, List<DoublePlayer> doubles) throws SQLException {                
+    protected String generate(IDatabase database, List<DoublePlayer> doubles) throws SQLException {                
         Competition[] events = database.readEvents(
                 this.type == ReportType.Doubles ? Competition.CP_DOUBLE : Competition.CP_MIXED
         );

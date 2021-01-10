@@ -2,7 +2,7 @@
 
 package de.webgen.generator.report;
 
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import java.sql.SQLException;
 
 
@@ -54,7 +54,7 @@ abstract public class Report {
         this.type = type;
     }
 
-    abstract public String generate(Database database) throws SQLException;
+    abstract public String generate(IDatabase database) throws SQLException;
 
     @Override
     public String toString() {
@@ -74,7 +74,7 @@ abstract public class Report {
         return type.toString().toLowerCase();
     }
     
-    public abstract java.sql.Timestamp getTimestamp(Database database) throws java.sql.SQLException;
+    public abstract java.sql.Timestamp getTimestamp(IDatabase database) throws java.sql.SQLException;
 
     public boolean selected = false;
 

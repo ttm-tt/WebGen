@@ -2,7 +2,7 @@
 
 package de.webgen.generator.report;
 
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.Player;
 import de.webgen.generator.Generator;
 import static de.webgen.generator.report.Report.SEP;
@@ -17,12 +17,12 @@ public class PlayersReport extends Report {
     }
 
     @Override
-    public java.sql.Timestamp getTimestamp(Database database) throws SQLException {
+    public java.sql.Timestamp getTimestamp(IDatabase database) throws SQLException {
         return database.getPlayerTimestamp();
     }
 
     @Override
-    public String generate(Database database) throws SQLException {
+    public String generate(IDatabase database) throws SQLException {
         Player[] players = database.getPlayers().toArray(new Player[0]);
         java.util.Arrays.sort(players, new java.util.Comparator<Player>() {
 

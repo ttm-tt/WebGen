@@ -3,7 +3,7 @@
 package de.webgen.generator.report;
 
 import de.webgen.database.Competition;
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.SinglePlayer;
 import de.webgen.generator.Generator;
 import static de.webgen.generator.report.Report.SEP;
@@ -18,12 +18,12 @@ public class SinglesReport extends Report {
     }
 
     @Override
-    public java.sql.Timestamp getTimestamp(Database database) throws SQLException {
+    public java.sql.Timestamp getTimestamp(IDatabase database) throws SQLException {
             return database.getEntryTimestamp(1);
     }
 
     @Override
-    public String generate(Database database) throws SQLException {
+    public String generate(IDatabase database) throws SQLException {
         Competition[] events = database.readEvents(Competition.CP_SINGLE);
 
         StringBuilder sb = new StringBuilder();

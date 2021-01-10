@@ -23,7 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class Database {
+public class Database implements IDatabase {
     
     final static java.nio.charset.Charset charsetUTF = java.nio.charset.Charset.forName("UTF-16LE");
     final static java.nio.charset.Charset charsetISO = java.nio.charset.Charset.forName("ISO-8859-1");
@@ -78,6 +78,7 @@ public class Database {
     }
 
 
+    @Override
     public boolean testConnection() {
         try (Connection conn = java.sql.DriverManager.getConnection(connectionString);) {
             return conn != null;
@@ -88,6 +89,7 @@ public class Database {
         return false;
     }
 
+    @Override
     public Association[] readAssociations() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -117,18 +119,22 @@ public class Database {
         }        
     }
     
+    @Override
     public Competition[] readEvents() throws SQLException {
         return readEvents(null, 0);
     }
     
+    @Override
     public Competition[] readEvents(Timestamp datetime) throws SQLException {        
         return readEvents(datetime, 0);
     }
     
+    @Override
     public Competition[] readEvents(int cpType) throws SQLException {
         return readEvents(null, cpType);
     }
     
+    @Override
     public Competition[] readEvents(Timestamp datetime, int cpType) throws SQLException {            
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -172,6 +178,7 @@ public class Database {
         }
     }
 
+    @Override
     public Competition readEvent(String cpName) throws SQLException {
         Competition cp = null;
 
@@ -202,6 +209,7 @@ public class Database {
     }
     
     
+    @Override
     public Group[] readPublishedGroups() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -244,6 +252,7 @@ public class Database {
 
     
     // Read groups with played matches
+    @Override
     public Group[] readCurrentGroups() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -285,6 +294,7 @@ public class Database {
         }
     }
 
+    @Override
     public Group[] readGroups(Competition cp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -320,6 +330,7 @@ public class Database {
         }
     }
 
+    @Override
     public Group[] readGroups(String date) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -362,6 +373,7 @@ public class Database {
         }
     }
 
+    @Override
     public Group readGroup(String cpName, String grName) throws SQLException {
         Competition cp = readEvent(cpName);
 
@@ -372,6 +384,7 @@ public class Database {
     }
 
 
+    @Override
     public Group readGroup(Competition cp, String grName) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -405,6 +418,7 @@ public class Database {
         }
     }
 
+    @Override
     public void updateTimestamp(Group group) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -443,6 +457,7 @@ public class Database {
         }
     }
 
+    @Override
     public List<Match> readMatches(Group gr, String date) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -496,6 +511,7 @@ public class Database {
         }
     }
     
+    @Override
     public List<List<Match>> readMatches(Group gr) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -556,6 +572,7 @@ public class Database {
         }
     }
 
+    @Override
     public List<Match> readIndividualMatches(Match teamMatch) throws SQLException {
         ResultSet res = null;
         List<Match> list = new java.util.ArrayList<>();
@@ -585,6 +602,7 @@ public class Database {
         }
     }
     
+    @Override
     public List<Match> readTeamMatches(int tmID) throws SQLException {
         List<Match> list = new java.util.ArrayList<>();
         
@@ -621,6 +639,7 @@ public class Database {
         return list;        
     }
     
+    @Override
     public List<Match> readPlayersMatches(int plNr) throws SQLException {
         List<Match> list = new java.util.ArrayList<>();
         
@@ -757,6 +776,7 @@ public class Database {
         return list;
     }
 
+    @Override
     public List<Groupposition> readGroupposition(Group gr) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -801,6 +821,7 @@ public class Database {
         }
     }
 
+    @Override
     public int getTableType() throws SQLException {
         Connection conn = getConnection();
         java.sql.Statement stmt = null;
@@ -828,6 +849,7 @@ public class Database {
         }
     }
     
+    @Override
     public String getTitle() throws SQLException {
         Connection conn = getConnection();
         java.sql.Statement stmt = null;
@@ -856,6 +878,7 @@ public class Database {
     }
     
 
+    @Override
     public List<Player> getPlayers() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -895,6 +918,7 @@ public class Database {
         }
     }
 
+    @Override
     public List<SinglePlayer> getSingles(Competition cp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -942,6 +966,7 @@ public class Database {
         }
     }
 
+    @Override
     public List<SinglePlayer> getPartnerWanted(Competition cp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -989,6 +1014,7 @@ public class Database {
         }
     }
 
+    @Override
     public List<DoublePlayer> getDoubles(Competition cp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1046,6 +1072,7 @@ public class Database {
         }
     }
 
+    @Override
     public List<TeamPlayer> getTeamPlayers(Competition cp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1101,6 +1128,7 @@ public class Database {
         }
     }
     
+    @Override
     public List<Team> getTeams(Competition cp) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1144,6 +1172,7 @@ public class Database {
         }
     }
     
+    @Override
     public Timestamp getPlayerTimestamp() throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1172,6 +1201,7 @@ public class Database {
         return ts;
     }
 
+    @Override
     public Timestamp getEntryTimestamp(int type) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1207,6 +1237,7 @@ public class Database {
         return ts.before(tspl) ? tspl : ts;
     }
 
+    @Override
     public Timestamp getMatchTimestamp(String date) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1241,6 +1272,7 @@ public class Database {
         return ts;
     }
 
+    @Override
     public Timestamp getMatchTimestamp(Group gr, String date) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -1276,6 +1308,7 @@ public class Database {
         return ts;
     }
 
+    @Override
     public List<Timestamp> getMatchDates(Group gr) throws SQLException {
         PreparedStatement  stmt = null;
         ResultSet  res  = null;
@@ -1309,6 +1342,7 @@ public class Database {
         
     }
     
+    @Override
     public void closeConnection() {
         if (connection != null) {
             try {                

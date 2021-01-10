@@ -2,7 +2,7 @@
 
 package de.webgen.generator;
 
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.Group;
 import de.webgen.database.match.Match;
 import de.webgen.generator.report.Report;
@@ -19,7 +19,7 @@ public class KOGenerator extends Generator {
 
     @Override
     @SuppressWarnings("DeadBranch")
-    public String generate(List<List<Match>> matchList, Database database) throws SQLException {
+    public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
         StringBuilder buffer = new StringBuilder();
         
         Group gr = null;
@@ -738,7 +738,7 @@ public class KOGenerator extends Generator {
     }
 
     @Override
-    public String generate(Report report, Database database) throws SQLException {
+    public String generate(Report report, IDatabase database) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

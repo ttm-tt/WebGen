@@ -2,7 +2,7 @@
 
 package de.webgen.generator;
 
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.match.Match;
 import de.webgen.generator.report.Report;
 import java.sql.SQLException;
@@ -12,7 +12,7 @@ import java.util.List;
 public class PlayersMatchesGenerator extends Generator {
 
     @Override
-    public String generate(List<List<Match>> matchList, Database database) throws SQLException {
+    public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
         if (matchList.isEmpty())
             return "";
         
@@ -100,7 +100,7 @@ public class PlayersMatchesGenerator extends Generator {
     }
 
     @Override
-    public String generate(Report report, Database database) throws SQLException {
+    public String generate(Report report, IDatabase database) throws SQLException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

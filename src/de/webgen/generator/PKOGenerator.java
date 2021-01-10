@@ -3,7 +3,7 @@
 package de.webgen.generator;
 
 
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.Group;
 import de.webgen.database.match.Match;
 import static de.webgen.generator.Generator.SEP;
@@ -19,7 +19,7 @@ public class PKOGenerator extends KOGenerator {
 
 
     @Override
-    public String generate(List<List<Match>> matchList, Database database) throws SQLException {
+    public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
         Group gr = matchList.get(0).get(0).gr;
         
         if (gr == null)

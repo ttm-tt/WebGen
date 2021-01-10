@@ -3,7 +3,7 @@
 package de.webgen.generator.report;
 
 import de.webgen.database.Competition;
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.DoublePlayer;
 import java.sql.SQLException;
 
@@ -15,12 +15,12 @@ public class MixedReport extends DoublesReport {
     }
 
     @Override
-    public java.sql.Timestamp getTimestamp(Database database) throws SQLException {
+    public java.sql.Timestamp getTimestamp(IDatabase database) throws SQLException {
         return database.getEntryTimestamp(3);
     }
 
     @Override
-    public String generate(Database database) throws SQLException {
+    public String generate(IDatabase database) throws SQLException {
         Competition[] events = database.readEvents();
 
         java.util.ArrayList<DoublePlayer> playersList = new java.util.ArrayList<>();

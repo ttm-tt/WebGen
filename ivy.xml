@@ -20,7 +20,13 @@
         <dependency org="org.ini4j" name="ini4j" rev="0.5.4" conf="compile->default"/>
         
         <!-- Test libs -->
-                
+        <!-- https://mvnrepository.com/artifact/junit/junit -->
+        <dependency org="junit" name="junit" rev="4.13" conf="test->default;sources->sources;javadoc->javadoc" />
+        <!-- https://mvnrepository.com/artifact/com.github.tntim96/JSCover -->
+        <dependency org="com.github.tntim96" name="JSCover" rev="2.0.10" conf="test->default;sources->sources;javadoc->javadoc" />
+        <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+        <dependency org="org.jsoup" name="jsoup" rev="1.13.1" conf="test->default;sources->sources;javadoc->javadoc"/>
+                        
         <!-- Avoid evicting modules when resolving dependencies -->
         <conflict manager="all" />
     </dependencies>

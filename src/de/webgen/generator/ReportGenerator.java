@@ -2,7 +2,7 @@
 
 package de.webgen.generator;
 
-import de.webgen.database.Database;
+import de.webgen.database.IDatabase;
 import de.webgen.database.match.Match;
 import de.webgen.generator.report.Report;
 import java.sql.SQLException;
@@ -16,12 +16,12 @@ public class ReportGenerator extends Generator {
 
 
     @Override
-    public String generate(List<List<Match>> matchList, Database database) {
+    public String generate(List<List<Match>> matchList, IDatabase database) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public String generate(Report report, Database database) throws SQLException {
+    public String generate(Report report, IDatabase database) throws SQLException {
         StringBuilder sb = new StringBuilder();
 
         sb.append(report.generate(database));
