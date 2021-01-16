@@ -4,6 +4,7 @@ package de.webgen.database;
 
 
 public class Team {
+    public int cpID;
     public Competition cp;
     public int    tmID;
     public String tmName;
@@ -19,6 +20,7 @@ public class Team {
     
     public Team(Competition cp) {
         this.cp = cp;
+        this.cpID = cp.cpID;
     }
 
     @Override

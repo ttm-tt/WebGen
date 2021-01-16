@@ -16,17 +16,17 @@ public class IndividualMatch extends Match {
     public Player plY;
 
     public static String getSelectString() {
-        return "SELECT mt.grID, mtNr, mt.mtMS, mtRound, mtMatch, mtReverse, mtTable, mtDateTime, mtTimestamp, " +
+        return "SELECT mt.grID, mt.mtID, mtNr, mt.mtMS, mtRound, mtMatch, mtReverse, mtTable, mtDateTime, mtTimestamp, " +
                "       1 AS mtMatches, mtBestOf, mt.mtResA, mt.mtResX, " +
                "       mtWalkOverA, mtWalkOverX, " +
                "       mtInjuredA, mtInjuredX, " +
                "       mtDisqualifiedA, mtDisqualifiedX, " +
                "       mt.mtPrinted, mt.mtChecked, " +
                "       stA, stX, tmAtmID, tmXtmID, " +
-               "       plAplNr, plApsFirst, plApsLast, plAnaName, plAnaDesc, plAnaRegion, " +
-               "       plBplNr, plBpsFirst, plBpsLast, plBnaName, plBnaDesc, plBnaRegion, " +
-               "       plXplNr, plXpsFirst, plXpsLast, plXnaName, plXnaDesc, plXnaRegion, " +
-               "       plYplNr, plYpsFirst, plYpsLast, plYnaName, plYnaDesc, plYnaRegion, " +
+               "       plAplID, plAplNr, plApsFirst, plApsLast, plAnaName, plAnaDesc, plAnaRegion, " +
+               "       plBplID, plBplNr, plBpsFirst, plBpsLast, plBnaName, plBnaDesc, plBnaRegion, " +
+               "       plXplID, plXplNr, plXpsFirst, plXpsLast, plXnaName, plXnaDesc, plXnaRegion, " +
+               "       plYplID, plYplNr, plYpsFirst, plYpsLast, plYnaName, plYnaDesc, plYnaRegion, " +
                "       mtSet1.mtResA, mtSet1.mtResX, " +
                "       mtSet2.mtResA, mtSet2.mtResX, " +
                "       mtSet3.mtResA, mtSet3.mtResX, " +
@@ -68,6 +68,7 @@ public class IndividualMatch extends Match {
         
         int idx = 0;
         grID = rs.getInt(++idx);
+        mtID = rs.getInt(++idx);
         mtNr = rs.getInt(++idx);
         mtMS = rs.getInt(++idx);
         mtRound = rs.getInt(++idx);
@@ -97,6 +98,7 @@ public class IndividualMatch extends Match {
         tmAtmID = rs.getInt(++idx);
         tmXtmID = rs.getInt(++idx);
 
+        plA.plID = rs.getInt(++idx);
         plA.plNr = rs.getInt(++idx);
         plA.psFirstName = Database.getString(rs, ++idx);
         plA.psLastName = Database.getString(rs, ++idx);
@@ -104,6 +106,7 @@ public class IndividualMatch extends Match {
         plA.naDesc = Database.getString(rs, ++idx);
         plA.naRegion = Database.getString(rs, ++idx);
 
+        plB.plID = rs.getInt(++idx);
         plB.plNr = rs.getInt(++idx);
         plB.psFirstName = Database.getString(rs, ++idx);
         plB.psLastName = Database.getString(rs, ++idx);
@@ -111,6 +114,7 @@ public class IndividualMatch extends Match {
         plB.naDesc = Database.getString(rs, ++idx);
         plB.naRegion = Database.getString(rs, ++idx);
 
+        plX.plID = rs.getInt(++idx);
         plX.plNr = rs.getInt(++idx);
         plX.psFirstName = Database.getString(rs, ++idx);
         plX.psLastName = Database.getString(rs, ++idx);
@@ -118,6 +122,7 @@ public class IndividualMatch extends Match {
         plX.naDesc = Database.getString(rs, ++idx);
         plX.naRegion = Database.getString(rs, ++idx);
 
+        plY.plID = rs.getInt(++idx);
         plY.plNr = rs.getInt(++idx);
         plY.psFirstName = Database.getString(rs, ++idx);
         plY.psLastName = Database.getString(rs, ++idx);

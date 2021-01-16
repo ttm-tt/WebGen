@@ -10,7 +10,7 @@ public class WebGenTestClass {
     }
 
     public static void tearDownClass() { 
-        System.out.println("Database tearDown");
+        // System.out.println("Database tearDown");
     }
 
 }

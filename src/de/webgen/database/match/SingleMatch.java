@@ -14,17 +14,20 @@ public class SingleMatch extends Match {
 
     public  Player  plA;
     public  Player  plX;
+    
+    public int plAplID;
+    public int plXplID;
 
     public static String getSelectString() {
-        return "SELECT mt.grID, mtNr, 0 AS mtMS, mtRound, mtMatch, 0 as mtReverse, mtTable, mtDateTime, mtTimestamp, " +
+        return "SELECT mt.grID, mt.mtID, mtNr, 0 AS mtMS, mtRound, mtMatch, 0 as mtReverse, mtTable, mtDateTime, mtTimestamp, " +
                "       1 AS mtMatches, mtBestOf, mt.mtResA, mt.mtResX, " +
                "       mtWalkOverA, mtWalkOverX, " +
                "       mtInjuredA, mtInjuredX, " +
                "       mtDisqualifiedA, mtDisqualifiedX, " +
                "       mtPrinted, mtChecked, " +
                "       stA, stX, tmAtmID, tmXtmID, " +
-               "       plAplNr, plApsFirst, plApsLast, plAnaName, plAnaDesc, plAnaRegion, " +
-               "       plXplNr, plXpsFirst, plXpsLast, plXnaName, plXnaDesc, plXnaRegion, " +
+               "       plAplID, plAplNr, plApsFirst, plApsLast, plAnaName, plAnaDesc, plAnaRegion, " +
+               "       plXplID, plXplNr, plXpsFirst, plXpsLast, plXnaName, plXnaDesc, plXnaRegion, " +
                "       xxA.stID, grQualA.grDesc, xxA.grPos, xxX.stID, grQualX.grDesc, xxX.grPos, " +                
                "       mtSet1.mtResA, mtSet1.mtResX, " +
                "       mtSet2.mtResA, mtSet2.mtResX, " +
@@ -59,6 +62,7 @@ public class SingleMatch extends Match {
         read(rs);
     }
     
+    @Override
     public void read(ResultSet rs) throws SQLException {
         plA = new Player();
         plX = new Player();
@@ -68,6 +72,7 @@ public class SingleMatch extends Match {
         
         int idx = 0;
         grID = rs.getInt(++idx);
+        mtID = rs.getInt(++idx);
         mtNr = rs.getInt(++idx);
         mtMS = rs.getInt(++idx);
         mtRound = rs.getInt(++idx);
@@ -96,6 +101,7 @@ public class SingleMatch extends Match {
         tmAtmID = rs.getInt(++idx);
         tmXtmID = rs.getInt(++idx);
 
+        plAplID = plA.plID = rs.getInt(++idx);
         plA.plNr = rs.getInt(++idx);
         plA.psFirstName = Database.getString(rs, ++idx);
         plA.psLastName = Database.getString(rs, ++idx);
@@ -103,6 +109,7 @@ public class SingleMatch extends Match {
         plA.naDesc = Database.getString(rs, ++idx);
         plA.naRegion = Database.getString(rs, ++idx);
 
+        plXplID = plX.plID = rs.getInt(++idx);
         plX.plNr = rs.getInt(++idx);
         plX.psFirstName = Database.getString(rs, ++idx);
         plX.psLastName = Database.getString(rs, ++idx);

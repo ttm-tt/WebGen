@@ -9,6 +9,8 @@ public class TeamPlayer {
         pl = new Player();        
     }
     
+    public int tmID;
+    public int plID;
     public Team tm;
     public Player pl;
 }

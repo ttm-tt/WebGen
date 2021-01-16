@@ -21,15 +21,15 @@ public class TeamMatch extends Match {
     private int nmID;
 
     public static String getSelectString() {
-        return "SELECT mt.grID, mtNr, 0 AS mtMS, mtRound, mtMatch, mtReverse, mtTable, mtDateTime, mtTimestamp, " +
+        return "SELECT mt.grID, mt.mtID, mtNr, 0 AS mtMS, mtRound, mtMatch, mtReverse, mtTable, mtDateTime, mtTimestamp, " +
                "       mtMatches, mtBestOf, mt.mtResA, mt.mtResX, " +
                "       mtWalkOverA, mtWalkOverX, " +
                "       mtInjuredA, mtInjuredX, " +
                "       mtDisqualifiedA, mtDisqualifiedX, " +
                "       mtPrinted, mtChecked, " +
-               "       stA, stX, tmAtmID, tmXtmID, " +
-               "       tmAtmName, tmAtmDesc, tmAnaName, tmAnaDesc, tmAnaRegion, " +
-               "       tmXtmName, tmXtmDesc, tmXnaName, tmXnaDesc, tmXnaRegion, " +
+               "       stA, stX, " +
+               "       tmAtmID, tmAtmName, tmAtmDesc, tmAnaName, tmAnaDesc, tmAnaRegion, " +
+               "       tmXtmID, tmXtmName, tmXtmDesc, tmXnaName, tmXnaDesc, tmXnaRegion, " +
                "       xxA.stID, grQualA.grDesc, xxA.grPos, xxX.stID, grQualX.grDesc, xxX.grPos, " +
                "       nm.nmID " +
                " FROM MtTeamList mt INNER JOIN GrList gr ON mt.grID = gr.grID " +
@@ -60,9 +60,11 @@ public class TeamMatch extends Match {
         read(rs);
     }
      
+    @Override
     public void read(ResultSet rs) throws SQLException {
         int idx = 0;
         grID = rs.getInt(++idx);
+        mtID = rs.getInt(++idx);
         mtNr = rs.getInt(++idx);
         mtMS = rs.getInt(++idx);
         mtRound = rs.getInt(++idx);
@@ -89,17 +91,14 @@ public class TeamMatch extends Match {
         stA = rs.getInt(++idx);
         stX = rs.getInt(++idx);
 
-        tmAtmID = rs.getInt(++idx);
-        tmA.tmID = tmAtmID;
-        tmXtmID = rs.getInt(++idx);
-        tmX.tmID = tmXtmID;
-
+        tmAtmID = tmA.tmID = rs.getInt(++idx);
         tmA.tmName = Database.getString(rs, ++idx);
         tmA.tmDesc = Database.getString(rs, ++idx); 
         tmA.naName = Database.getString(rs, ++idx); 
         tmA.naDesc = Database.getString(rs, ++idx); 
         tmA.naRegion = Database.getString(rs, ++idx); 
 
+        tmXtmID = tmX.tmID = rs.getInt(++idx);
         tmX.tmName = Database.getString(rs, ++idx); 
         tmX.tmDesc = Database.getString(rs, ++idx); 
         tmX.naName = Database.getString(rs, ++idx); 

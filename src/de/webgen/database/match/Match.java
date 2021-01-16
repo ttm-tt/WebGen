@@ -15,6 +15,7 @@ public abstract class Match {
     public Group gr;
     
     public int grID;
+    public int mtID;
     public int mtNr;
     public int mtMS;
     public int mtRound;

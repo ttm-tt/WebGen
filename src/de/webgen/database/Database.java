@@ -883,7 +883,7 @@ public class Database implements IDatabase {
         PreparedStatement stmt = null;
         ResultSet res = null;
         
-        String sql = "SELECT plNr, psLast, psFirst, psSex, naName, naDesc, naRegion, plExtID FROM PlList";
+        String sql = "SELECT plID, plNr, psLast, psFirst, psSex, naName, naDesc, naRegion, plExtID FROM PlList";
 
         List<Player> list = new java.util.ArrayList<>();
 
@@ -895,6 +895,7 @@ public class Database implements IDatabase {
                 int idx = 0;
                 
                 Player pl = new Player();
+                pl.plID = res.getInt(++idx);
                 pl.plNr = res.getInt(++idx);
                 pl.psLastName = getString(res, ++idx); 
                 pl.psFirstName = getString(res, ++idx); 
@@ -927,7 +928,7 @@ public class Database implements IDatabase {
             return null;
         
         String sql = 
-                    "SELECT plNr, psLast, psFirst, psSex, naName, naDesc, naRegion " +
+                    "SELECT cpID, plID, plNr, psLast, psFirst, psSex, naName, naDesc, naRegion " +
                     "  FROM TmSingleList tm " +
                     " WHERE tm.cpID = ?";
 
@@ -944,6 +945,8 @@ public class Database implements IDatabase {
                 
                 SinglePlayer pl = new SinglePlayer();
                 pl.cp = cp;
+                pl.cpID = res.getInt(++idx);
+                pl.plID = pl.pl.plID = res.getInt(++idx);
                 pl.pl.plNr = res.getInt(++idx);
                 pl.pl.psLastName = getString(res, ++idx); 
                 pl.pl.psFirstName = getString(res, ++idx); 
@@ -1023,8 +1026,9 @@ public class Database implements IDatabase {
             return null;
         
         String sql =
-                "SELECT plplNr, plpsLast, plpsFirst, plpsSex, plnaName, plnaDesc, plnaRegion, " +
-                "       bdplNr, bdpsLast, bdpsFirst, bdpsSex, bdNaName, bdnaDesc, bdnaRegion  " +
+                "SELECT cpID, " +
+                "       plplID, plplNr, plpsLast, plpsFirst, plpsSex, plnaName, plnaDesc, plnaRegion, " +
+                "       bdplID, bdplNr, bdpsLast, bdpsFirst, bdpsSex, bdNaName, bdnaDesc, bdnaRegion  " +
                 "  FROM TmDoubleList tm  " +
                 " WHERE tm.cpID = ?";
                 
@@ -1041,6 +1045,8 @@ public class Database implements IDatabase {
                 
                 DoublePlayer pair = new DoublePlayer();
                 pair.cp = cp;
+                pair.cpID = res.getInt(++idx);
+                pair.plID = pair.pl.plID = res.getInt(++idx);
                 pair.pl.plNr = res.getInt(++idx);
                 pair.pl.psLastName = getString(res, ++idx); 
                 pair.pl.psFirstName = getString(res, ++idx);
@@ -1050,6 +1056,7 @@ public class Database implements IDatabase {
                 pair.pl.naRegion = getString(res, ++idx); 
 
                 pair.bd = new Player();
+                pair.bdID = pair.bd.plID = res.getInt(++idx);
                 pair.bd.plNr = res.getInt(++idx);
                 pair.bd.psLastName = getString(res, ++idx); 
                 pair.bd.psFirstName = getString(res, ++idx); 
@@ -1081,7 +1088,7 @@ public class Database implements IDatabase {
             return null;
 
         String sql = 
-                    "SELECT nt.plNr, nt.psLast, nt.psFirst, nt.psSex, nt.naName, nt.naDesc, nt.naRegion, " +
+                    "SELECT nt.plID, nt.plNr, nt.psLast, nt.psFirst, nt.psSex, nt.naName, nt.naDesc, nt.naRegion, " +
                     "       tm.tmID, tm.tmName, tm.tmDesc, tm.naName, tm.naDesc, tm.naRegion " +
                     "  FROM NtEntryList nt INNER JOIN TmTeamList tm ON nt.tmID = tm.tmID " +
                     " WHERE tm.cpID = ?";
@@ -1098,7 +1105,7 @@ public class Database implements IDatabase {
                 int idx = 0;
                 
                 TeamPlayer player = new TeamPlayer(cp);
-                
+                player.plID = player.pl.plID = res.getInt(++idx);
                 player.pl.plNr = res.getInt(++idx);
                 player.pl.psLastName = getString(res, ++idx);
                 player.pl.psFirstName = getString(res, ++idx); 
@@ -1107,7 +1114,7 @@ public class Database implements IDatabase {
                 player.pl.naDesc = getString(res, ++idx); 
                 player.pl.naRegion = getString(res, ++idx);
 
-                player.tm.tmID   = res.getInt(++idx);
+                player.tmID = player.tm.tmID   = res.getInt(++idx);
                 player.tm.tmName = getString(res, ++idx); 
                 player.tm.tmDesc = getString(res, ++idx); 
                 player.tm.naName = getString(res, ++idx); 
@@ -1137,7 +1144,7 @@ public class Database implements IDatabase {
             return null;
 
         String sql = 
-                "SELECT tmID, tmName, tmDesc, naName, naDesc FROM TmTeamList tm WHERE tm.cpID = ?";
+                "SELECT cpID, tmID, tmName, tmDesc, naName, naDesc FROM TmTeamList tm WHERE tm.cpID = ?";
         
         List<Team> list = new java.util.ArrayList<>();
 
@@ -1152,6 +1159,7 @@ public class Database implements IDatabase {
                 
                 Team tm = new Team(cp);
                 
+                tm.cpID = res.getInt(++idx);
                 tm.tmID   = res.getInt(++idx);
                 tm.tmName = getString(res, ++idx); 
                 tm.tmDesc = getString(res, ++idx); 

@@ -5,6 +5,7 @@ package de.webgen.database;
 
 public class Player {
 
+    public int    plID;
     public int    plNr;
     public String psFirstName;
     public String psLastName;
