@@ -98,21 +98,21 @@ public class KOGenerator extends Generator {
                     Match mt = matchList.get(startRd).get(0);
 
                     if (mt.mtRound <= mt.gr.grQualRounds)
-                        content.append("<span data-i18n=\"ko.format.long.qualification\" />");
+                        content.append("<span data-i18n=\"ko.format.long.qualification\"></span>");
                     else if (mt.gr.grNofRounds > 0 || mt.gr.grNofMatches > 0 || mt.gr.grWinner != 1)
-                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                     else {
                         switch (maxRound - mt.mtRound + 1) {
                             case 1 : // Final
-                                content.append("<span data-i18n=\"ko.format.long.final\" />");
+                                content.append("<span data-i18n=\"ko.format.long.final\"></span>");
                                 break;
                                 
                             case 2 : // Semifinal
-                                content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                                content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
                                 break;
                                 
                             default :
-                                content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                                content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                                 break;
                         }
                     }
@@ -216,21 +216,21 @@ public class KOGenerator extends Generator {
                 if (mt.gr.grNofRounds > 0 && mt.mtRound > mt.gr.grNofRounds)
                     break;
                 else if(mt.mtRound <= mt.gr.grQualRounds) 
-                    content.append("<span data-i18n=\"ko.format.long.qualification\" />");
+                    content.append("<span data-i18n=\"ko.format.long.qualification\"></span>");
                 else if (mt.gr.grNofRounds > 0 || mt.gr.grNofMatches > 0 || mt.gr.grWinner != 1)
-                    content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                    content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                 else {
                     switch (maxRound - mt.mtRound + 1) {
                         case 1 : // Final
-                            content.append("<span data-i18n=\"ko.format.long.final\" />");
+                            content.append("<span data-i18n=\"ko.format.long.final\"></span>");
                             break;
 
                         case 2 : // Semifinal
-                            content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                            content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
                             break;
 
                         default :
-                            content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                            content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                             break;
                     }
                 }
@@ -241,7 +241,7 @@ public class KOGenerator extends Generator {
         
         // Und dann noch der Sieger
         if (matchList.size() > 0 && matchList.get(0).size() > 0 && matchList.get(0).get(0).gr.grNofRounds == 0)
-            content.append("<th>").append("<span data-i18n=\"ko.winner\" />").append("</th>");
+            content.append("<th>").append("<span data-i18n=\"ko.winner\"></span>").append("</th>");
         else
             content.append("<th>").append("</th>");
         
@@ -299,21 +299,21 @@ public class KOGenerator extends Generator {
                     if (mt.gr.grNofRounds > 0 && mt.mtRound > mt.gr.grNofRounds)
                         break;
                     else if(mt.mtRound <= mt.gr.grQualRounds)
-                        content.append("<span data-i18n=\"ko.format.long.qualification\" />");
+                        content.append("<span data-i18n=\"ko.format.long.qualification\"></span>");
                     else if (mt.gr.grNofRounds > 0 || mt.gr.grNofMatches > 0 || mt.gr.grWinner != 1)
-                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                     else {
                         switch (maxRound - mt.mtRound+ 1) {
                             case 1 : // Final
-                                content.append("<span data-i18n=\"ko.format.long.final\" />");
+                                content.append("<span data-i18n=\"ko.format.long.final\"></span>");
                                 break;
 
                             case 2 : // Semifinal
-                                content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                                content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
                                 break;
 
                             default :
-                                content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                                content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                                 break;
                         }
                     }
@@ -324,7 +324,7 @@ public class KOGenerator extends Generator {
 
             // Und dann noch der Sieger
             if (matchList.size() > 0 && matchList.get(0).size() > 0 && matchList.get(0).get(0).gr.grNofRounds == 0)
-                content.append("<th>").append("<span data-i18n=\"ko.winner\" />").append("</th>");
+                content.append("<th>").append("<span data-i18n=\"ko.winner\"></span>").append("</th>");
             else
                 content.append("<th>").append("</th>");
 
@@ -383,9 +383,9 @@ public class KOGenerator extends Generator {
                     Match mt = matchList.get(startRd).get(0);
 
                     if (mt.mtRound <= mt.gr.grQualRounds)
-                        content.append("<span data-i18n=\"ko.format.long.qualification\" />");
+                        content.append("<span data-i18n=\"ko.format.long.qualification\"></span>");
                     else
-                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\' />");
+                        content.append("<span data-i18n=\"ko.format.long.round\" data-i18n-options=\'{\"round\":\"").append(mt.mtRound - gr.grQualRounds).append("\"}\'></span>");
                 }
                 content
                     .append("</strong>")
@@ -540,7 +540,7 @@ public class KOGenerator extends Generator {
                         .append("\"wday\" : \"").append(prevMt.mtDateTime.getDay() + 1).append("\", ")
                         .append("\"day\" : \"").append(String.format("%02d", prevMt.mtDateTime.getDate())).append("\", ")
                         .append("\"month\" : \"").append(prevMt.mtDateTime.getMonth() + 1).append("\"")
-                        .append("}\' />")
+                        .append("}\'></span>")
                     ;
                     
                     if (prevMt.mtDateTime.getHours() != 0 || prevMt.mtTable != 0)
@@ -550,7 +550,7 @@ public class KOGenerator extends Generator {
                             .append("data-i18n-options=\'{")
                             .append("\"hour\" : \"").append(String.format("%02d", prevMt.mtDateTime.getHours())).append("\", ")
                             .append("\"minute\" : \"").append(String.format("%02d", prevMt.mtDateTime.getMinutes())).append("\" ")
-                            .append("}\' />")
+                            .append("}\'></span>")
                         ;
                     
                     if (prevMt.mtTable != 0) {
@@ -559,7 +559,7 @@ public class KOGenerator extends Generator {
                             .append("<span data-i18n=\"ko.format.short.table\" ")
                             .append("data-i18n-options=\'{")
                             .append("\"table\" : \"").append(prevMt.mtTable).append("\" ")
-                            .append("}\' />");
+                            .append("}\'></span>");
                     }
                 }
                 else
@@ -605,7 +605,7 @@ public class KOGenerator extends Generator {
                         .append("\"wday\" : \"").append(prevMt.mtDateTime.getDay() + 1).append("\", ")
                         .append("\"day\" : \"").append(String.format("%02d", prevMt.mtDateTime.getDate())).append("\", ")
                         .append("\"month\" : \"").append(prevMt.mtDateTime.getMonth() + 1).append("\"")
-                        .append("}\' />")
+                        .append("}\'></span>")
                     ;
                     
                     if (prevMt.mtDateTime.getHours() != 0 || prevMt.mtTable != 0)
@@ -615,7 +615,7 @@ public class KOGenerator extends Generator {
                             .append("data-i18n-options=\'{")
                             .append("\"hour\" : \"").append(String.format("%02d", prevMt.mtDateTime.getHours())).append("\", ")
                             .append("\"minute\" : \"").append(String.format("%02d", prevMt.mtDateTime.getMinutes())).append("\" ")
-                            .append("}\' />")
+                            .append("}\'></span>")
                         ;
                     
                     if (prevMt.mtTable != 0) {
@@ -624,7 +624,7 @@ public class KOGenerator extends Generator {
                             .append("<span data-i18n=\"ko.format.short.table\" ")
                             .append("data-i18n-options=\'{")
                             .append("\"table\" : \"").append(prevMt.mtTable).append("\" ")
-                            .append("}\' />");
+                            .append("}\'></span>");
                     }
                 }
                 else
@@ -694,7 +694,7 @@ public class KOGenerator extends Generator {
                         .append("\"wday\" : \"").append(prevMt.mtDateTime.getDay() + 1).append("\", ")
                         .append("\"day\" : \"").append(String.format("%02d", prevMt.mtDateTime.getDate())).append("\", ")
                         .append("\"month\" : \"").append(prevMt.mtDateTime.getMonth() + 1).append("\"")
-                        .append("}\' />")
+                        .append("}\'></span>")
                     ;
                     
                     if (prevMt.mtDateTime.getHours() != 0 || prevMt.mtTable != 0)
@@ -704,7 +704,7 @@ public class KOGenerator extends Generator {
                             .append("data-i18n-options=\'{")
                             .append("\"hour\" : \"").append(String.format("%02d", prevMt.mtDateTime.getHours())).append("\", ")
                             .append("\"minute\" : \"").append(String.format("%02d", prevMt.mtDateTime.getMinutes())).append("\" ")
-                            .append("}\' />")
+                            .append("}\'></span>")
                         ;
                     
                     if (prevMt.mtTable != 0) {
@@ -713,7 +713,7 @@ public class KOGenerator extends Generator {
                             .append("<span data-i18n=\"ko.format.short.table\" ")
                             .append("data-i18n-options=\'{")
                             .append("\"table\" : \"").append(prevMt.mtTable).append("\" ")
-                            .append("}\' />");
+                            .append("}\'></span>");
                     }
                 } else {
                     contentArray[idx].append("<br>");
