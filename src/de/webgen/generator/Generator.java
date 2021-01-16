@@ -101,7 +101,7 @@ public abstract class Generator {
                     .append("\"wday\" : \"").append(mt.mtDateTime.getDay() + 1).append("\", ")
                     .append("\"day\" : \"").append(String.format("%02d", mt.mtDateTime.getDate())).append("\", ")
                     .append("\"month\" : \"").append(mt.mtDateTime.getMonth() + 1).append("\"")
-                    .append("}\' />")
+                    .append("}\'></span>")
                 ;
 
                 if (mt.mtDateTime.getHours() != 0 || mt.mtTable != 0)
@@ -111,7 +111,7 @@ public abstract class Generator {
                         .append("data-i18n-options=\'{")
                         .append("\"hour\" : \"").append(String.format("%02d", mt.mtDateTime.getHours())).append("\", ")
                         .append("\"minute\" : \"").append(String.format("%02d", mt.mtDateTime.getMinutes())).append("\" ")
-                        .append("}\' />")
+                        .append("}\'></span>")
                     ;
 
                 if (mt.mtTable != 0) {
@@ -120,7 +120,7 @@ public abstract class Generator {
                         .append("<span data-i18n=\"rr.format.long.table\" ")
                         .append("data-i18n-options=\'{")
                         .append("\"table\" : \"").append(mt.mtTable).append("\" ")
-                        .append("}\' />");
+                        .append("}\'></span>");
                 }
             }
 
