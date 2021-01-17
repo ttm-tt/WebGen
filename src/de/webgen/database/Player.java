@@ -31,7 +31,7 @@ public class Player {
         if (withFlag) {
             sb
                 .append("<span class=\"flag\">")
-                .append("<img src=\"\" data-webgen-nation=\"").append(naName).append("\" data-webgen-region=\"").append(naRegion).append("\"></img>")
+                .append("<img src=\"\" data-webgen-nation=\"").append(naName).append("\" data-webgen-region=\"").append(naRegion).append("\">")
                 .append("</span>")
             ;
         }

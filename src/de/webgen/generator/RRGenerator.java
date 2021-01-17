@@ -72,15 +72,15 @@ public class RRGenerator extends Generator {
         }
 
         content.append("<th class=\"rr points\" scope=\"col\">");
-        content.append("<span data-i18n=\"rr.mt-pts\" />");
+        content.append("<span data-i18n=\"rr.mt-pts\"></span>");
         content.append("</th>");
         
         content.append("<th class=\"games\" scope=\"col\">");
-        content.append("<span data-i18n=\"rr.games\" />");
+        content.append("<span data-i18n=\"rr.games\"></span>");
         content.append("</th>");
         
         content.append("<th class=\"standing\" scope=\"col\">");
-        content.append("<span data-i18n=\"rr.stdng\" />");
+        content.append("<span data-i18n=\"rr.stdng\"></span>");
         content.append("</th>");
                 
         content.append("</tr>").append(SEP);
@@ -219,7 +219,7 @@ public class RRGenerator extends Generator {
             content
                 .append("<h6>")
                 .append("<strong>")
-                .append("<span data-i18n=\"rr.format.long.round\" data-i18n-options=\'{\"round\" : \"").append(matchList.get(i).get(0).mtRound).append("\"}\' />")
+                .append("<span data-i18n=\"rr.format.long.round\" data-i18n-options=\'{\"round\" : \"").append(matchList.get(i).get(0).mtRound).append("\"}\'></span>")
                 .append("</strong>")
                 .append("</h6>")
                 .append(SEP);
