@@ -91,11 +91,11 @@ public class PKOGenerator extends KOGenerator {
         buffer.append("<div id=\"ko-nav\" class=\"row col-12 pb-3\">").append(SEP);
         buffer.append("<ul class=\"nav nav-tabs\">").append(SEP);  
         if (gr.grNofRounds != 1 && matchList.size() > 1)
-            buffer.append("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" id=\"one-round\">").append("<span data-i18n=\"nav.ko.one-round\" />").append("</a>").append("</li>").append(SEP);
-        buffer.append("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" id=\"all-rounds\">").append("<span data-i18n=\"nav.ko.all-rounds\" />").append("</a>").append("</li>").append(SEP);
+            buffer.append("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" id=\"one-round\">").append("<span data-i18n=\"nav.ko.one-round\"></span>").append("</a>").append("</li>").append(SEP);
+        buffer.append("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" id=\"all-rounds\">").append("<span data-i18n=\"nav.ko.all-rounds\"></span>").append("</a>").append("</li>").append(SEP);
         
         if (gr.cp.isTeam())
-            buffer.append("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" id=\"teammatches\">").append("<span data-i18n=\"nav.ko.teammatches\" />").append("</a>").append("</li>").append(SEP);
+            buffer.append("<li class=\"nav-item\"><a class=\"nav-link\" href=\"#\" id=\"teammatches\">").append("<span data-i18n=\"nav.ko.teammatches\"></span>").append("</a>").append("</li>").append(SEP);
         
         buffer.append("</ul>").append(SEP);
         buffer.append("</div>").append(SEP);
@@ -158,9 +158,9 @@ public class PKOGenerator extends KOGenerator {
                                 .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
                         ;
                     else if (startPos == 1 && endPos == 2)
-                        content.append("<span data-i18n=\"ko.format.long.final\" />");
+                        content.append("<span data-i18n=\"ko.format.long.final\"></span>");
                     else if (startPos == 1 && endPos == 4)
-                        content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                        content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
                     else
                         content
                                 .append("data-i18n=\"pko.format.short.pos\" ")
@@ -273,7 +273,7 @@ public class PKOGenerator extends KOGenerator {
             
             // Einrueckung der Ueberschriften
             if (nofRounds > roundCount)
-                content.append("<th colspan=\"").append(nofRounds - roundCount).append("\" />");
+                content.append("<th colspan=\"").append(nofRounds - roundCount).append("\"></th>");
 
             for (int j = 0; j < roundCount; j++) {
                 int matchCount = ((ArrayList)(koGames[i].get(j))).size();
@@ -290,9 +290,9 @@ public class PKOGenerator extends KOGenerator {
                             .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
                     ;
                 else if (startPos == 1 && endPos == 2)
-                    content.append("<span data-i18n=\"ko.format.long.final\" />");
+                    content.append("<span data-i18n=\"ko.format.long.final\"></span>");
                 else if (startPos == 1 && endPos == 4)
-                    content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                    content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
                 else
                     content
                             .append("data-i18n=\"pko.format.short.pos\" ")
@@ -383,9 +383,9 @@ public class PKOGenerator extends KOGenerator {
                                 .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
                         ;
                     else if (startPos == 1 && endPos == 2)
-                        content.append("<span data-i18n=\"ko.format.long.final\" />");
+                        content.append("<span data-i18n=\"ko.format.long.final\"></span>");
                     else if (startPos == 1 && endPos == 4)
-                        content.append("<span data-i18n=\"ko.format.long.semifinal\" />");
+                        content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
                     else
                         content
                                 .append("data-i18n=\"pko.format.short.pos\" ")
