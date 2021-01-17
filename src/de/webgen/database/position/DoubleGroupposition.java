@@ -9,6 +9,9 @@ import java.sql.SQLException;
 
 
 public class DoubleGroupposition extends Groupposition {
+    public int plAplID;
+    public int plBplID;
+    
     public Player plA;
     public Player plB;
 
@@ -18,8 +21,8 @@ public class DoubleGroupposition extends Groupposition {
             "       tb.mtMatchPoints, tb.mtMatchCount, " +
             "       tb.mtPointsA, tb.mtPointsX, tb.mtMatchesA, tb.mtMatchesX, " +
             "       tb.mtSetsA, tb.mtSetsX, tb.mtBallsA, tb.mtBallsX, " +
-            "       st.plplNr, st.plpsLast, st.plpsFirst, st.plnaName, st.plnaDesc, st.plnaRegion, " +
-            "       st.bdplNr, st.bdpsLast, st.bdpsFirst, st.bdnaName, st.bdnaDesc, st.bdnaRegion, " +
+            "       st.plplID, st.plplNr, st.plpsLast, st.plpsFirst, st.plnaName, st.plnaDesc, st.plnaRegion, " +
+            "       st.bdplID, st.bdplNr, st.bdpsLast, st.bdpsFirst, st.bdnaName, st.bdnaDesc, st.bdnaRegion, " +
             "       grQual.grDesc, xx.grPos " +
             "  FROM TbSortFunc(?) tb INNER JOIN StDoubleList st ON tb.stID = st.stID " +
             "       LEFT OUTER JOIN (XxList xx LEFT OUTER JOIN GrList grQual ON xx.grID = grQual.grID) ON st.stID = xx.stID "
@@ -53,14 +56,14 @@ public class DoubleGroupposition extends Groupposition {
         mtBallsA = rs.getInt(++idx);
         mtBallsX = rs.getInt(++idx);
 
-        plA.plNr = rs.getInt(++idx);
+        plAplID = plA.plNr = rs.getInt(++idx);
         plA.psLastName = Database.getString(rs, ++idx);
         plA.psFirstName = Database.getString(rs, ++idx);
         plA.naName = Database.getString(rs, ++idx);
         plA.naDesc = Database.getString(rs, ++idx);
         plA.naRegion = Database.getString(rs, ++idx);
 
-        plB.plNr = rs.getInt(++idx);
+        plBplID = plB.plNr = rs.getInt(++idx);
         plB.psLastName = Database.getString(rs, ++idx);
         plB.psFirstName = Database.getString(rs, ++idx);
         plB.naName = Database.getString(rs, ++idx);

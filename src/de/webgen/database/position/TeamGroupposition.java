@@ -31,8 +31,6 @@ public class TeamGroupposition extends Groupposition {
 
 
     public TeamGroupposition(Competition cp, ResultSet rs) throws SQLException {
-        byte[] b;
-        
         tm = new Team(cp);
         
         int idx = 0;

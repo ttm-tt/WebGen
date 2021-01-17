@@ -9,6 +9,7 @@ import java.sql.SQLException;
 
 
 public class SingleGroupposition extends Groupposition {
+    public int plID;
     public Player pl;
 
 
@@ -18,7 +19,7 @@ public class SingleGroupposition extends Groupposition {
             "       tb.mtMatchPoints, tb.mtMatchCount, " +
             "       tb.mtPointsA, tb.mtPointsX, tb.mtMatchesA, tb.mtMatchesX, " +
             "       tb.mtSetsA, tb.mtSetsX, tb.mtBallsA, tb.mtBallsX, " +
-            "       st.plNr, st.psLast, st.psFirst, st.naName, st.naDesc, st.naRegion, " +
+            "       st.plID, st.plNr, st.psLast, st.psFirst, st.naName, st.naDesc, st.naRegion, " +
             "       grQual.grDesc, xx.grPos " +
             "  FROM TbSortFunc(?) tb INNER JOIN StSingleList st ON tb.stID = st.stID " +
             "       LEFT OUTER JOIN (XxList xx LEFT OUTER JOIN GrList grQual ON xx.grID = grQual.grID) ON st.stID = xx.stID "
@@ -51,6 +52,7 @@ public class SingleGroupposition extends Groupposition {
         mtBallsA = rs.getInt(++idx);
         mtBallsX = rs.getInt(++idx);
 
+        plID = pl.plID = rs.getInt(++idx);
         pl.plNr = rs.getInt(++idx);
         pl.psLastName = Database.getString(rs, ++idx);
         pl.psFirstName = Database.getString(rs, ++idx);
