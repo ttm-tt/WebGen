@@ -1,5 +1,5 @@
 /* Copyright (C) 2020 Christoph Theis */
-package de.webgen.generator;
+package de.webgen.generator.database;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -34,7 +34,7 @@ public class TestDatabase implements IDatabase {
     Map<Integer, Group> groups = new java.util.HashMap<>();
     Map<Integer, Match> matches = new java.util.HashMap<>();
     
-    TestDatabase() {
+    public TestDatabase() {
         Gson json = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:MM")
                 .create();

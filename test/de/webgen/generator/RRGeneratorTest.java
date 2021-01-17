@@ -1,6 +1,7 @@
 /* Copyright (C) 2020 Christoph Theis */
 package de.webgen.generator;
 
+import de.webgen.WebGenTestClass;
 import de.webgen.database.Group;
 import de.webgen.database.match.Match;
 import java.sql.SQLException;

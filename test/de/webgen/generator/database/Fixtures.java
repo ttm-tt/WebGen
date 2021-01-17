@@ -1,5 +1,5 @@
 /* Copyright (C) 2020 Christoph Theis */
-package de.webgen.generator;
+package de.webgen.generator.database;
 
 public class Fixtures {
     static String[] players = {

@@ -1,7 +1,10 @@
 /* Copyright (C) 2020 Christoph Theis */
-package de.webgen.generator;
+package de.webgen;
 
 // Setup a database for testing
+
+import de.webgen.generator.database.TestDatabase;
+
 public class WebGenTestClass {
 
     static public TestDatabase testdb;
