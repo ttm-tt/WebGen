@@ -50,9 +50,9 @@ public class RRGeneratorTest extends WebGenTestClass {
         Document doc = Jsoup.parse(html, "", parser);
         // System.out.println(html);
         // System.out.println(doc.toString());
-        for (org.jsoup.parser.ParseError err : parser.getErrors()) {
-            System.out.println(html.substring(Math.max(0, err.getPosition() - 20), Math.min(err.getPosition() + 20, html.length())) + ": " + err.getErrorMessage());
-        } 
+        // for (org.jsoup.parser.ParseError err : parser.getErrors()) {
+        //     System.out.println(html.substring(Math.max(0, err.getPosition() - 20), Math.min(err.getPosition() + 20, html.length())) + ": " + err.getErrorMessage());
+        // } 
         // System.out.println(parser.getErrors());
         assertEquals(0L, parser.getErrors().size());
     }
