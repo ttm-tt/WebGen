@@ -16,6 +16,7 @@ import de.webgen.database.TeamPlayer;
 import de.webgen.database.match.Match;
 import de.webgen.database.match.SingleMatch;
 import de.webgen.database.position.Groupposition;
+import de.webgen.database.position.SingleGroupposition;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
@@ -41,7 +42,7 @@ public class TestDatabase implements IDatabase {
         // Read fixtures
         for (String str : Fixtures.players) {
             Player pl = json.fromJson(str, Player.class);
-            players.put(pl.plNr, pl);
+            players.put(pl.plID, pl);
         }
         
         // Add empty player as place holder
@@ -212,7 +213,21 @@ public class TestDatabase implements IDatabase {
 
     @Override
     public List<Groupposition> readGroupposition(Group gr) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet."); 
+        List<Groupposition> list = new java.util.ArrayList<>();
+        for (int i = 0; i < gr.grSize; ++i) {
+            SingleGroupposition pos = new SingleGroupposition();
+            pos.tmID = i+1;
+            pos.stID = i+1;
+            pos.stNr = i+1;
+            pos.stPos = 0;            
+            pos.plID = i+1;
+            
+            pos.pl = players.get(pos.plID);
+            
+            list.add(pos);
+        }
+        
+        return list;
     }
 
     @Override
