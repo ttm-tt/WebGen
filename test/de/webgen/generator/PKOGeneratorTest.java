@@ -1,7 +1,6 @@
 /* Copyright (C) 2020 Christoph Theis */
 package de.webgen.generator;
 
-import de.webgen.database.Competition;
 import de.webgen.database.Group;
 import de.webgen.database.match.Match;
 import java.sql.SQLException;
@@ -17,7 +16,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 
-public class KOGeneratorTest extends WebGenTestClass {
+public class PKOGeneratorTest extends WebGenTestClass {
     protected Parser parser;
     
     @BeforeClass
@@ -43,15 +42,18 @@ public class KOGeneratorTest extends WebGenTestClass {
     
     @Test
     public void test_010_generate() throws SQLException {
-        Group gr = testdb.readGroup("TEST", "KO");
+        Group gr = testdb.readGroup("TEST", "PKO");
         
         List<List<Match>> matches = testdb.readMatches(gr);
         
-        String html = new KOGenerator().generate(matches, testdb);
+        String html = new PKOGenerator().generate(matches, testdb);
         Document doc = Jsoup.parse(html, "", parser);
         // System.out.println(html);
         // System.out.println(doc.toString());
-        System.out.println(parser.getErrors());
+        // for (org.jsoup.parser.ParseError err : parser.getErrors()) {
+        //     System.out.println(html.substring(Math.max(0, err.getPosition() - 20), Math.min(err.getPosition() + 20, html.length())) + ": " + err.getErrorMessage());
+        // } 
+        // System.out.println(parser.getErrors());
         assertEquals(0L, parser.getErrors().size());
     }
 }
