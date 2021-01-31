@@ -81,7 +81,7 @@ public class GeneratorTest extends WebGenTestClass {
     @Test
     public void test_999_dummy() {
         Document doc = Jsoup.parse("<div><span></span></div>", "", parser);
-        assertEquals(0L, parser.getErrors());
+        assertEquals(0L, parser.getErrors().size());
         // System.err.println(parser.getErrors());
         // System.out.println(doc.toString());
         
