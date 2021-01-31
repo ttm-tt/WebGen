@@ -81,24 +81,24 @@ var translations = {
             }
         },
         'rr' : {
-            'title' : '__cpdesc__ - __grdesc__',
+            'title' : '{{cpdesc}} - {{grdesc}}',
             'mt-pts' : 'Mt. Pkt.',
             'games' : 'Sätze',
             'stdng' : 'Pos.',
             'format' : {
                 'long' : {
-                    'date' : '$t(date.EEEE.__wday__), __day__ $t(date.MMMM.__month__)',
-                    'time' : '__hour__:__minute__',
-                    'table' : 'T. __table__',
-                    'round' : '__round__. Runde'
+                    'date' : '$t(date.EEEE.{{wday}}), {{day}} $t(date.MMMM.{{month}})',
+                    'time' : '{{hour}}:{{minute}}',
+                    'table' : 'T. {{table}}',
+                    'round' : '{{round}}. Runde'
                 },
                 'short' : {
-                    'round' : 'Rd. __round__'
+                    'round' : 'Rd. {{round}}'
                 }
             }
         },
         'ko' : {
-            'title' : '__cpdesc__ - __grdesc__',
+            'title' : '{{cpdesc}} - {{grdesc}}',
             'winner' : 'Sieger',
             'first' : 'Erste',
             'prev' : 'Vorige',
@@ -106,17 +106,17 @@ var translations = {
             'last' : 'Letzte',
             'format' : {
                 'long' : {
-                    'round' : '__round__. Runde',
+                    'round' : '{{round}}. Runde',
                     'qualification' : 'Qualifikation',
                     'final' : 'Finale',
                     'semifinal' : 'Halbfinale'
                 },
                 'short' : {
-                    'date' : '$t(date.EEE.__wday__), __day__ $t(date.MMM.__month__)',
-                    'time' : '__hour__:__minute__',
-                    'table' : 'T. __table__',
-                    'round' : 'Rd. __round__',
-                    'roundof' : '1/__matches__',
+                    'date' : '$t(date.EEE.{{wday}}), {{day}} $t(date.MMM.{{month}})',
+                    'time' : '{{hour}}:{{minute}}',
+                    'table' : 'T. {{table}}',
+                    'round' : 'Rd. {{round}}',
+                    'roundof' : '1/{{matches}}',
                     'qualification' : 'Qu.',
                     'final' : 'F',
                     'semifinal' : 'SF'
@@ -126,7 +126,7 @@ var translations = {
         'pko' : {
             'format' : {
                 'short' : {
-                    'pos' : 'Pos. __from__ - __to__'                    
+                    'pos' : 'Pos. {{from}} - {{to}}'                    
                 }
             }
         },
@@ -160,14 +160,14 @@ var translations = {
             },
             'format' : {
                 'long' : {                     
-                    'date' : '$t(date.EEE.__wday__), __day__ $t(date.MMM.__month__)'
+                    'date' : '$t(date.EEE.{{wday}}), {{day}} $t(date.MMM.{{month}})'
                 },
                 'short' : {
-                    'date' : '__day__ $t(date.MMM.__month__)',
-                    'time' : '__hour__:__minute__',
-                    'table' : 'T. __table__',
-                    'round' : 'Rd. __round__',
-                    'roundof' : '1/__matches__',
+                    'date' : '{{day}} $t(date.MMM.{{month}})',
+                    'time' : '{{hour}}:{{minute}}',
+                    'table' : 'T. {{table}}',
+                    'round' : 'Rd. {{round}}',
+                    'roundof' : '1/{{matches}}',
                     'qualification' : 'Qu.',
                     'final' : 'F',
                     'semifinal' : 'SF'
@@ -190,13 +190,13 @@ var translations = {
                 'all-assocs' : 'Alle Verbände'
             },
             'date' : {
-                'format' : '$t(date.EEE.__wday__), $t(date.MMMM.__month__) __day__'            
+                'format' : '$t(date.EEE.{{wday}}), $t(date.MMMM.{{month}}) {{day}}'            
             },
             'time' : {
                 'no-time' : 'Ohne Zeit'
 
             },
-            'title' : 'Spiele von $t(date.EEEE.__wday__), __day__. $t(date.MMMM.__month__)'
+            'title' : 'Spiele von $t(date.EEEE.{{wday}}), {{day}}. $t(date.MMMM.{{month}})'
         }
     },
     'en' : {
@@ -279,24 +279,24 @@ var translations = {
             }
         },
         'rr' : {
-            'title' : '__cpdesc__ - __grdesc__',
+            'title' : '{{cpdesc}} - {{grdesc}}',
             'mt-pts' : 'Mt. Pts.',
             'games' : 'Games',
             'stdng' : 'Stdng.',
             'format' : {
                 'long' : {
-                    'date' : '$t(date.EEEE.__wday__), __day__ $t(date.MMMM.__month__)',
-                    'time' : '__hour__:__minute__',
-                    'table' : 'T. __table__',
-                    'round' : '__round__. Round'
+                    'date' : '$t(date.EEEE.{{wday}}), {{day}} $t(date.MMMM.{{month}})',
+                    'time' : '{{hour}}:{{minute}}',
+                    'table' : 'T. {{table}}',
+                    'round' : '{{round}}. Round'
                 },
                 'short' : {
-                    'round' : 'Rd. __round__'
+                    'round' : 'Rd. {{round}}'
                 }
             }
         },
         'ko' : {
-            'title' : '__cpdesc__ - __grdesc__',
+            'title' : '{{cpdesc}} - {{grdesc}}',
             'first' : 'First',
             'prev' : 'Prev',
             'next' : 'Next',
@@ -304,17 +304,17 @@ var translations = {
             'winner' : 'Winner',
             'format' : {
                 'long' : {
-                    'round' : '__round__. Round',                    
+                    'round' : '{{round}}. Round',                    
                     'qualification' : 'Qualification',
                     'final' : 'Final',
                     'semifinal' : 'Semifinal'
                 },
                 'short' : {
-                    'date' : '$t(date.EEE.__wday__), __day__ $t(date.MMM.__month__)',
-                    'time' : '__hour__:__minute__',
-                    'table' : 'T. __table__',
-                    'round' : 'Rd. __round__',
-                    'roundof' : 'Rd. of __entries__',
+                    'date' : '$t(date.EEE.{{wday}}), {{day}} $t(date.MMM.{{month}})',
+                    'time' : '{{hour}}:{{minute}}',
+                    'table' : 'T. {{table}}',
+                    'round' : 'Rd. {{round}}',
+                    'roundof' : 'Rd. of {{entries}}',
                     'qualification' : 'Qu.',
                     'final' : 'F',
                     'semifinal' : 'SF'
@@ -324,7 +324,7 @@ var translations = {
         'pko' : {
             'format' : {
                 'short' : {
-                    'pos' : 'Pos. __from__ - __to__'                    
+                    'pos' : 'Pos. {{from}} - {{to}}'                    
                 }
             }
         },
@@ -358,14 +358,14 @@ var translations = {
             },
             'format' : {
                 'long' : {                     
-                    'date' : '$t(date.EEE.__wday__), __day__ $t(date.MMM.__month__)'
+                    'date' : '$t(date.EEE.{{wday}}), {{day}} $t(date.MMM.{{month}})'
                 },
                 'short' : {
-                    'date' : '__day__ $t(date.MMM.__month__)',
-                    'time' : '__hour__:__minute__',
-                    'table' : 'T. __table__',
-                    'round' : 'Rd. __round__',
-                    'roundof' : 'Rd. of __entries__',
+                    'date' : '{{day}} $t(date.MMM.{{month}})',
+                    'time' : '{{hour}}:{{minute}}',
+                    'table' : 'T. {{table}}',
+                    'round' : 'Rd. {{round}}',
+                    'roundof' : 'Rd. of {{entries}}',
                     'qualification' : 'Qu.',
                     'final' : 'F',
                     'semifinal' : 'SF'
@@ -388,13 +388,13 @@ var translations = {
                 'all-assocs' : 'All Associations'
             },
             'date' : {
-                'format' : '$t(date.EEE.__wday__), $t(date.MMMM.__month__) __day__'            
+                'format' : '$t(date.EEE.{{wday}}), $t(date.MMMM.{{month}}) {{day}}'            
             },
             'time' : {
                 'no-time' : 'No Time'
 
             },
-            'title' : 'Matches from $t(date.EEEE.__wday__), $t(date.MMMM.__month__) __day__'
+            'title' : 'Matches from $t(date.EEEE.{{wday}}), $t(date.MMMM.{{month}}) {{day}}'
         }
     }
 };

@@ -1,6 +1,6 @@
 /* Copyright (C) 2020 Christoph Theis */
 
-/* global config, filePath, translations, i18n, ticker */
+/* global config, filePath, translations, ticker, i18next, jqueryI18next, i18nextBrowserLanguageDetector */
 
 var webgen = {};
 
@@ -169,19 +169,16 @@ $(document).ready(function () {
     });
 
     // Initialize I18N
-    $.i18n.init(
+    i18next
+            .use(i18nextBrowserLanguageDetector)
+            .init(
             {
-                useDataAttrOptions: true,
                 fallbackLng: 'en',
-                customLoad: function (lng, ns, options, loadComplete) {
-                    if (translations[lng])
-                        loadComplete(null, translations[lng]);
-                    else
-                        loadComplete(lng + ' not found', {});
-                }
+                resources: translations
             },
             function () {
-                $(document).i18n();
+                jqueryI18next.init(i18next, $, {useOptionsAttr: true});
+                $(document).localize();
             }
     );
 
@@ -191,9 +188,9 @@ $(document).ready(function () {
         // $('#sidebar').toggleClass('hidden-xs');
         $('.row-offcanvas').toggleClass('active');
         if ($('.row-offcanvas').hasClass('active'))
-            $(this).text(i18n.t('nav.hide-' + webgen.lastNav));
+            $(this).text(i18next.t('nav.hide-' + webgen.lastNav));
         else
-            $(this).text(i18n.t('nav.show-' + webgen.lastNav));
+            $(this).text(i18next.t('nav.show-' + webgen.lastNav));
     });
 
 
@@ -255,10 +252,10 @@ function loadNav(id) {
     else
         $('button#offcanvas-toggle-button').parent().show();
 
-    $('button#offcanvas-toggle-button').text(i18n.t('nav.hide-' + webgen.lastNav));
+    $('button#offcanvas-toggle-button').text(i18next.t('nav.hide-' + webgen.lastNav));
 
     $(target).load(href, function () {
-        $(target).i18n();
+        $(target).localize();
 
         $('.navbar-collapse').collapse('hide');
 
@@ -341,7 +338,7 @@ this.events = function () {
         }
 
         $('#content').load(href, function () {
-            $('#content').i18n();
+            $('#content').localize();
 
             var select = $('#content #filter select#groups');
             if (select.find('option').length <= 1)
@@ -372,7 +369,7 @@ this.events = function () {
 
         $('#group-content').load(href + '.html', function () {
             // Reparse entire content, not only group-content, because we may change the title
-            $('#content').i18n();
+            $('#content').localize();
 
             // When flags are to be shown replace all src attributes with the data-href- one
             if (config.flagtype > 0) {
@@ -572,7 +569,7 @@ this.dates = function () {
         $('button.refresh').html(refreshLoad);
 
         $('#content').load(href, function () {
-            $('#content').i18n();
+            $('#content').localize();
 
             // When flags are to be shown replace all src attributes with the data-href- one
             if (config.flagtype > 0) {
@@ -813,7 +810,7 @@ this.reports = function () {
         $('button.refresh').html(refreshLoad);
 
         $('#content').load(href, function () {
-            $('#content').i18n();
+            $('#content').localize();
             // Needed for iOS? Maybe, maybenot.
             // $('#content').find('.collapse').collapse({toggle: false});
 
@@ -913,7 +910,7 @@ this.reports = function () {
                 var url = (isEttu ? folderPath(filePath) + fileBasename($this.attr('data-href')) : $this.attr('data-href'));
                 $.get(url, function (data) {
                     // Set content and init I18N
-                    $this.find('> td').html(data).i18n();
+                    $this.find('> td').html(data).localize();
 
                     // When flags are to be shown replace all src attributes with the data-href- one
                     if (config.flagtype > 0) {
