@@ -266,15 +266,34 @@ function loadNav(id) {
 
         $(target).css('visibility', 'visible');
 
+        // Special cases
         if (id === 'dates') {
+            // Dates starts with current date, if it exists
             var ct = formatDate(new Date());
             var link = $('a[href="' + ct + '.html' + '"]');
             if (link !== undefined && link.length > 0) {
                 dates.load(link.attr('href'));
+                
+                // Hide nav if shown
+                if ($('.row-offcanvas').hasClass('active'))
+                    $('[data-toggle=offcanvas]').click();
             } else {
                 if (!$('.row-offcanvas').hasClass('active'))
                     $('[data-toggle=offcanvas]').click();
             }
+        } else if (id === 'reports') {
+            // Reports starts with players, if it exists
+            var link = $('a[href="players.html"');
+            if (link !== undefined && link.length > 0) {
+                reports.load(link.attr('href'));
+                
+                // Hide nav if shown
+                if ($('.row-offcanvas').hasClass('active'))
+                    $('[data-toggle=offcanvas]').click();
+            } else {
+                if (!$('.row-offcanvas').hasClass('active'))
+                    $('[data-toggle=offcanvas]').click();
+            }            
         }
     });
 
