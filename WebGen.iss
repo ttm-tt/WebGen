@@ -13,7 +13,7 @@ OutputBaseFilename=setup
 MinVersion=6.1
 
 ; Sign installer
-SignTool=MS /d $qWeb Page Generator$q $f
+; SignTool=MS /d $qWeb Page Generator$q $f
 
 
 [Languages]
