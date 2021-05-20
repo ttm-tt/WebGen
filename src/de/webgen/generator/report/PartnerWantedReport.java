@@ -76,7 +76,7 @@ public class PartnerWantedReport extends Report {
         java.util.ArrayList<SinglePlayer> playerList = new java.util.ArrayList<>();
 
         for (int i = 0; i < events.length; i++) {
-            if ( !events[i].isDouble() && !events[i].isMixed() )
+            if ( !events[i].isDouble() && !events[i].isMixed() && !events[i].isTeam() )
                 continue;
 
             playerList.addAll(database.getPartnerWanted(events[i]));

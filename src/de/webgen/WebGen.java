@@ -370,7 +370,7 @@ public class WebGen {
                     break;
                     
                 case PartnerWanted :
-                    if (typeSet.contains(Competition.CP_DOUBLE) || typeSet.contains(Competition.CP_MIXED))
+                    if (typeSet.contains(Competition.CP_DOUBLE) || typeSet.contains(Competition.CP_MIXED) || typeSet.contains(Competition.CP_TEAM))
                         list.add(Report.getReportByType(i));
                     break;
             }

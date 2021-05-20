@@ -974,7 +974,7 @@ public class Database implements IDatabase {
         PreparedStatement stmt = null;
         ResultSet res = null;
 
-        if (!cp.isDouble() && !cp.isMixed())
+        if (!cp.isDouble() && !cp.isMixed() && !cp.isTeam())
             return null;
         
         String sql = 
