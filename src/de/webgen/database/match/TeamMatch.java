@@ -132,7 +132,7 @@ public class TeamMatch extends Match {
             mtDisqualifiedA || mtDisqualifiedX)
             return true;
 
-        return mtResA > mtMatches / 2 || mtResX > mtMatches / 2;
+        return 2 * mtResA > mtMatches || 2 * mtResX > mtMatches || mtResA + mtResX == mtMatches;
     }
     
     @Override
