@@ -883,7 +883,9 @@ public class Database implements IDatabase {
         PreparedStatement stmt = null;
         ResultSet res = null;
         
-        String sql = "SELECT plID, plNr, psLast, psFirst, psSex, naName, naDesc, naRegion, plExtID FROM PlList";
+        String sql = 
+                "SELECT plID, plNr, psLast, psFirst, psSex, naName, naDesc, naRegion, plExtID " +
+                "  FROM PlList WHERE plDeleted = 0";
 
         List<Player> list = new java.util.ArrayList<>();
 
