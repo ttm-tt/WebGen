@@ -61,7 +61,7 @@ public class Group {
         if (ret == 0)
             ret = cp.compareTo(g.cp);
         if (ret == 0)
-            ret =  grSortOrder - g.grSortOrder;
+            ret =  -(grSortOrder - g.grSortOrder);
         if (ret == 0)
             ret = grStage.compareTo(g.grStage);
         if (ret == 0)
