@@ -161,7 +161,7 @@ ticker.formatTeam = function(tm) {
 
 ticker.formatPlayers = function(plA, plB, isTeam, tm) {
     if (plA == null || plA.plNr == 0) {
-        var s = '<span class="player">';
+        var s = '<span class="players"><span class="player">';
         
         if (isTeam && tm !== undefined && tm !== null && tm.tmDesc !== undefined){
             if (config.flagtype === 1)
@@ -173,12 +173,12 @@ ticker.formatPlayers = function(plA, plB, isTeam, tm) {
             
             s += '<span class="name">' + tm.tmDesc + '</span>';
         }
-        s += '</span>';
+        s += '</span></span>';
         
         return s;
     }
 
-    var s = '<span class="player">';
+    var s = '<span class="players"><span class="player">';
     if (config.flagtype === 1)
         s += '<span class="flag"><img src="flags/' + plA.naName + '.png"></span>';    
     else if (config.flagtype === 2)
@@ -204,6 +204,7 @@ ticker.formatPlayers = function(plA, plB, isTeam, tm) {
         s += '</span>';
     }
 
+    s += '</span>';
     return s;
 };
 

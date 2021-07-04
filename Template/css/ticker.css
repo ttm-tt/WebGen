@@ -145,12 +145,13 @@ div#ticker-content table.ticker tr.match td.name {
 }
 
 div#ticker-content table.ticker tr.match td.name span {
-    display: table-cell;
+    /* display: table-cell; */
+    vertical-align: middle;
 }
 
 div#ticker-content table.ticker tr.match td.name span.playerservice {
     width: 10px;
-    display: table-cell;
+    /* display: table-cell; */
     min-width: 10px;
     max-width: 10px;
 }
@@ -166,6 +167,7 @@ div#ticker-content table.ticker tr.match td.name span.playerservice.service div 
 
 div#ticker-content table.ticker tr.match td.name span.player {
     padding-left: 5px;
+    display: block;
 }
 
 div#ticker-content table.ticker tr.match td.result {
