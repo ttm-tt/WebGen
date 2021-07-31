@@ -446,6 +446,7 @@ public class Database implements IDatabase {
 
             res  = stmt.executeQuery();
 
+            // ts is ordered descending, so we need only the first (and highest) row
             if (res.next())
                 ts = res.getTimestamp(1);
 
