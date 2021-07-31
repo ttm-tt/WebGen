@@ -423,10 +423,17 @@ public class Database implements IDatabase {
         PreparedStatement stmt = null;
         ResultSet res = null;
         
+        // Weil Liveticker mtTimestamp immer aendert:
         // Kein Timestamp, wenn Gruppe begonnen hat (mtPrinted) aber nicht geprueft wurde (mtChecked)
-        // Liveticker aendert naemlich jedesmal mtTimestamp
+        // Oder noch kein Punkt gespielt wurde (SUM(MtSet.mtResA + MtSet.mtResX)
+        // Letztere Bedinung ist noetig weil WebGen sonst die Aenderung nicht mehr erkennt, wenn
+        // unmittelbar danach die Zettel gedruckt werden.
+        
         String sql = 
-                "SELECT MAX(mtTimestamp) AS timestamp FROM MtList WHERE (mtPrinted = 0 OR mtChecked = 1) AND grID = ? " +
+                "SELECT MAX(mtTimestamp) AS timestamp FROM MtList " +
+                " WHERE (mtPrinted = 0 OR mtChecked = 1 OR " +
+                "        (SELECT SUM(mtResA + mtResX) FROM MtSet WHERE MtSet.mtID = MtList.mtID) = 0) " +
+                "       AND grID = ? " +
                 "UNION " +
                 "SELECT MAX(stTimestamp) AS timestmap FROM StList WHERE grID = ? " +
                 "ORDER BY timestamp DESC";
