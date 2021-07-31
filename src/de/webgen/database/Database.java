@@ -424,7 +424,7 @@ public class Database implements IDatabase {
         ResultSet res = null;
         
         // Kein Timestamp, wenn Gruppe begonnen hat (mtPrinted) aber nicht geprueft wurde (mtChecked)
-        // Liveticker aendert naemliich jedesmal mtTimestamp
+        // Liveticker aendert naemlich jedesmal mtTimestamp
         String sql = 
                 "SELECT MAX(mtTimestamp) AS timestamp FROM MtList WHERE (mtPrinted = 0 OR mtChecked = 1) AND grID = ? " +
                 "UNION " +
