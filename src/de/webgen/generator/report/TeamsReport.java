@@ -117,12 +117,12 @@ public class TeamsReport extends Report{
             String href = target + ".html";
             
             sb.append("<tbody>").append(SEP);
-            sb.append("<tr class=\"report\" data-toggle=\"collapse\" data-target=\"[data-webgen-team=&quot;").append(target).append("&quot;]\">");
+            sb.append("<tr class=\"report\" data-bs-toggle=\"collapse\" data-bs-target=\"[data-webgen-team=&quot;").append(target).append("&quot;]\">");
             sb.append("<td class=\"team\">").append(tm.tmDesc).append("</td>");
             sb.append("<td class=\"assoc\">").append("<div>").append(tm.naDesc).append("</div>").append("</td>");
             sb.append("<td class=\"event\">").append(tm.cp.cpName).append("</td>");
             sb.append("</tr>").append(SEP);
-            sb.append("<tr class=\"collapse\" data-webgen-team=\"").append(target).append("\" data-href=\"").append(href).append("\">");
+            sb.append("<tr class=\"collapse\" data-webgen-team=\"").append(target).append("\" data-bs-href=\"").append(href).append("\">");
             sb.append("<td colspan=\"3\" class=\"p-0\"></td>");
             sb.append("</tr>").append(SEP);
             sb.append("</tbody>").append(SEP);
@@ -153,14 +153,14 @@ public class TeamsReport extends Report{
             String href = "pl_" + plNr + ".html";
             
             sb.append("<tbody>").append(SEP);
-            sb.append("<tr class=\"report\" data-toggle=\"collapse\" data-target=\"[data-webgen-player=&quot;").append(target).append("&quot;]\">");
+            sb.append("<tr class=\"report\" data-bs-toggle=\"collapse\" data-bs-target=\"[data-webgen-player=&quot;").append(target).append("&quot;]\">");
             sb.append("<td class=\"plnr\">").append("<div>").append(players[j].pl.plNr % 10000).append("</div>").append("</td>");
             sb.append("<td class=\"name\">").append("<div>").append(players[j].pl.psLastName).append(", ").append(players[j].pl.psFirstName).append("</div>").append("</td>");
             sb.append("<td class=\"assoc\">").append("<div>").append(players[j].pl.naDesc).append("</div>").append("</td>");
             sb.append("<td class=\"team\">").append(players[j].tm.toString()).append("</td>");
             sb.append("<td class=\"event\">").append(players[j].tm.cp.cpName).append("</td>");
             sb.append("</tr>").append(SEP);
-            sb.append("<tr class=\"collapse\" data-webgen-player=\"").append(target).append("\" data-href=\"").append(href).append("\">");
+            sb.append("<tr class=\"collapse\" data-webgen-player=\"").append(target).append("\" data-bs-href=\"").append(href).append("\">");
             sb.append("<td colspan=\"5\" class=\"p-0\"></td>");
             sb.append("</tr>").append(SEP);
             sb.append("</tbody>").append(SEP);

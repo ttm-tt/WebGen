@@ -123,7 +123,7 @@ public class DoublesReport extends Report {
             String href = "pl_" + plNr + ".html";
             
             sb.append("<tbody>").append(SEP);
-            sb.append("<tr class=\"report\" data-toggle=\"collapse\" data-target=\"[data-webgen-player=&quot;").append(target).append("&quot;]\">");
+            sb.append("<tr class=\"report\" data-bs-toggle=\"collapse\" data-bs-target=\"[data-webgen-player=&quot;").append(target).append("&quot;]\">");
             sb.append("<td class=\"plnr\">")
                     .append("<div>").append(players[j].pl.plNr % 10000).append("</div>")
                     .append("<div>").append(players[j].bd.plNr % 10000).append("</div>")

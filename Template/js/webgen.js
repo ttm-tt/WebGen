@@ -184,7 +184,7 @@ $(document).ready(function () {
 
     // -------------------------------------------------------------------
     // Hide / Show sub navigation on small devices
-    $('[data-toggle=offcanvas]').click(function () {
+    $('[data-bs-toggle=offcanvas]').click(function () {
         // $('#sidebar').toggleClass('hidden-xs');
         $('.row-offcanvas').toggleClass('active');
         if ($('.row-offcanvas').hasClass('active'))
@@ -211,7 +211,7 @@ $(document).ready(function () {
 
         // Should be outside of loadNav, because loadNav is also called from refresh
         if (!$('.row-offcanvas').hasClass('active'))
-            $('[data-toggle=offcanvas]').click();
+            $('[data-bs-toggle=offcanvas]').click();
     });
 
     // Close popover when clicking outside
@@ -243,7 +243,7 @@ function loadNav(id) {
     }
 
     var href = (isEttu ? folderPath(filePath) + id + '.html' : id + '.html');
-    var target = $('#' + id).attr('data-target') || '#sidebar';
+    var target = $('#' + id).attr('data-bs-target') || '#sidebar';
 
     $(target).css('visibility', 'hidden');
 
@@ -276,10 +276,10 @@ function loadNav(id) {
                 
                 // Hide nav if shown
                 if ($('.row-offcanvas').hasClass('active'))
-                    $('[data-toggle=offcanvas]').click();
+                    $('[data-bs-toggle=offcanvas]').click();
             } else {
                 if (!$('.row-offcanvas').hasClass('active'))
-                    $('[data-toggle=offcanvas]').click();
+                    $('[data-bs-toggle=offcanvas]').click();
             }
         } else if (id === 'reports') {
             // Reports starts with players, if it exists
@@ -289,10 +289,10 @@ function loadNav(id) {
                 
                 // Hide nav if shown
                 if ($('.row-offcanvas').hasClass('active'))
-                    $('[data-toggle=offcanvas]').click();
+                    $('[data-bs-toggle=offcanvas]').click();
             } else {
                 if (!$('.row-offcanvas').hasClass('active'))
-                    $('[data-toggle=offcanvas]').click();
+                    $('[data-bs-toggle=offcanvas]').click();
             }            
         }
     });
@@ -307,13 +307,13 @@ function initCollapsible(which) {
     // -------------------------------------------------------------------
     // Add chevron up / down to accorion
     $(which).find('.collapse').on('show.bs.collapse', function () {
-        $(this).parent().find('[data-toggle="collapse"] span.oi')
+        $(this).parent().find('[data-bs-toggle="collapse"] span.oi')
                 .removeClass('oi-chevron-left')
                 .addClass('oi-chevron-bottom');
     });
 
     $(which).find('.collapse').on('hide.bs.collapse', function () {
-        $(this).parent().find('[data-toggle="collapse"] span.oi')
+        $(this).parent().find('[data-bs-toggle="collapse"] span.oi')
                 .removeClass('oi-chevron-bottom')
                 .addClass('oi-chevron-left');
     });
@@ -348,7 +348,7 @@ this.events = function () {
         events.load(href);
 
         if ($('.row-offcanvas').hasClass('active'))
-            $('[data-toggle=offcanvas]').click();
+            $('[data-bs-toggle=offcanvas]').click();
     });
 
     events.load = function (href) {
@@ -464,7 +464,7 @@ this.events = function () {
             $('div#ko-nav-rounds .page-item.ko-first a').click();
 
             // Add handler for detailed result
-            $('table.matches tr.match').not('[data-toggle=collapse]').click(function (event) {
+            $('table.matches tr.match').not('[data-bs-toggle=collapse]').click(function (event) {
                 event.preventDefault();
 
                 displayGames(this);
@@ -484,7 +484,7 @@ this.events = function () {
                 $('[data-webgen-stid="' + stid + '"]').removeClass('kopath');
             });
 
-            $('[data-toggle="popover"]')
+            $('[data-bs-toggle="popover"]')
                     .popover({
                         html: true,
                         sanitize: false, // We trust our own content
@@ -493,7 +493,7 @@ this.events = function () {
                         placement: 'bottom',
                         // fallbackPlacement: 'bottom',
                         content: function () {
-                            var target = $(this).data('target');
+                            var target = $(this).data('bs-target');
                             var html = $('tbody' + target).html();
                             var classes = $('tbody' + target).parent().hasClass('rr') ? 'rr' : 'ko';
 
@@ -577,7 +577,7 @@ this.dates = function () {
         dates.load(href);
 
         if ($('.row-offcanvas').hasClass('active'))
-            $('[data-toggle=offcanvas]').click();
+            $('[data-bs-toggle=offcanvas]').click();
     });
 
     dates.load = function (href) {
@@ -651,7 +651,7 @@ this.dates = function () {
             $('div#times table.matches').click(function (event) {
                 var id;
 
-                if (!(id = event.target.closest('tr.match:not([data-toggle=collapse]), tr.individual')))
+                if (!(id = event.target.closest('tr.match:not([data-bs-toggle=collapse]), tr.individual')))
                     return;
 
                 event.preventDefault;
@@ -815,7 +815,7 @@ this.reports = function () {
         reports.load(href);
 
         if ($('.row-offcanvas').hasClass('active'))
-            $('[data-toggle=offcanvas]').click();
+            $('[data-bs-toggle=offcanvas]').click();
     });
 
     reports.load = function (href) {
@@ -951,7 +951,7 @@ this.reports = function () {
                     }
 
                     // Add handler for detailed results
-                    $this.find('> td table.matches tr.match').not('[data-toggle=collapse]').click(function (event) {
+                    $this.find('> td table.matches tr.match').not('[data-bs-toggle=collapse]').click(function (event) {
                         event.preventDefault();
 
                         displayGames(this);
@@ -1043,7 +1043,7 @@ this.liveticker = function () {
     $('#sidebar').html('');
 
     if ($('.row-offcanvas').hasClass('active'))
-        $('[data-toggle=offcanvas]').click();
+        $('[data-bs-toggle=offcanvas]').click();
 
     var venues = config.liveticker.venues;
 
@@ -1133,7 +1133,7 @@ this.news = function () {
     $('#sidebar').html('');
 
     if ($('.row-offcanvas').hasClass('active'))
-        $('[data-toggle=offcanvas]').click();
+        $('[data-bs-toggle=offcanvas]').click();
 
     $.ajax({
         type: 'GET',

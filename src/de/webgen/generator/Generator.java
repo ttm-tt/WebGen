@@ -130,7 +130,7 @@ public abstract class Generator {
                 List<Match> indivMatches = database.readIndividualMatches(mt);
                 if (indivMatches != null && indivMatches.size() > 0 && 
                         indivMatches.get(0).getPlA() != null && indivMatches.get(0).getPlA().plNr != 0) {
-                    tr = "<tr class=\"match\" data-toggle=\"collapse\" data-target=\"[data-webgen-match=&quot;" + mt.mtNr + "&quot;]\">";
+                    tr = "<tr class=\"match\" data-bs-toggle=\"collapse\" data-bs-target=\"[data-webgen-match=&quot;" + mt.mtNr + "&quot;]\">";
 
                     for (Match tmMt : indivMatches) {
                         row.append("</tr>").append(SEP);
@@ -197,7 +197,7 @@ public abstract class Generator {
                 .append("<td class=\"game\" colspan=\"").append(colspan).append("\">").append("Disqu.").append("</td>")
             ;
         } else if (gr.cp.isTeam() && mt.mtMS == 0) {
-            tr = "<tr class=\"match\" data-toggle=\"collapse\" data-target=\"[data-webgen-match=&quot;" + mt.mtNr + "&quot;]\">";
+            tr = "<tr class=\"match\" data-bs-toggle=\"collapse\" data-bs-target=\"[data-webgen-match=&quot;" + mt.mtNr + "&quot;]\">";
 
             row
                 .append("<td class=\"result\">")
@@ -330,7 +330,7 @@ public abstract class Generator {
         buffer
             .append("<div id=\"filter\" class=\"row filter\">").append(SEP)
             .append("<fieldset class=\"col-12 my-3 filter border\">").append(SEP)
-            .append("<legend><a href=\"#filter-content\" data-toggle=\"collapse\" class=\"btn btn-light\">")
+            .append("<legend><a href=\"#filter-content\" data-bs-toggle=\"collapse\" class=\"btn btn-light\">")
             .append("<span class=\"oi oi-chevron-bottom pr-3\"></span>")
             .append("<span class=\"h5\" data-i18n=\"report.filter.filter\"></span>")
             .append("</a></legend>").append(SEP)

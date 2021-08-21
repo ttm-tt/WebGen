@@ -120,7 +120,7 @@ public class RRGenerator extends Generator {
                         content.append("<br>");
                     else if (mt.isFinished()) {
                         if (gr.cp.isTeam())
-                            content.append("<a href=\"#\" tabindex=\"0\" role=\"button\" data-toggle=\"popover\" data-target=\"[data-webgen-teammatch=&quot;").append(mt.mtNr).append("&quot;]\">");
+                            content.append("<a href=\"#\" tabindex=\"0\" role=\"button\" data-bs-toggle=\"popover\" data-bs-target=\"[data-webgen-teammatch=&quot;").append(mt.mtNr).append("&quot;]\">");
                         if (swap)
                             content.append(mt.mtResX).append("&nbsp;:&nbsp;").append(mt.mtResA);
                         else

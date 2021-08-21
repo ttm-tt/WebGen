@@ -901,8 +901,8 @@ public class WebGen {
                 // Open next category
                 if (cp.cpCategory != null && !cp.cpCategory.equals(lastCp == null ? null : lastCp.cpCategory)) {
                     buf
-                            .append("<li class=\"list-group-item list-group-action bg-light p-0\" data-toggle=\"collapse\" ")
-                            .append("data-target=\"[data-webgen-category=&quot;").append(cp.cpCategory).append("&quot;]\">")
+                            .append("<li class=\"list-group-item list-group-action bg-light p-0\" data-bs-toggle=\"collapse\" ")
+                            .append("data-bs-target=\"[data-webgen-category=&quot;").append(cp.cpCategory).append("&quot;]\">")
                     ;
                     buf
                             .append("<span class=\"btn list-group-item bg-light text-left w-100 border-0 cpcateory\">")

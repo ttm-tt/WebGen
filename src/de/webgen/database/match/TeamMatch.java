@@ -184,7 +184,7 @@ public class TeamMatch extends Match {
         if (nmID == 0) 
             return "<br>";
 
-        return "<a href=\"#\" tabindex=\"0\" role=\"button\" data-toggle=\"popover\" data-target=\"[data-webgen-teammatch=&quot;" + mtNr + "&quot;]\">" +
+        return "<a href=\"#\" tabindex=\"0\" role=\"button\" data-bs-toggle=\"popover\" data-bs-target=\"[data-webgen-teammatch=&quot;" + mtNr + "&quot;]\">" +
                "<span class=\"result\">" +
                (!forWinner || mtResA > mtResX ? mtResA : mtResX) + "&nbsp;:&nbsp;" + (!forWinner || mtResA > mtResX ? mtResX : mtResA) +
                "</span>" +

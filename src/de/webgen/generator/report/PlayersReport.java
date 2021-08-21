@@ -83,7 +83,7 @@ public class PlayersReport extends Report {
             String href = "pl_" + plNr + ".html";
             
             sb.append("<tbody>").append(SEP);
-            sb.append("<tr class=\"report\" data-toggle=\"collapse\" data-target=\"[data-webgen-player=&quot;").append(target).append("&quot;]\">");
+            sb.append("<tr class=\"report\" data-bs-toggle=\"collapse\" data-bs-target=\"[data-webgen-player=&quot;").append(target).append("&quot;]\">");
             sb.append("<td class=\"plnr\">").append("<div>").append(players[i].plNr).append("</div>").append("</div></td>");
             sb.append("<td class=\"name\">").append("<div>").append(players[i].psLastName).append(", ").append(players[i].psFirstName).append("</div>").append("</td>");
             sb.append("<td class=\"assoc\">").append("<div>").append(players[i].naDesc).append("</div>").append("</td>");
