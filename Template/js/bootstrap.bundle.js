@@ -1654,6 +1654,8 @@
       this._isTransitioning = false;
       this._config = this._getConfig(config);
       this._triggerArray = [];
+
+      /* ChT: Only for multi-target collapsibles        
       const toggleList = SelectorEngine.find(SELECTOR_DATA_TOGGLE$4);
 
       for (let i = 0, len = toggleList.length; i < len; i++) {
@@ -1667,7 +1669,8 @@
           this._triggerArray.push(elem);
         }
       }
-
+      */
+     
       this._initializeChildren();
 
       if (!this._config.parent) {
