@@ -84,7 +84,7 @@ public class DateGenerator extends Generator {
                     .append("<div class=\"row pb-3 timeround\">").append(SEP)
                     .append("<div class=\"col-12 px-0\">").append(SEP)
                     .append("<h4>")
-                    .append("<a class=\"btn btn-light col-12 text-left\" data-bs-toggle=\"collapse\" href=\"#collapse-").append(dfID.format(mt.mtDateTime)).append("\">").append(SEP)
+                    .append("<a class=\"btn btn-light col-12 text-start\" data-bs-toggle=\"collapse\" href=\"#collapse-").append(dfID.format(mt.mtDateTime)).append("\">").append(SEP)
                     .append("<span class=\"oi oi-chevron-left\"></span>").append(SEP)
                 ;
                 

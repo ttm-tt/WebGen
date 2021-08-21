@@ -342,7 +342,7 @@ public abstract class Generator {
             buffer
                 .append("<div class=\"row form-group\">").append(SEP)
                 .append("<label for=\"events\" class=\"col-md-2 offset-md-1 col-form-label\"><span data-i18n=\"dates.filter.events\"></span></label>").append(SEP)
-                .append("<div class=\"col-md-8\"><select class=\"form-control\" id=\"events\">")
+                .append("<div class=\"col-md-8\"><select class=\"form-select\" id=\"events\">")
                 .append("<option value=\"\" data-i18n=\"report.filter.all-events\">").append("</option>")
             ;
 
@@ -361,7 +361,7 @@ public abstract class Generator {
             buffer
                 .append("<div class=\"row form-group\">").append(SEP)
                 .append("<label for=\"events\" class=\"col-md-2 offset-md-1 col-form-label\"><span data-i18n=\"events.filter.groups\"></span></label>").append(SEP)
-                .append("<div class=\"col-md-8\"><select class=\"form-control\" id=\"groups\">")
+                .append("<div class=\"col-md-8\"><select class=\"form-select\" id=\"groups\">")
             ;
 
             for (Group gr : groups) {
@@ -385,7 +385,7 @@ public abstract class Generator {
             buffer
                 .append("<div class=\"row form-group\">").append(SEP)
                 .append("<label for=\"assocs\" class=\"col-md-2 offset-md-1 col-form-label\"><span data-i18n=\"dates.filter.assocs\"></span></label>").append(SEP)
-                .append("<div class=\"col-md-8\"><select class=\"form-control\" id=\"assocs\">")
+                .append("<div class=\"col-md-8\"><select class=\"form-select\" id=\"assocs\">")
                 .append("<option value=\"\" data-i18n=\"report.filter.all-assocs\">").append("</option>")
             ;
 
