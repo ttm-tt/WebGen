@@ -11,11 +11,11 @@
 
     <dependencies defaultconf="compile->default;sources->sources;javadoc->javadoc">
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency org="com.google.code.gson" name="gson" rev="2.8.6"/>
+        <dependency org="com.google.code.gson" name="gson" rev="2.8.8"/>
         <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
-        <dependency org="com.microsoft.sqlserver" name="mssql-jdbc" rev="9.2.0.jre11"/>
+        <dependency org="com.microsoft.sqlserver" name="mssql-jdbc" rev="9.4.0.jre11"/>
         <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc_auth -->
-        <dependency org="com.microsoft.sqlserver" name="mssql-jdbc_auth" rev="9.2.0.x64" conf="runtime->default"/>
+        <dependency org="com.microsoft.sqlserver" name="mssql-jdbc_auth" rev="9.4.0.x64" conf="runtime->default"/>
         <!-- https://mvnrepository.com/artifact/org.ini4j/ini4j -->
         <dependency org="org.ini4j" name="ini4j" rev="0.5.4" conf="compile->default"/>
         
@@ -23,7 +23,7 @@
         <!-- https://mvnrepository.com/artifact/junit/junit -->
         <dependency org="junit" name="junit" rev="4.13" conf="test->default;sources->sources;javadoc->javadoc" />
         <!-- https://mvnrepository.com/artifact/com.github.tntim96/JSCover -->
-        <dependency org="com.github.tntim96" name="JSCover" rev="2.0.10" conf="test->default;sources->sources;javadoc->javadoc" />
+        <!-- <dependency org="com.github.tntim96" name="JSCover" rev="2.0.12" conf="test->default;sources->sources;javadoc->javadoc" /> -->
         <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
         <dependency org="org.jsoup" name="jsoup" rev="1.13.1" conf="test->default;sources->sources;javadoc->javadoc"/>
                         
