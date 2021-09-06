@@ -317,9 +317,10 @@ public class XmlProperties {
     
     
     public void setReportActive(Report rep, boolean active) {
-        if (!hasReport(rep))
+        if (!hasReport(rep) && active)
             addReport(rep);
         
+        // Does nothing if report does not exist
         setReportActive(rep.getType().name(), active);
     }
 
@@ -335,7 +336,7 @@ public class XmlProperties {
     
     public boolean isReportActive(Report rep) {
         if (!hasReport(rep))
-            addReport(rep);
+            return false;
         
         return reports.containsKey(rep.getType().name()) && reports.get(rep.getType().name()).active;
     }

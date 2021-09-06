@@ -217,10 +217,10 @@ public class WebGen {
         copyFiles(WebGen.templateDir + File.separator + "flags", path + File.separator + "flags", ".png");
         copyFiles(WebGen.templateDir, path + File.separator, ".html");
         
-        copyFile(WebGen.templateDir + File.separator + "index.html", path + File.separator + "index.html");
+        copyFile(WebGen.templateDir + File.separator + "index.html", getIndexHtmlFile());
 
         // index.xml erzeugen
-        File indexFile = new File(path + File.separator + "index.xml");
+        File indexFile = new File(getIndexXmlFile());
 
         if (!indexFile.exists()) {
             indexFile.createNewFile();
@@ -290,7 +290,7 @@ public class WebGen {
     // Access to index.xml
     private void processIndexFile() throws SQLException {
         xmlProperties = new XmlProperties();
-        xmlProperties.load(path + File.separator + "index.xml");
+        xmlProperties.load(getIndexXmlFile());
         
         xmlProperties.setPublishedGroups(database.readPublishedGroups());
     }
@@ -542,8 +542,12 @@ public class WebGen {
     
     // -------------------------------------------------------------------------
     // Run WebGen
-    public String getHtmlIndexFile() {
+    public String getIndexHtmlFile() {
         return this.path + File.separator + "index.html";
+    }
+    
+    public String getIndexXmlFile() {
+        return this.path + File.separator + "index.xml";
     }
     
     public static final Map<Long, WebGen> threadIdMap = new java.util.HashMap<>();
@@ -618,7 +622,7 @@ public class WebGen {
             upload();
         
             // Allfaellige Aenderugnen im XML-Doc sichern
-            xmlProperties.store(path + File.separator + "index.xml");        
+            xmlProperties.store(getIndexXmlFile());        
             
             database.closeConnection();            
         } catch (IOException ex) {

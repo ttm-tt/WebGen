@@ -753,7 +753,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private void jButtonViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewActionPerformed
         try {
             try {
-                java.awt.Desktop.getDesktop().browse(new java.net.URI("file", null, "/" + webGenerator.getHtmlIndexFile().replaceAll("\\\\", "/"), null, null));
+                java.awt.Desktop.getDesktop().browse(new java.net.URI("file", null, "/" + webGenerator.getIndexHtmlFile().replaceAll("\\\\", "/"), null, null));
             } catch (IOException ex) {
                 Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
