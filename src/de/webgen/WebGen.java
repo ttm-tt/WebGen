@@ -563,6 +563,8 @@ public class WebGen {
         try {
             // Create config.js, passiert nur beim Start
             createConfigFile();
+            // In case state of reports have changed recreate it at start
+            createReportsFile();
         } catch (IOException | SQLException ex) {
             Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
         }
