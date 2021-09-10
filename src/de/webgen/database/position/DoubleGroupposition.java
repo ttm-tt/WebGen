@@ -34,8 +34,6 @@ public class DoubleGroupposition extends Groupposition {
     }
 
     public DoubleGroupposition(ResultSet rs) throws SQLException {
-        byte[] b;
-        
         plA = new Player();
         plB = new Player();
         
@@ -56,14 +54,16 @@ public class DoubleGroupposition extends Groupposition {
         mtBallsA = rs.getInt(++idx);
         mtBallsX = rs.getInt(++idx);
 
-        plAplID = plA.plNr = rs.getInt(++idx);
+        plAplID = plA.plID = rs.getInt(++idx);
+        plA.plNr = rs.getInt(++idx);
         plA.psLastName = Database.getString(rs, ++idx);
         plA.psFirstName = Database.getString(rs, ++idx);
         plA.naName = Database.getString(rs, ++idx);
         plA.naDesc = Database.getString(rs, ++idx);
         plA.naRegion = Database.getString(rs, ++idx);
 
-        plBplID = plB.plNr = rs.getInt(++idx);
+        plBplID = plB.plID = rs.getInt(++idx);
+        plB.plNr = rs.getInt(++idx);
         plB.psLastName = Database.getString(rs, ++idx);
         plB.psFirstName = Database.getString(rs, ++idx);
         plB.naName = Database.getString(rs, ++idx);
