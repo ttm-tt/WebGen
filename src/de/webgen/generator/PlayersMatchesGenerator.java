@@ -52,10 +52,10 @@ public class PlayersMatchesGenerator extends Generator {
                         .append("\"wday\" : \"").append(mt.mtDateTime.getDay() + 1).append("\", ")
                         .append("\"day\" : \"").append(String.format("%02d", mt.mtDateTime.getDate())).append("\", ")
                         .append("\"month\" : \"").append(mt.mtDateTime.getMonth() + 1).append("\"")
-                        .append("}\' />")
+                        .append("}\'>").append("</span>")
                     ;
                 } else {
-                    sb.append("<span class=\"date\" />");
+                    sb.append("<span class=\"date\"></span>");
                 }
                      
                 if (mt.mtDateTime != null && (mt.mtDateTime.getHours() != 0 || mt.mtTable != 0)) {
@@ -64,10 +64,10 @@ public class PlayersMatchesGenerator extends Generator {
                         .append("data-i18n-options=\'{")
                         .append("\"hour\" : \"").append(String.format("%02d", mt.mtDateTime.getHours())).append("\", ")
                         .append("\"minute\" : \"").append(String.format("%02d", mt.mtDateTime.getMinutes())).append("\" ")
-                        .append("}\' />")
+                        .append("}\'>").append("</span>")
                     ;
                 } else {
-                    sb.append("<span class=\"time\" />");
+                    sb.append("<span class=\"time\"></span>");
                 }
                 
                 if (mt.mtTable != 0) {
@@ -75,10 +75,10 @@ public class PlayersMatchesGenerator extends Generator {
                         .append("<span class=\"mttable\" data-i18n=\"report.format.short.table\" ")
                         .append("data-i18n-options=\'{")
                         .append("\"table\" : \"").append(mt.mtTable).append("\" ")
-                        .append("}\' />")
+                        .append("}\'>").append("</span>")
                     ;
                 } else {
-                    sb.append("<span class=\"mttable\" />");
+                    sb.append("<span class=\"mttable\"></span>");
                 }
                 
                 sb.append("</span>");
