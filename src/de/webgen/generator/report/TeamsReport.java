@@ -91,8 +91,8 @@ public class TeamsReport extends Report{
         // Navigation
         sb.append("<div class=\"row\" id=\"report-nav\">").append(SEP);        
         sb.append("<ul class=\"col-12 nav nav-tabs\">").append(SEP);
-        sb.append("<li class=\"nav-item\">").append("<a class=\"nav-link active\" href=\"#\" id=\"report-teams-teams\">").append("<span data-i18n=\"nav.report.teams\" />").append("</a>").append("</li>").append(SEP);
-        sb.append("<li class=\"nav-item\">").append("<a class=\"nav-link\" href=\"#\" id=\"report-teams-players\">").append("<span data-i18n=\"nav.report.players\" />").append("</a>").append("</li>").append(SEP);
+        sb.append("<li class=\"nav-item\">").append("<a class=\"nav-link active\" href=\"#\" id=\"report-teams-teams\">").append("<span data-i18n=\"nav.report.teams\"></span>").append("</a>").append("</li>").append(SEP);
+        sb.append("<li class=\"nav-item\">").append("<a class=\"nav-link\" href=\"#\" id=\"report-teams-players\">").append("<span data-i18n=\"nav.report.players\"></span>").append("</a>").append("</li>").append(SEP);
         
         sb.append("</ul>").append(SEP);
         sb.append("</div>").append(SEP);
@@ -106,9 +106,9 @@ public class TeamsReport extends Report{
         sb.append("<table id=\"report-teams-teams\" class=\"report teams table border\">").append(SEP);
         sb.append("<thead class=\"bg-light\">").append(SEP);
         sb.append("<tr>");
-        sb.append("<th class=\"team sort up\">").append("<span data-i18n=\"report.team\" />").append("</th>");
-        sb.append("<th class=\"assoc\">").append("<span data-i18n=\"report.assoc\" />").append("</th>");
-        sb.append("<th class=\"event\">").append("<span data-i18n=\"report.event\" />").append("</th>");
+        sb.append("<th class=\"team sort up\">").append("<span data-i18n=\"report.team\"></span>").append("</th>");
+        sb.append("<th class=\"assoc\">").append("<span data-i18n=\"report.assoc\"></span>").append("</th>");
+        sb.append("<th class=\"event\">").append("<span data-i18n=\"report.event\"></span>").append("</th>");
         sb.append("</tr>").append(SEP);
         sb.append("</thead>").append(SEP);
         
@@ -139,11 +139,11 @@ public class TeamsReport extends Report{
         sb.append("<table id=\"report-teams-players\" class=\"report teams table border\">").append(SEP);
         sb.append("<thead class=\"bg-light\">").append(SEP).append("<tr>");
         
-        sb.append("<th class=\"plnr sort up\">").append("<span data-i18n=\"report.plnr\" />").append("</th>");
-        sb.append("<th class=\"name\">").append("<span data-i18n=\"report.plname\" />").append("</th>");
-        sb.append("<th class=\"assoc\">").append("<span data-i18n=\"report.assoc\" />").append("</th>");
-        sb.append("<th class=\"team\">").append("<span data-i18n=\"report.team\" />").append("</th>");
-        sb.append("<th class=\"event\">").append("<span data-i18n=\"report.event\" />").append("</th>");
+        sb.append("<th class=\"plnr sort up\">").append("<span data-i18n=\"report.plnr\"></span>").append("</th>");
+        sb.append("<th class=\"name\">").append("<span data-i18n=\"report.plname\"></span>").append("</th>");
+        sb.append("<th class=\"assoc\">").append("<span data-i18n=\"report.assoc\"></span>").append("</th>");
+        sb.append("<th class=\"team\">").append("<span data-i18n=\"report.team\"></span>").append("</th>");
+        sb.append("<th class=\"event\">").append("<span data-i18n=\"report.event\"></span>").append("</th>");
         sb.append("</tr>").append(SEP);
         sb.append("</thead>").append(SEP);
         

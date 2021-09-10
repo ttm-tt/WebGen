@@ -85,10 +85,10 @@ public class SinglesReport extends Report {
 
         sb.append("<table id=\"report-singles\" class=\"report singles table border\">").append(SEP);
         sb.append("<thead").append(SEP).append("><tr>");
-        sb.append("<th class=\"plnr sort up\">").append("<span data-i18n=\"report.plnr\" />").append("</th>");
-        sb.append("<th class=\"name\">").append("<span data-i18n=\"report.plname\" />").append("</th>");
-        sb.append("<th class=\"assoc\">").append("<span data-i18n=\"report.assoc\" />").append("</th>");
-        sb.append("<th class=\"event\">").append("<span data-i18n=\"report.event\" />").append("</th>");
+        sb.append("<th class=\"plnr sort up\">").append("<span data-i18n=\"report.plnr\"></span>").append("</th>");
+        sb.append("<th class=\"name\">").append("<span data-i18n=\"report.plname\"></span>").append("</th>");
+        sb.append("<th class=\"assoc\">").append("<span data-i18n=\"report.assoc\"></span>").append("</th>");
+        sb.append("<th class=\"event\">").append("<span data-i18n=\"report.event\"></span>").append("</th>");
         sb.append("</tr>").append(SEP);
         sb.append("</thead>").append(SEP);
 

@@ -47,7 +47,7 @@ public class DateGenerator extends Generator {
             .append(    "\"wday\": \"").append(date.getDay() + 1).append("\", ")
             .append(    "\"month\": \"").append(date.getMonth() + 1) .append("\"")
             .append(    "}\'")
-            .append(" />")
+            .append(">").append("</span>")
             .append("</h4>")
             .append("</div>")
             .append(SEP)
