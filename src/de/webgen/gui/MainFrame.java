@@ -866,6 +866,4 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JLabel userLabel;
     private javax.swing.JTextField userTextField;
     // End of variables declaration//GEN-END:variables
-
-    private javax.swing.JButton jButtonHelpText;
 }
