@@ -738,6 +738,9 @@ public class MainFrame extends javax.swing.JFrame {
                     .append("UID=").append(user).append(";")
                     .append("PWD=").append(pwd).append(";");
         
+        // Need to switch off ANSU_NULLS, Paddings, and Waarnings
+        sb.append("AnsiNPW=No;");
+        
         String connectionString = sb.toString();
 
         return connectionString;
