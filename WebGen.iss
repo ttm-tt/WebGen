@@ -4,13 +4,14 @@
 [Setup]
 AppName=WebGen
 AppVerName=WebGen 21.09.01
-AppPublisher=Christoph Theis
+; AppPublisher=Christoph Theis
 DefaultDirName={pf}\TTM\WebGen
 DefaultGroupName=TTM
 OutputDir=.\Output
 OutputBaseFilename=setup
 ; Mindestens Windows 7
 MinVersion=6.1
+ArchitecturesInstallIn64BitMode=x64
 
 ; Sign installer
 ; SignTool=MS /d $qWeb Page Generator$q $f
@@ -70,8 +71,8 @@ Filename: {code:GetIniDir}\TT32.ini; Section: Settings; Key: Language; String: {
 Root: HKLM; Subkey: "Software\JavaSoft\Prefs"; Flags: noerror
 
 [Icons]
-Name: "{group}\WebGen"; Filename: "{app}\lib\WebGen2.jar"; WorkingDir: "{app}"; IconFilename: "{app}\WebGen.ico";
-Name: "{userdesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{app}"; Tasks: desktopicon; IconFilename: "{app}\WebGen.ico";
+Name: "{group}\WebGen"; Filename: "{app}\lib\WebGen2.jar"; WorkingDir: "{autoappdata}"; IconFilename: "{app}\WebGen.ico";
+Name: "{userdesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{autoappdata}"; Tasks: desktopicon; IconFilename: "{app}\WebGen.ico";
 
 [Run]
 ; Alte Files von 3.x loeschen
