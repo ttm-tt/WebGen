@@ -11,7 +11,7 @@
 
     <dependencies defaultconf="compile->default;sources->sources;javadoc->javadoc">
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
-        <dependency org="com.google.code.gson" name="gson" rev="2.8.8"/>
+        <dependency org="com.google.code.gson" name="gson" rev="2.8.9"/>
         <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc -->
         <dependency org="com.microsoft.sqlserver" name="mssql-jdbc" rev="9.4.0.jre11"/>
         <!-- https://mvnrepository.com/artifact/com.microsoft.sqlserver/mssql-jdbc_auth -->
