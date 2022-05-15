@@ -114,17 +114,6 @@ function restoreData() {
 
 $(document).ready(function () {
     // Load ETTU specific scripts, if we think we are ETTU
-    if (isEttu) {
-        $('head').append(
-                '<link href="css/ettu.css" rel="stylesheet">'
-                );
-
-        $('head').append(
-                '<script type="text/javascript" src="js/ettu.js"></script>'
-                );
-    }
-
-    // Load site specific configs
     if (config.config !== '') {
         $('head').append(
                 '<link href="css/' + config.config + '.css" rel="stylesheet">'
