@@ -4,7 +4,7 @@
  * Write here tournament specific scripts
  */
 
-/* global i18n */
+/* global i18next */
 
 WebFontConfig = {
   google: { families: [ 'Open+Sans+Condensed:300:latin' ] }
@@ -20,5 +20,6 @@ WebFontConfig = {
 })();
 
 $(document).ready(function() {
-  i18n.setLng('en-US', { fixLng: true }, function(enUS) { $(document).i18n(); });
+  // i18n.setLng('en-US', { fixLng: true }, function(enUS) { $(document).i18n(); });
+  i18next.changeLanguage('en-US', function() { });
 });
