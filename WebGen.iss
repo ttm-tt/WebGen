@@ -3,12 +3,12 @@
 
 [Setup]
 AppName=WebGen
-AppVerName=WebGen 21.09.01
+AppVerName=WebGen 22.06
 ; AppPublisher=Christoph Theis
-DefaultDirName={pf}\TTM\WebGen
+DefaultDirName={autopf}\TTM\WebGen
 DefaultGroupName=TTM
 OutputDir=.\Output
-OutputBaseFilename=setup
+OutputBaseFilename=install
 ; Mindestens Windows 7
 MinVersion=6.1
 ArchitecturesInstallIn64BitMode=x64
