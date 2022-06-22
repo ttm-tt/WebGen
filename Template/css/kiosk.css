@@ -1,0 +1,11 @@
+div#filter {
+    display: none;
+}
+
+div#sidebar {
+    display: none;
+}
+
+div#pagination {
+    display: none;
+}
