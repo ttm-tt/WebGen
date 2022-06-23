@@ -9,3 +9,7 @@ div#sidebar {
 div#pagination {
     display: none;
 }
+
+div.navbar {
+    display: none;
+}
