@@ -31,12 +31,12 @@ function restoreData() {
         if (webgen.lastNav === null) {
             webgen.lastNav = undefined;
             webgen.lastContent = undefined;
-            webgen.lastFilter = {};
+            webgen.lastFilter = [];
         }
 
         if (webgen.lastContent === null) {
             webgen.lastContent = undefined;
-            webgen.lastFilter = {};
+            webgen.lastFilter = [];
         }
     }
 
@@ -44,19 +44,19 @@ function restoreData() {
         if ($.find('div.navbar-collapse #' + webgen.lastNav).length === 0) {
             webgen.lastNav = undefined;
             webgen.lastContent = undefined;
-            webgen.lastFilter = {};
+            webgen.lastFilter = [];
         }
     }
 
     if (webgen.lastFilter === undefined)
-        webgen.lastFilter = {};
+        webgen.lastFilter = [];
 
     if (window.location.hash !== undefined &&
             window.location.hash !== null &&
             window.location.hash.length > 1) {
         webgen.lastNav = window.location.hash.substr(1);  // skip leading '#'
         webgen.lastContent = undefined;
-        webgen.lastFilter = {};
+        webgen.lastFilter = [];
     } else if (window.location.search !== undefined &&
             window.location.search !== null &&
             window.location.search.length > 1) {
@@ -64,12 +64,13 @@ function restoreData() {
         webgen.lastContent = getParameterByName('content', undefined);
         if (webgen.lastContent !== undefined)
             webgen.lastContent += '.html';
-        webgen.lastFilter = {};
+        webgen.lastFilter = [];
 
         var filterEvent = getParameterByName('filterEvent', undefined);
         var filterAssoc = getParameterByName('filterAssoc', undefined);
         var filterExtId = getParameterByName('filterExtId', undefined);
         var filterStartNo = getParameterByName('filterStartNo', undefined);
+        var filterGroup = getParameterByName('filterGroup', undefined);
 
         if (filterEvent !== undefined) {
             webgen.lastFilter[webgen.lastNav] = {};
@@ -90,6 +91,11 @@ function restoreData() {
             webgen.lastFilter[webgen.lastNav] = {};
             webgen.lastFilter[webgen.lastNav].extid = filterExtId;
         }
+
+        if (filterGroup !== undefined) {
+            webgen.lastFilter[webgen.lastNav] = {};
+            webgen.lastFilter[webgen.lastNav].group = filterGroup;
+        }
     }
 
     // Verfiy validity of lastNav
@@ -98,7 +104,7 @@ function restoreData() {
 
     if (webgen.lastNav === undefined) {
         webgen.lastContent = undefined;
-        webgen.lastFilter = {};
+        webgen.lastFilter = [];
 
         if (config.liveticker)
             webgen.lastNav = 'liveticker';
@@ -361,16 +367,24 @@ this.events = function () {
             initCollapsible($(this));
 
             // And load first group
-            events.changeGroup();
+            if (webgen.lastFilter[webgen.lastNav] === undefined)
+                webgen.lastFilter[webgen.lastNav] = {};
+            events.changeGroup(webgen.lastFilter[webgen.lastNav].group);
         });
     };
 
-    events.changeGroup = function () {
+    events.changeGroup = function (href) {
         var item = $('#content #filter select#groups :selected');
-        var href = item.attr('data-webgen-href');
+        var href = href !== undefined ? href : item.attr('data-webgen-href');
+        
+        if (webgen.lastFilter === undefined)
+            webgen.lastFilter = [];
+        
+        if (webgen.lastFilter[webgen.lastNav] === undefined)
+            webgen.lastFilter[webgen.lastNav] = {};
 
-        if (webgen.lastFilter !== href) {
-            webgen.lastFilter = href;
+        if (webgen.lastFilter[webgen.lastNav].group !== href) {
+            webgen.lastFilter[webgen.lastNav].group = href;
         }
 
         $('button.refresh').html(refreshLoad);
