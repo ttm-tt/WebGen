@@ -8,7 +8,7 @@ $(document).ready(function() {
     });
     $('#scanner').on('change', function() {
         // Reload the page with new filter
-        window.location.href = window.location.href.split('?')[0] + '?nav=reports&filterExtId=' + $('#scanner').val();
+        window.location.href = window.location.href.split('?')[0] + '?nav=reports&filterStartNo=' + $('#scanner').val();
     });
     
     // Wait a bit until page contnt is loaded , too, before showing the rows
