@@ -432,7 +432,7 @@ public class Database implements IDatabase {
         String sql = 
                 "SELECT MAX(mtTimestamp) AS timestamp FROM MtList " +
                 " WHERE (mtPrinted = 0 OR mtChecked = 1 OR " +
-                "        (SELECT SUM(mtResA + mtResX) FROM MtSet WHERE MtSet.mtID = MtList.mtID) = 0) " +
+                "        (SELECT ISNULL(SUM(mtResA + mtResX), 0) FROM MtSet WHERE MtSet.mtID = MtList.mtID) = 0) " +
                 "       AND grID = ? " +
                 "UNION " +
                 "SELECT MAX(stTimestamp) AS timestmap FROM StList WHERE grID = ? " +
@@ -1266,7 +1266,7 @@ public class Database implements IDatabase {
             "SELECT MAX(mtTimestamp) " +
             "  FROM MtList LEFT OUTER JOIN MtSet ON MtList.mtID = MtSet.mtID AND MtSet.mtMS = 0 ANd MtSet.mtSet = 0 " +
              "WHERE FORMAT(mtDateTime, 'yyyy-MM-dd') = ? " +
-             "  AND (MtSet.mtID IS NULL OR MtSet.mtResA = 0 AND MtSet.mtResX = 0 OR mtChecked > 0) ";
+             "  AND (MtSet.mtID IS NULL OR (ISNULL(MtSet.mtResA, 0) = 0 AND ISNULL(MtSet.mtResX, 0) = 0) OR mtChecked > 0) ";
               
 
         try {
@@ -1301,7 +1301,7 @@ public class Database implements IDatabase {
             "SELECT MAX(mtTimestamp) " +
             "  FROM MtList LEFT OUTER JOIN MtSet ON MtList.mtID = MtSet.mtID AND MtSet.mtMS = 0 ANd MtSet.mtSet = 0 " +
              "WHERE grID = ? AND FORMAT(mtDateTime, 'yyyy-MM-dd') = ? " +
-             "  AND (MtSet.mtID IS NULL OR MtSet.mtResA = 0 AND MtSet.mtResX = 0 OR mtChecked > 0) ";
+             "  AND (MtSet.mtID IS NULL OR (ISNULL(MtSet.mtResA, 0) = 0 AND ISNULL(MtSet.mtResX, 0) = 0) OR mtChecked > 0) ";
 // Und noch im ersten Satz
         try {
             stmt = prepareStatement(sql);

@@ -1114,6 +1114,7 @@ public class WebGen {
             XmlGroup xmlGroup = xmlProperties.getGroup(gr);
             if (xmlGroup == null)
                 continue;
+            
                         
             // Filedatum pruefen
             File file = new File(path + File.separator + gr.getFileName() + ".html");
@@ -1351,12 +1352,8 @@ public class WebGen {
                 // Spiele, die sich seit dem letzten Update nicht geaendert habem, ignorieren.
                 // Ich brauche hier nur eine Liste von Spielern, die seither gespielt haben.
                 // Von diesen Spielern hole ich mir anschliessend wieder alle Spiele
+                // Liveticker setzt jedesmal mtTimestamp, timestamp beruecksichtigt dies aber
                 if (mt.mtTimestamp != null && mt.mtTimestamp.compareTo(lastTS) < 0)
-                    continue;
-                
-                // Liveticker setzt jedesmal mtTimestamp
-                // Uns interessieren aber nur Spiele, die nicht gespielt sind oder fertig sind
-                if (mt.mtPrinted && !mt.mtChecked)
                     continue;
                 
                 if (mt.getPlA() != null)
