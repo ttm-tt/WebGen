@@ -349,6 +349,7 @@ this.events = function () {
     events.load = function (href) {
         if (webgen.lastContent !== href) {
             webgen.lastContent = href;
+            webgen.lastFilter[webgen.lastNav] = {};
         }
 
         $('#content').load(href, function () {
