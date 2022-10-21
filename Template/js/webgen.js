@@ -1058,7 +1058,8 @@ this.liveticker = function () {
     $('div#ticker-content table').remove('tbody');
 
     for (var i = 0; i < venues.length; i++) {
-        var href = (isEttu ? folderPath(filePath) + 'js/' + venues[i] : 'js/' + venues[i]);
+        var venue = venues[i].trim();
+        var href = (isEttu ? folderPath(filePath) + 'js/' + venue : 'js/' + venue);
 
         ticker.update(href);
     }
