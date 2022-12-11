@@ -11,6 +11,6 @@ $(document).ready(function() {
         window.location.href = window.location.href.split('?')[0] + '?nav=reports&filterStartNo=' + $('#scanner').val();
     });
     
-    // Wait a bit until page contnt is loaded , too, before showing the rows
-    setTimeout(function() {$('table tbody').not('.filtered').find('tr').collapse('show');}, 100);
+    // Wait a bit until page content is loaded , too, before showing the rows
+    setTimeout(function() {$('table tbody').not('.filtered').find('tr').collapse('show');}, 500);
 });
