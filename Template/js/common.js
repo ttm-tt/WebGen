@@ -3,21 +3,11 @@
 function getParameterByName(name, def, href)
 {
     if (href === undefined)
-        href = window.location.search;
-    
-    if (href === undefined)
+    var params = new URLSearchParams(window.location.search);
+    if (!params.has(name))
         return def;
     
-    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-    var regexS = "[\\?&]" + name + "=([^&#]*)";
-    var regex = new RegExp(regexS);
-    var results = regex.exec(href);
-    if(results == null && parent !== undefined && parent.window !== undefined)
-        results = regex.exec(parent.window.location.search);
-    if(results == null)
-        return def;
-    else
-        return decodeURIComponent(results[1].replace(/\+/g, " "));
+    return params.get(name);
 }
 
 function formatString(s, len) {
