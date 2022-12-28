@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=WebGen
-AppVerName=WebGen 22.06
+AppVerName=WebGen 22.12
 ; AppPublisher=Christoph Theis
 DefaultDirName={autopf}\TTM\WebGen
 DefaultGroupName=TTM
