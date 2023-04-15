@@ -158,9 +158,9 @@ public class PKOGenerator extends KOGenerator {
                                 .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
                         ;
                     else if (startPos == 1 && endPos == 2)
-                        content.append("<span data-i18n=\"ko.format.long.final\"></span>");
+                        content.append("data-i18n=\"ko.format.long.final\">");
                     else if (startPos == 1 && endPos == 4)
-                        content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
+                        content.append("data-i18n=\"ko.format.long.semifinal\">");
                     else
                         content
                                 .append("data-i18n=\"pko.format.short.pos\" ")
@@ -290,9 +290,9 @@ public class PKOGenerator extends KOGenerator {
                             .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
                     ;
                 else if (startPos == 1 && endPos == 2)
-                    content.append("<span data-i18n=\"ko.format.long.final\"></span>");
+                    content.append("data-i18n=\"ko.format.long.final\"");
                 else if (startPos == 1 && endPos == 4)
-                    content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
+                    content.append("data-i18n=\"ko.format.long.semifinal\"");
                 else
                     content
                             .append("data-i18n=\"pko.format.short.pos\" ")
@@ -383,9 +383,9 @@ public class PKOGenerator extends KOGenerator {
                                 .append("data-i18n-options=\'{\"from\" : \"").append(startPos).append("\", \"to\": \"").append(endPos).append("\"}\'")
                         ;
                     else if (startPos == 1 && endPos == 2)
-                        content.append("<span data-i18n=\"ko.format.long.final\"></span>");
+                        content.append("data-i18n=\"ko.format.long.final\"");
                     else if (startPos == 1 && endPos == 4)
-                        content.append("<span data-i18n=\"ko.format.long.semifinal\"></span>");
+                        content.append("data-i18n=\"ko.format.long.semifinal\"");
                     else
                         content
                                 .append("data-i18n=\"pko.format.short.pos\" ")
