@@ -716,9 +716,9 @@ public class WebGen {
                             // Stage
                             (!xmlGroup.grStage.equals(gr.grStage)) 
                     ) {
-                        xmlGroup.cpCategory = gr.cp.cpCategory;
+                        xmlGroup.cpCategory = gr.cp.cpCategory.strip();
                         xmlGroup.grSortOrder = gr.grSortOrder;
-                        xmlGroup.grStage = gr.grStage;
+                        xmlGroup.grStage = gr.grStage.strip();
                         updateEventsFile = true;
                     }
                 }
