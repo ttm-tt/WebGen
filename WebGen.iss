@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=WebGen
-AppVerName=WebGen 22.12
+AppVerName=WebGen 23.08
 ; AppPublisher=Christoph Theis
 DefaultDirName={autopf}\TTM\WebGen
 DefaultGroupName=TTM
@@ -44,7 +44,7 @@ Name: {code:GetIniDir}; Permissions: authusers-modify
 ; signtool kann kein jar signieren
 ; Source: ".\dist\WebGen2.jar"; DestDir: "{app}"; Flags: ignoreversion signonce 
 Source: ".\dist\WebGen2.jar"; DestDir: "{app}"; Flags: ignoreversion 
-Source: ".\dist\*.dll"; DestDir: "{app}"; Excludes: "edtftpj.jar"; Flags: ignoreversion
+Source: ".\dist\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\dist\lib\*.jar"; DestDir: "{app}\lib"; Excludes: "edtftp*.jar"; Flags: ignoreversion
 ; Copy either the OSS edtftpj.jar or the commercial runtime with our FTPClient
 ; Source: ".\lib\edtftpj.jar"; DestDir: "{app}\lib"; Flags: ignoreversion
@@ -71,8 +71,8 @@ Filename: {code:GetIniDir}\TT32.ini; Section: Settings; Key: Language; String: {
 Root: HKLM; Subkey: "Software\JavaSoft\Prefs"; Flags: noerror
 
 [Icons]
-Name: "{group}\WebGen"; Filename: "{app}\lib\WebGen2.jar"; WorkingDir: "{autoappdata}"; IconFilename: "{app}\WebGen.ico";
-Name: "{userdesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{autoappdata}"; Tasks: desktopicon; IconFilename: "{app}\WebGen.ico";
+Name: "{group}\WebGen"; Filename: "{app}\lib\WebGen2.jar"; WorkingDir: "{app}"; IconFilename: "{app}\WebGen.ico";
+Name: "{userdesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{app}"; Tasks: desktopicon; IconFilename: "{app}\WebGen.ico";
 
 [Run]
 ; Alte Files von 3.x loeschen
