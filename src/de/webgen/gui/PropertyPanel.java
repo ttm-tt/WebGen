@@ -56,9 +56,9 @@ public class PropertyPanel extends javax.swing.JPanel {
                 @Override
                 public void setValueAt(Object value, int row, int col) {
                     if (rows.get(row)[col] instanceof Integer)
-                        rows.get(row)[col] = new Integer(value.toString());
+                        rows.get(row)[col] = Integer.valueOf(value.toString());
                     else if (rows.get(row)[col] instanceof Long)
-                        rows.get(row)[col] = new Long(value.toString());
+                        rows.get(row)[col] = Long.valueOf(value.toString());
                     else if (rows.get(row)[col] instanceof Boolean)
                         rows.get(row)[col] = Boolean.valueOf(value.toString());
                     else
