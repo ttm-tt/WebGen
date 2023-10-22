@@ -32,7 +32,11 @@ public class XmlGroup {
         grSortOrder = gr.grSortOrder;
         grStage = gr.grStage;
         grName = gr.grName;
-        published = gr.grPublished;      
+        published = gr.grPublished;  
+        
+        // cpCategory might become an empty string, make it null again
+        if ((cpCategory != null) && cpCategory.isBlank())
+            cpCategory = null;
     }
     
     public void read(Element el) {
@@ -42,6 +46,10 @@ public class XmlGroup {
         grName = el.getAttribute(ATTRIBUTE_GRNAME);
         enabled = Boolean.parseBoolean(el.getAttribute(ATTRIBUTE_ENABLED));
         disabled = Boolean.parseBoolean(el.getAttribute(ATTRIBUTE_DISABLED));
+        
+        // cpCategory might become an empty string, make it null again
+        if ((cpCategory != null) && cpCategory.isBlank())
+            cpCategory = null;
         
         // backward compatibility
         if (el.hasAttribute(ATTRIBUTE_ACTIVE))
