@@ -40,12 +40,12 @@ public class XmlGroup {
     }
     
     public void read(Element el) {
-        cpCategory = el.getAttribute(ATTRIBUTE_CPATEGORY);
-        cpName = el.getAttribute(ATTRIBUTE_CPNAME);
-        grStage = el.getAttribute(ATTRIBUTE_GRSTAGE);
-        grName = el.getAttribute(ATTRIBUTE_GRNAME);
-        enabled = Boolean.parseBoolean(el.getAttribute(ATTRIBUTE_ENABLED));
-        disabled = Boolean.parseBoolean(el.getAttribute(ATTRIBUTE_DISABLED));
+        cpCategory = getAttribute(el, ATTRIBUTE_CPATEGORY);
+        cpName = getAttribute(el, ATTRIBUTE_CPNAME);
+        grStage = getAttribute(el, ATTRIBUTE_GRSTAGE);
+        grName = getAttribute(el, ATTRIBUTE_GRNAME);
+        enabled = Boolean.parseBoolean(getAttribute(el, ATTRIBUTE_ENABLED));
+        disabled = Boolean.parseBoolean(getAttribute(el, ATTRIBUTE_DISABLED));
         
         // cpCategory might become an empty string, make it null again
         if ((cpCategory != null) && cpCategory.isBlank())
@@ -65,13 +65,13 @@ public class XmlGroup {
     }
     
     public Element write(Element el) {
-        el.setAttribute(ATTRIBUTE_CPATEGORY, cpCategory);
-        el.setAttribute(ATTRIBUTE_CPNAME, cpName);
-        el.setAttribute(ATTRIBUTE_GRSTAGE, grStage);
-        el.setAttribute(ATTRIBUTE_GRNAME, grName);
-        el.setAttribute(ATTRIBUTE_ENABLED, Boolean.toString(enabled));
-        el.setAttribute(ATTRIBUTE_DISABLED, Boolean.toString(disabled));
-        el.setAttribute(ATTRIBUTE_TS, ts.toString());
+        setAttribute(el, ATTRIBUTE_CPATEGORY, cpCategory);
+        setAttribute(el, ATTRIBUTE_CPNAME, cpName);
+        setAttribute(el, ATTRIBUTE_GRSTAGE, grStage);
+        setAttribute(el, ATTRIBUTE_GRNAME, grName);
+        setAttribute(el, ATTRIBUTE_ENABLED, Boolean.toString(enabled));
+        setAttribute(el, ATTRIBUTE_DISABLED, Boolean.toString(disabled));
+        setAttribute(el, ATTRIBUTE_TS, ts.toString());
         
         return el;
     }
@@ -83,10 +83,11 @@ public class XmlGroup {
     public int compare(XmlGroup gr) {
         int ret = 0;
 
+        // Sort null to top, so it comes just before empty string
         if (cpCategory == null && gr.cpCategory != null)
-            return +1;
-        if (cpCategory != null && gr.cpCategory == null)
             return -1;
+        if (cpCategory != null && gr.cpCategory == null)
+            return +1;
 
         if (cpCategory != null && gr.cpCategory != null)
             ret = cpCategory.compareTo(gr.cpCategory);
@@ -100,6 +101,28 @@ public class XmlGroup {
             ret = grName.compareTo(gr.grName);
         
         return ret;
+    }
+    
+    // Take care of null values
+    private void setAttribute(Element el, String name, String value) {
+        if (value != null && !value.isBlank())
+            el.setAttribute(name, value);
+        else if (el.hasAttribute(name))
+            el.removeAttribute(name);
+    }
+    
+    private String getAttribute(Element el, String name) {
+        if (!el.hasAttribute(name))
+            return null;
+
+        return el.getAttribute(name);
+    }
+    
+    private boolean getBoolean(Element el, String name) {
+        String val = getAttribute(el, name);
+        if (val == null)
+            return false;
+        return Boolean.parseBoolean(val);
     }
     
     private static final String ATTRIBUTE_GRNAME = "GRNAME";
