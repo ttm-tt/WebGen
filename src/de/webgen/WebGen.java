@@ -204,6 +204,7 @@ public class WebGen {
     private void initializeServer() throws IOException, ParserConfigurationException {
         (new File(path)).mkdirs();
         (new File(path + File.separator + "css")).mkdirs();
+        (new File(path + File.separator + "themes")).mkdirs();
         (new File(path + File.separator + "js")).mkdirs();
         (new File(path + File.separator + "fonts")).mkdirs();
         (new File(path + File.separator + "img")).mkdirs();        
@@ -211,6 +212,7 @@ public class WebGen {
         
         // Files von template kopieren
         copyFiles(WebGen.templateDir + File.separator + "css", path + File.separator + "css", ".css");
+        copyFiles(WebGen.templateDir + File.separator + "themes", path + File.separator + "themes", ".css");
         copyFiles(WebGen.templateDir + File.separator + "js", path + File.separator + "js", ".js");
         copyFiles(WebGen.templateDir + File.separator + "fonts", path + File.separator + "fonts", null);
         copyFiles(WebGen.templateDir + File.separator + "img", path + File.separator + "img", null);
@@ -1644,6 +1646,10 @@ public class WebGen {
         
         fileList.addAll(Arrays.asList(folderContent));
         
+        folderContent = new File(path, "themes").listFiles();
+        
+        fileList.addAll(Arrays.asList(folderContent));
+        
         folderContent = new File(path, "fonts").listFiles();
         
         fileList.addAll(Arrays.asList(folderContent));
@@ -1776,6 +1782,8 @@ public class WebGen {
                         if (files[i].getParent() != null) {
                             if (files[i].getParent().endsWith(File.separator + "js"))
                                 prefix = "js";
+                            else if (files[i].getParent().endsWith(File.separator + "themes"))
+                                prefix = "themes";
                             else if (files[i].getParent().endsWith(File.separator + "css"))
                                 prefix = "css";
                             else if (files[i].getParent().endsWith(File.separator + "fonts"))

@@ -53,7 +53,7 @@ Source: "..\FtpClient\lib\edtftpj-pro.jar"; DestDir: "{app}\lib"; Flags: ignorev
 Source: ".\dist\WebGen.ico"; DestDir: "{app}"; Flags: ignoreversion 
 Source: ".\Template\*.html"; DestDir: "{code:GetIniDir}\WebGen\Template\"; Flags: ignoreversion
 Source: ".\Template\css\*"; DestDir: "{code:GetIniDir}\WebGen\Template\css\"; Flags: ignoreversion
-Source: ".\Template\themes\*"; DestDir: "{code:GetIniDir}\WebGen\Template\css\"; Flags: ignoreversion
+Source: ".\Template\themes\*"; DestDir: "{code:GetIniDir}\WebGen\Template\themes\"; Flags: ignoreversion
 Source: ".\Template\fonts\*"; DestDir: "{code:GetIniDir}\WebGen\Template\fonts\"; Flags: ignoreversion
 Source: ".\Template\js\*"; DestDir: "{code:GetIniDir}\WebGen\Template\js\"; Flags: ignoreversion
 Source: ".\Template\img\*"; DestDir: "{code:GetIniDir}\WebGen\Template\img\"; Flags: ignoreversion
