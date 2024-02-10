@@ -138,6 +138,13 @@ $(document).ready(function () {
     $('head').append(
             '<script type="text/javascript" src="js/user.js"></script>'
             );
+    
+    // And themes
+    var theme = getParameterByName('theme', undefined);
+    if (theme !== undefined)
+        $('head').append(
+                '<link href="themes/' + theme + '.css" rel="stylesheet">'
+                );
 
     // Set title, init Liveticker
     if (config.description !== '')

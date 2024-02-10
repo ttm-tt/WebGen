@@ -1,0 +1,14 @@
+/* Copyright (C) 2024 Christoph Theis */
+/* 
+    Created on : 10.02.2024, 18:24:19
+    Author     : chtheis
+*/
+
+/* Hide all not required for the ticker */
+div.navbar {
+    display: none;
+}
+
+div#sidebar {
+    display: none;
+}
