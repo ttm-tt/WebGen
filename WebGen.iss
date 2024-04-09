@@ -17,6 +17,10 @@ ArchitecturesInstallIn64BitMode=x64
 ; SignTool=MS /d $qWeb Page Generator$q $f
 
 
+; Close TTM before installation
+CloseApplications=force
+CloseApplicationsFilter=*.exe,*.dll,*.jar
+
 [Languages]
 Name: en; MessagesFile: compiler:Default.isl
 Name: de; MessagesFile: compiler:Languages\German.isl           
