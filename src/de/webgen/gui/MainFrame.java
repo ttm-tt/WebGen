@@ -27,7 +27,7 @@ import org.ini4j.Ini;
 
 public class MainFrame extends javax.swing.JFrame {
 
-    private static final String versionNumber = "24.02";
+    private static final String versionNumber = "24.04.01";
     
     private static final ResourceBundle bundle = ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
     private String tournament = null;
@@ -584,7 +584,7 @@ public class MainFrame extends javax.swing.JFrame {
                 panel.add(new javax.swing.JLabel(bundle.getString("Click OK to download and install it.")));
                 
                 if (javax.swing.JOptionPane.showConfirmDialog(this, panel, bundle.getString("Update Available"), javax.swing.JOptionPane.OK_CANCEL_OPTION) == javax.swing.JOptionPane.OK_OPTION)
-                    java.awt.Desktop.getDesktop().browse(new java.net.URI("http://downloads.ttm.co.at/webgen/setup.exe"));
+                    java.awt.Desktop.getDesktop().browse(new java.net.URI("http://downloads.ttm.co.at/webgen/install.exe"));
             } else {
                 javax.swing.JOptionPane.showMessageDialog(this, bundle.getString("You are using the current version of WebGen."));
             }
@@ -605,6 +605,31 @@ public class MainFrame extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItemCheckUpdateActionPerformed
 
+    
+    public static boolean isUpdateAvailable() {
+        java.io.InputStream is = null;
+        boolean update = false;
+        try {
+            java.net.URL url = new java.net.URL("http://downloads.ttm.co.at/webgen/current.txt");
+            is = url.openStream();
+            java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(is));
+            String current = br.readLine();
+            update = current.compareTo(versionNumber) > 0;
+        } catch (IOException ex) {
+            Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                if (is != null)
+                    is.close();
+            } catch (IOException ex) {
+                Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        return update;
+    }
+    
+    
     private void jMenuItemDebugActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemDebugActionPerformed
         if (jMenuItemDebug.getState())
             Logger.getLogger(WebGen.class.getName()).setLevel(Level.ALL);
@@ -827,9 +852,22 @@ public class MainFrame extends javax.swing.JFrame {
                     frame.setLocation(x, y);
                     
                     frame.setVisible(true);
-                } catch (IOException e) {
-                    JOptionPane.showMessageDialog(null, MessageFormat.format(bundle.getString("Cannot read INI file {0}: {1}"), "tt32.ini", e.getLocalizedMessage()), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
-                    System.exit(2);
+                    
+                    // Check for updates
+                    if (isUpdateAvailable()) {
+                        javax.swing.JPanel panel = new javax.swing.JPanel();
+                        panel.setLayout(new javax.swing.BoxLayout(panel, javax.swing.BoxLayout.Y_AXIS));
+                        panel.add(new javax.swing.JLabel(bundle.getString("A new version is available.")));
+                        panel.add(new javax.swing.JLabel(bundle.getString("Click OK to download and install it.")));
+
+                        int ret = javax.swing.JOptionPane.showConfirmDialog(
+                                frame, panel, bundle.getString("Update Available"), 
+                                javax.swing.JOptionPane.OK_CANCEL_OPTION);
+                        if (ret == javax.swing.JOptionPane.OK_OPTION)
+                            java.awt.Desktop.getDesktop().browse(new java.net.URI("http://downloads.ttm.co.at/webgen/install.exe"));
+                    }
+                } catch (Exception ex) {
+                    
                 }
             }
         });
