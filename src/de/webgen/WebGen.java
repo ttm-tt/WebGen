@@ -913,7 +913,7 @@ public class WebGen {
                             .append("data-bs-target=\"[data-webgen-category=&quot;").append(cp.cpCategory).append("&quot;]\">")
                     ;
                     buf
-                            .append("<span class=\"btn list-group-item bg-light text-start w-100 border-0 cpcateory\">")
+                            .append("<span class=\"btn list-group-item bg-light text-start w-100 border-0 cpcategory\">")
                             .append("<span>").append(cp.cpCategory).append("</span></span>")
                     ;
                     buf
@@ -1648,7 +1648,9 @@ public class WebGen {
         
         folderContent = new File(path, "themes").listFiles();
         
-        fileList.addAll(Arrays.asList(folderContent));
+        // themes may not exist
+        if (folderContent != null)
+            fileList.addAll(Arrays.asList(folderContent));
         
         folderContent = new File(path, "fonts").listFiles();
         
