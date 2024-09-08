@@ -931,7 +931,7 @@ public class WebGen {
                 buf
                         .append("<li class=\"list-group-item list-group-action")
                         .append(cp.cpCategory != null ? " border-left-0 border-right-0" : " bg-light")
-                        .append("\"/>")
+                        .append("\">")
                 ;
                 
                 buf
