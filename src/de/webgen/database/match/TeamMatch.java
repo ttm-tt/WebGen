@@ -175,9 +175,9 @@ public class TeamMatch extends Match {
 
         if (mtDisqualifiedA || mtDisqualifiedX) {
             if (forWinner)
-                return "<span class=\"result\"><span data-i18n=\"result.format.short.disqualified\"></span>";
+                return "<span class=\"result\"><span data-i18n=\"result.format.short.disqualifiedWinner\"></span>";
             else
-                return "<span class=\"result\">" + mtResA + "&nbsp;:&nbsp;" + mtResX + "</span><span class=\"games\"><span data-i18n=\"result.format.short.disqualified\"></span>";
+                return "<span class=\"result\">" + mtResA + "&nbsp;:&nbsp;" + mtResX + "</span><span class=\"games\"><span data-i18n=\"result.format.short.disqualifiedLoser\"></span>";
         }
 
         // Wenn es noch keine Nominierung (von Team A) gibt

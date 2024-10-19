@@ -135,7 +135,9 @@ var translations = {
                 'short' : {
                     'wo' : 'w/o',
                     'injured' : 'Verl.',
-                    'disqualified' : 'Disqu.'
+                    'disqualifiedWinner' : 'wg. DSQ',
+                    'disqualifiedLoser' : 'wg. DSQ',
+                    'disqualified' : 'DSQ.'
                 }
             }
         },
@@ -333,7 +335,9 @@ var translations = {
                 'short' : {
                     'wo' : 'w/o',
                     'injured' : 'Inj.',
-                    'disqualified' : 'Disqu.'
+                    'disqualifiedWinner' : 'w.b.DSQ.',
+                    'disqualifiedLoser' : 'l.b.DSQ',
+                    'disqualified' : 'DSQ.',
                 }
             }
         },
