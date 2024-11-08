@@ -16,10 +16,20 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
+import com.sun.net.httpserver.HttpServer;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.InetSocketAddress;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 
 
 public class ServerPanel extends javax.swing.JPanel {
 
+    final static Charset UTF8 = Charset.forName("UTF-8");
+    
     WebGen webGenerator;
 
     /** Creates new form ServerPanel */
@@ -753,7 +763,76 @@ public class ServerPanel extends javax.swing.JPanel {
     private void jButtonViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewActionPerformed
         try {
             try {
-                java.awt.Desktop.getDesktop().browse(new java.net.URI("file", null, "/" + webGenerator.getIndexHtmlFile().replaceAll("\\\\", "/"), null, null));
+                HttpServer httpServer = HttpServer.create(new InetSocketAddress(0), 0, "/", new HttpHandler() {
+                    @Override
+                    public void handle(HttpExchange he) throws IOException {
+                        if (!he.getRequestMethod().equals("GET")) {
+                            he.getResponseHeaders().add("Allow", "GET");
+                            sendErrorResponse(he, 405, "Method not allowed");
+
+                            return;
+                        }
+
+                        String uri = he.getRequestURI().getPath();
+
+                        if (uri.contains("/../")) {
+                            sendErrorResponse(he, 404, "Not found");
+                        }
+                        
+                        String path = new File(webGenerator.getIndexHtmlFile()).getParent();
+
+                        File file = new File(path, uri);
+                        
+                        if (!file.exists()) {
+                            sendErrorResponse(he, 404, "Not found");
+
+                            return;
+                        } else if (file.isDirectory()) {
+                            File index = new File(file, "index.html");
+                            if (!index.exists()) {
+                                sendErrorResponse(he, 404, "Not found");
+
+                                return;
+                            }
+
+                            file = index;
+                        }
+        
+                        String mime = null;
+
+                        // Sometimes probeContentType will return text/plain for html and js files
+                        if (file.getName().endsWith(".html"))
+                            mime = "text/html";
+                        else if (file.getName().endsWith(".js"))
+                            mime = "text/javascript";
+                        else
+                            mime = Files.probeContentType(file.toPath());
+
+                        he.getResponseHeaders().add("Content-Type", mime == null ? "application/octet-stream" : mime);
+        
+                        he.sendResponseHeaders(200, file.length());
+                        byte b[] = new byte[0x10000];
+                        int  count;
+                        try (FileInputStream fis = new FileInputStream(file)) {
+                            while ( (count = fis.read(b)) >= 0 )
+                                he.getResponseBody().write(b, 0, count);
+                        }
+                        he.getResponseBody().close();
+                    }
+                    
+                    private void sendErrorResponse(HttpExchange he, int code, String message) {
+                        try {
+                            byte[] response = message.getBytes(UTF8);
+                            he.sendResponseHeaders(code, response.length);
+                            he.getResponseBody().write(response);                                
+                            he.getResponseBody().close();
+                        } catch (IOException ex) {
+                            Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                });
+                httpServer.start();
+                java.awt.Desktop.getDesktop().browse(new java.net.URI("http://localhost:" + httpServer.getAddress().getPort() + "/index.html"));
             } catch (IOException ex) {
                 Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
