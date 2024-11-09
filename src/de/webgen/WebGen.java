@@ -378,7 +378,7 @@ public class WebGen {
             }
         }
 
-        return list.toArray(new Report[0]);
+        return list.toArray(Report[]::new);
     }
     
     public void setReportActive(Report rep, boolean active) {
@@ -1009,7 +1009,7 @@ public class WebGen {
         ;
 
         // Filter
-        grBuf.append(Generator.writeFilter(EnumSet.of(FilterTypes.FilterGroup), null, null, grList.toArray(new Group[0])));
+        grBuf.append(Generator.writeFilter(EnumSet.of(FilterTypes.FilterGroup), null, null, grList.toArray(Group[]::new)));
         
         // Content
         grBuf.append("<div class=\"row\" id=\"group-content\"></div>");
@@ -1667,7 +1667,7 @@ public class WebGen {
         if (fileList.isEmpty())
             return;
 
-        File[] files = fileList.toArray(new File[0]);
+        File[] files = fileList.toArray(File[]::new);
         
         // Aufsteigend nach Aenderungszeit sortieren
         java.util.Arrays.sort(files, new java.util.Comparator<File>() {
