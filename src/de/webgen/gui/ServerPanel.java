@@ -31,6 +31,8 @@ public class ServerPanel extends javax.swing.JPanel {
     final static Charset UTF8 = Charset.forName("UTF-8");
     
     WebGen webGenerator;
+    
+    HttpServer httpServer;
 
     /** Creates new form ServerPanel */
     public ServerPanel(String server, String tournament, String path) {
@@ -763,78 +765,84 @@ public class ServerPanel extends javax.swing.JPanel {
     private void jButtonViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewActionPerformed
         try {
             try {
-                HttpServer httpServer = HttpServer.create(new InetSocketAddress(0), 0, "/", new HttpHandler() {
-                    @Override
-                    public void handle(HttpExchange he) throws IOException {
-                        if (!he.getRequestMethod().equals("GET")) {
-                            he.getResponseHeaders().add("Allow", "GET");
-                            sendErrorResponse(he, 405, "Method not allowed");
-
-                            return;
-                        }
-
-                        String uri = he.getRequestURI().getPath();
-
-                        if (uri.contains("/../")) {
-                            sendErrorResponse(he, 404, "Not found");
-                        }
-                        
-                        String path = new File(webGenerator.getIndexHtmlFile()).getParent();
-
-                        File file = new File(path, uri);
-                        
-                        if (!file.exists()) {
-                            sendErrorResponse(he, 404, "Not found");
-
-                            return;
-                        } else if (file.isDirectory()) {
-                            File index = new File(file, "index.html");
-                            if (!index.exists()) {
-                                sendErrorResponse(he, 404, "Not found");
+                if (httpServer == null) {
+                    httpServer = HttpServer.create(new InetSocketAddress(0), 0, "/", new HttpHandler() {
+                        @Override
+                        public void handle(HttpExchange he) throws IOException {
+                            if (!he.getRequestMethod().equals("GET")) {
+                                he.getResponseHeaders().add("Allow", "GET");
+                                sendErrorResponse(he, 405, "Method not allowed");
 
                                 return;
                             }
 
-                            file = index;
-                        }
-        
-                        String mime = null;
+                            String uri = he.getRequestURI().getPath();
 
-                        // Sometimes probeContentType will return text/plain for html and js files
-                        if (file.getName().endsWith(".html"))
-                            mime = "text/html";
-                        else if (file.getName().endsWith(".js"))
-                            mime = "text/javascript";
-                        else
-                            mime = Files.probeContentType(file.toPath());
+                            // Don't escape
+                            if (uri.contains("/../")) {
+                                sendErrorResponse(he, 404, "Not found");
+                            }
 
-                        he.getResponseHeaders().add("Content-Type", mime == null ? "application/octet-stream" : mime);
-        
-                        he.sendResponseHeaders(200, file.length());
-                        byte b[] = new byte[0x10000];
-                        int  count;
-                        try (FileInputStream fis = new FileInputStream(file)) {
-                            while ( (count = fis.read(b)) >= 0 )
-                                he.getResponseBody().write(b, 0, count);
-                        }
-                        he.getResponseBody().close();
-                    }
-                    
-                    private void sendErrorResponse(HttpExchange he, int code, String message) {
-                        try {
-                            byte[] response = message.getBytes(UTF8);
-                            he.sendResponseHeaders(code, response.length);
-                            he.getResponseBody().write(response);                                
+                            String path = new File(webGenerator.getIndexHtmlFile()).getParent();
+
+                            File file = new File(path, uri);
+
+                            if (!file.exists()) {
+                                sendErrorResponse(he, 404, "Not found");
+
+                                return;
+                            } else if (file.isDirectory()) {
+
+                                File index = new File(file, "index.html");
+                                if (!index.exists()) {
+                                    sendErrorResponse(he, 404, "Not found");
+
+                                    return;
+                                }
+
+                                file = index;
+                            }
+
+                            String mime = null;
+
+                            // Sometimes probeContentType will return text/plain for html and js files
+                            if (file.getName().endsWith(".html"))
+                                mime = "text/html";
+                            else if (file.getName().endsWith(".js"))
+                                mime = "text/javascript";
+                            else
+                                mime = Files.probeContentType(file.toPath());
+
+                            he.getResponseHeaders().add("Content-Type", mime == null ? "application/octet-stream" : mime);
+
+                            he.sendResponseHeaders(200, file.length());
+                            byte b[] = new byte[0x10000];
+                            int  count;
+                            try (FileInputStream fis = new FileInputStream(file)) {
+                                while ( (count = fis.read(b)) >= 0 )
+                                    he.getResponseBody().write(b, 0, count);
+                            }
                             he.getResponseBody().close();
-                        } catch (IOException ex) {
-                            Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                    }
-                });
-                httpServer.start();
+
+                        private void sendErrorResponse(HttpExchange he, int code, String message) {
+                            try {
+                                byte[] response = message.getBytes(UTF8);
+                                he.sendResponseHeaders(code, response.length);
+                                he.getResponseBody().write(response);                                
+                                he.getResponseBody().close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    });
+                
+                    httpServer.start();
+                }
                 java.awt.Desktop.getDesktop().browse(new java.net.URI("http://localhost:" + httpServer.getAddress().getPort() + "/index.html"));
             } catch (IOException ex) {
                 Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
+                httpServer = null;
             }
         } catch (URISyntaxException ex) {
             Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
