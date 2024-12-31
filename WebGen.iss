@@ -127,13 +127,13 @@ begin
     javaVersion := GetJREVersion()
   end;
 
-	if javaVersion >= '11' then begin
+	if javaVersion >= '21' then begin
 		(* MsgBox('Found java version' + javaVersion, mbInformation, MB_OK); *)
 		Result := true;
 	end
 	else begin
-		MsgBox('Setup is unable to find a Java Development Kit or Java Runtime 11, or higher, installed.' + #13 +
-			     'You must have installed at least JDK or JRE, 11 or higher to continue setup.' + #13 +
+		MsgBox('Setup is unable to find a Java Development Kit or Java Runtime 21, or higher, installed.' + #13 +
+			     'You must have installed at least JDK or JRE, 21 or higher to continue setup.' + #13 +
 			     'Please install one from https://AdoptOpenJDK.com and then run this setup again.', mbInformation, MB_OK);
 		Result := true;
 	end;
