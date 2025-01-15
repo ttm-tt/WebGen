@@ -503,8 +503,10 @@ this.events = function () {
                         // container: 'body',
                         placement: 'bottom',
                         // fallbackPlacement: 'bottom',
-                        content: function () {
-                            var target = $(this).data('bs-target');
+                        content: function (el) {
+                            // $this should be the triggering element but it may not
+                            // Instead the trigger could be the argument
+                            var target = $(el || this).data('bs-target');
                             var html = $('tbody' + target).html();
                             var classes = $('tbody' + target).parent().hasClass('rr') ? 'rr' : 'ko';
 
