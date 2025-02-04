@@ -730,7 +730,7 @@ public class ServerPanel extends javax.swing.JPanel {
         if (!webGenerator.isRunning()) {
             webGenerator.setFtpHost(jTextFieldHost.getText());
             webGenerator.setFtpDirectory(jTextFieldDir.getText());
-            webGenerator.setFtpUser(jTextFieldUser.getText());
+            webGenerator.setFtpUser(jTextFieldUser.getText().strip());
             webGenerator.setFtpPassword(jPasswordFieldPwd.getText());
             webGenerator.setTitle(jTextFieldTitle.getText());
             webGenerator.setDescription(jTextFieldDescription.getText());
