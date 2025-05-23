@@ -114,12 +114,12 @@
         <!-- Native authentication only with 64 bit, 32 bit have to use SQL authentication
             <copy file="lib/x86/sqljdbc_auth.dll" todir="${dist.dir}/x86"/> 
         -->
-        <copy file="lib/mssql-jdbc_auth-12.2.0.x64.dll" todir="${dist.dir}"/>
+        <copy file="lib/mssql-jdbc_auth-12.10.0.x64.dll" todir="${dist.dir}"/>
 
         <copy file="WebGen.ico" todir="${dist.dir}"/>
 
         <!-- Also to cwd for debugging -->        
-        <copy file="lib/mssql-jdbc_auth-12.2.0.x64.dll" todir="${work.dir}"/>
+        <copy file="lib/mssql-jdbc_auth-12.10.0.x64.dll" todir="${work.dir}"/>
     </target>
     
 </project>
