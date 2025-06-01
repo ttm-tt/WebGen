@@ -31,10 +31,12 @@
                   <Component id="jTabbedPane" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="jButtonStart" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jProgressBar" max="32767" attributes="2"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="jButtonView" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="jButtonOpen" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -46,15 +48,16 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jTabbedPane" max="32767" attributes="0"/>
-              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" alignment="0" groupAlignment="1" attributes="0">
-                      <Component id="jProgressBar" min="-2" pref="23" max="-2" attributes="1"/>
-                      <Component id="jButtonView" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                      <Component id="jButtonView" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="jButtonOpen" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="jButtonStart" alignment="0" min="-2" max="-2" attributes="1"/>
+                  <Component id="jProgressBar" min="-2" pref="23" max="-2" attributes="1"/>
               </Group>
-              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -154,7 +157,7 @@
                                       </Group>
                                   </Group>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jTextFieldTitle" alignment="0" pref="321" max="32767" attributes="0"/>
+                                      <Component id="jTextFieldTitle" alignment="0" pref="336" max="32767" attributes="0"/>
                                       <Component id="jTextFieldDescription" alignment="0" max="32767" attributes="0"/>
                                       <Component id="jTextFieldTournamentUrl" alignment="0" max="32767" attributes="0"/>
                                       <Component id="jTextFieldNewsUrl" alignment="0" max="32767" attributes="0"/>
@@ -418,7 +421,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jScrollPane3" pref="0" max="32767" attributes="0"/>
                               <Component id="jCheckBoxIncludePlayedGroups" linkSize="37" min="-2" max="-2" attributes="0"/>
-                              <Component id="jComboBoxEvent" alignment="0" pref="398" max="32767" attributes="0"/>
+                              <Component id="jComboBoxEvent" alignment="0" pref="419" max="32767" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
@@ -585,7 +588,7 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="jButtonReportsDisable" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <Component id="jScrollPane6" alignment="0" pref="413" max="32767" attributes="0"/>
+                              <Component id="jScrollPane6" alignment="0" pref="430" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -732,7 +735,7 @@
                                   <Component id="jTextFieldHost" max="32767" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace pref="13" max="32767" attributes="0"/>
+                          <EmptySpace pref="23" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -867,6 +870,16 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonStartActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="jButtonOpen">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="de/webgen/gui/resources/WebGen.properties" key="Open" replaceFormat="java.util.ResourceBundle.getBundle(&quot;{bundleNameSlashes}&quot;).getString(&quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButtonOpenActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

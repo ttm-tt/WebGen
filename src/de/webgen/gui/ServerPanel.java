@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
@@ -210,6 +211,7 @@ public class ServerPanel extends javax.swing.JPanel {
         jProgressBar = new javax.swing.JProgressBar();
         jButtonView = new javax.swing.JButton();
         jButtonStart = new javax.swing.JButton();
+        jButtonOpen = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(470, 500));
 
@@ -302,7 +304,7 @@ public class ServerPanel extends javax.swing.JPanel {
                                 .addComponent(jLabel9)
                                 .addGap(61, 61, 61)))
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
+                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE)
                             .addComponent(jTextFieldDescription)
                             .addComponent(jTextFieldTournamentUrl)
                             .addComponent(jTextFieldNewsUrl)
@@ -445,7 +447,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jCheckBoxIncludePlayedGroups)
-                    .addComponent(jComboBoxEvent, 0, 398, Short.MAX_VALUE)
+                    .addComponent(jComboBoxEvent, 0, 419, Short.MAX_VALUE)
                     .addGroup(jPanel20Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -533,7 +535,7 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addComponent(jButtonReportsEnable)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonReportsDisable))
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 413, Short.MAX_VALUE))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanelListsLayout.setVerticalGroup(
@@ -625,7 +627,7 @@ public class ServerPanel extends javax.swing.JPanel {
                             .addComponent(jCheckBoxSftp)
                             .addComponent(jCheckBoxPassiveMode, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE))
                         .addComponent(jTextFieldHost)))
-                .addContainerGap(13, Short.MAX_VALUE))
+                .addContainerGap(23, Short.MAX_VALUE))
         );
 
         jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jCheckBoxFtpDebug, jCheckBoxPassiveMode});
@@ -693,6 +695,13 @@ public class ServerPanel extends javax.swing.JPanel {
             }
         });
 
+        jButtonOpen.setText(bundle.getString("Open")); // NOI18N
+        jButtonOpen.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonOpenActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -703,10 +712,12 @@ public class ServerPanel extends javax.swing.JPanel {
                     .addComponent(jTabbedPane)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jButtonStart)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButtonView)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButtonView)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jButtonOpen)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -716,10 +727,11 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addComponent(jTabbedPane)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                        .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jButtonView))
-                    .addComponent(jButtonStart))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButtonView)
+                        .addComponent(jButtonOpen))
+                    .addComponent(jButtonStart)
+                    .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -958,6 +970,17 @@ public class ServerPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
 
+    private void jButtonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenActionPerformed
+        if (Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
+            try {
+                File indexFile = new File(webGenerator.getIndexHtmlFile());
+                Desktop.getDesktop().open(new File(indexFile.getParent()));
+            } catch (IOException ex) {
+                System.getLogger(ServerPanel.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            }
+        }
+    }//GEN-LAST:event_jButtonOpenActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupFlags;
@@ -965,6 +988,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JButton jButtonGroupDisable;
     private javax.swing.JButton jButtonGroupEnable;
     private javax.swing.JButton jButtonLivetickerProperties;
+    private javax.swing.JButton jButtonOpen;
     private javax.swing.JButton jButtonReportsDisable;
     private javax.swing.JButton jButtonReportsEnable;
     private javax.swing.JButton jButtonStart;
