@@ -655,6 +655,15 @@ public class WebGen {
         updateIndexXml();        
     }
     
+    // Compare 2 strings, with null and "" are treated as eequal
+    static private boolean equalStrings(String left, String right) {
+        if (left == null)
+            return right == null || right.isEmpty();
+        if (right == null)
+            return left.isEmpty(); // left can't be null here anymore
+        return left.equals(right);
+    }
+    
     private void updateIndexXml() throws IOException, SQLException {
         boolean updateEventsFile = new File(getEventsFileName()).exists() == false;
         boolean updateReportsFile = new File(getReportsFileName()).exists() == false;
@@ -710,9 +719,7 @@ public class WebGen {
                 XmlGroup xmlGroup = xmlProperties.getGroup(gr);
                 if (xmlGroup != null) {
                     if (    // Category
-                            (xmlGroup.cpCategory == null && gr.cp.cpCategory != null) ||
-                            (xmlGroup.cpCategory != null && gr.cp.cpCategory == null) ||
-                            (xmlGroup.cpCategory != null && !xmlGroup.cpCategory.equals(gr.cp.cpCategory)) ||
+                            !equalStrings(xmlGroup.cpCategory, gr.cp.cpCategory) ||
                             // Sort order
                             (xmlGroup.grSortOrder != gr.grSortOrder) ||
                             // Stage
@@ -1763,7 +1770,11 @@ public class WebGen {
                     return;
                 }
 
-                Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Connected to server {0}", ftpHost);
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+                
+                Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Connected to server {0} to uploaad files modified after {1}", 
+                        new String[]{ftpHost, sdf.format(new java.util.Date(ts.getTime()))}
+                );
 
                 // Delay, sonst geht auf einigen Servern das folgende Upload nicht.
                 try {
@@ -1797,8 +1808,12 @@ public class WebGen {
                         }
 
                         Logger.getLogger(WebGen.class.getName()).log(
-                                Level.INFO, "Upload file {0} with {1} bytes",
-                                new String[] {(prefix.isEmpty() ? "" : prefix + "/") + files[i].getName(), "" + files[i].length()});
+                                Level.INFO, "Upload file {0} with {1} bytes last modified at {2}",
+                                new String[] {
+                                    (prefix.isEmpty() ? "" : prefix + "/") + files[i].getName(), 
+                                    "" + files[i].length(),
+                                    sdf.format(new java.util.Date(files[i].lastModified()))
+                                });
 
                         if (!prefix.isEmpty()) {
                             try {
