@@ -1,4 +1,4 @@
-#define Version '25.06.01'
+#define Version '25.06.02'
 
 [Setup]
 AppName=WebGen
