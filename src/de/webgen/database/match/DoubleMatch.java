@@ -18,7 +18,7 @@ public class DoubleMatch extends Match {
     public Player plY;
     
     public static String getSelectString() {
-        return "SELECT mt.grID, mt.mtID, mtNr, 0 AS mtMS, mtRound, mtMatch, 0 as mtReverse, mtTable, mtDateTime, mtTimestamp, " +
+        return "SELECT gr.grID, mt.mtID, mtNr, 0 AS mtMS, mtRound, mtMatch, 0 as mtReverse, mtTable, mtDateTime, mtTimestamp, " +
                "       1 AS mtMatches, mtBestOf, mt.mtResA, mt.mtResX, " +
                "       mtWalkOverA, mtWalkOverX, " +
                "       mtInjuredA, mtInjuredX, " +

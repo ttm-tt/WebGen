@@ -1162,7 +1162,11 @@ public class WebGen {
      * @throws IOException
      */
     private void updateGroup(Group group, Timestamp ts) throws IOException, SQLException {
-        Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Generate group {0}", group.getFileName());
+        Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Generate group {0} with ts {1} > {2}", 
+                new String[]{
+                    group.getFileName(), 
+                    group.timestamp == null ? "<null>" : sdf.format(group.timestamp), 
+                    ts == null ? "<null>" : sdf.format(ts)});
 
         List<List<Match>> matchList = database.readMatches(group);
 
@@ -1292,6 +1296,8 @@ public class WebGen {
         Set<Integer> plNrs = new java.util.HashSet<>();
         // Liste der Mannschaft IDs
         Set<Integer> tmIDs = new java.util.HashSet<>();
+        // List of matches which have changed
+        Set<Integer> mtNrs = new java.util.HashSet<>();
         
         // Da in den Spielen nur ein ID vorkommt, ich aber die Dateien nach
         // Mannschaftsname und Wettbewerb benenne brauche ich ein mapping ID => Team
@@ -1318,7 +1324,8 @@ public class WebGen {
             // Grob auf Aenderungen testen
             Timestamp lastTS = xmlDate.ts;
             Timestamp dateTS = database.getMatchTimestamp(xmlDate.name);
-            if (dateTS != null && dateTS.compareTo(lastTS) <= 0)
+            
+            if (dateTS == null || dateTS.compareTo(lastTS) <= 0)
                 continue;
             
             // List<List<Match>>, damit das Interface spaeter passt
@@ -1342,7 +1349,11 @@ public class WebGen {
             if (!needUpdate || matchList.get(0).isEmpty())
                 continue;
             
-            Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Generate matches for {0}", xmlDate.name);
+            Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Generate matches for {0} with ts {1} > {2}", 
+                    new String[]{
+                        xmlDate.name, 
+                        (dateTS == null ? "<null>" : sdf.format(dateTS)), 
+                        (lastTS == null ? "<null>": sdf.format(lastTS))});
 
             Match[] matches = matchList.get(0).toArray(new Match[0]);
             java.util.Arrays.sort(matches, new java.util.Comparator<Match>() {
@@ -1364,6 +1375,8 @@ public class WebGen {
                 // Liveticker setzt jedesmal mtTimestamp, timestamp beruecksichtigt dies aber
                 if (mt.mtTimestamp != null && mt.mtTimestamp.compareTo(lastTS) < 0)
                     continue;
+                
+                mtNrs.add(mt.mtNr);
                 
                 if (mt.getPlA() != null)
                     plNrs.add(mt.getPlA().plNr % 10000);
@@ -1518,7 +1531,8 @@ public class WebGen {
             }
         }
                 
-        Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Generate matches of {0} players", plNrs.size());
+        Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Generate matches of {0} players in {1} updated matches", 
+                new Object[]{plNrs.size(), mtNrs.size()});
 
         for (int plNr : plNrs) {
             if (plNr == 0)
@@ -1770,8 +1784,6 @@ public class WebGen {
                     return;
                 }
 
-                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                
                 Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Connected to server {0} to uploaad files modified after {1}", 
                         new String[]{ftpHost, sdf.format(new java.util.Date(ts.getTime()))}
                 );
@@ -1892,6 +1904,7 @@ public class WebGen {
     }
 
 
+    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     private static int tableType = 1;
 
     private String server;

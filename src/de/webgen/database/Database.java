@@ -431,11 +431,11 @@ public class Database implements IDatabase {
         
         String sql = 
                 "SELECT MAX(mtTimestamp) AS timestamp FROM MtList " +
-                " WHERE (mtPrinted = 0 OR mtChecked = 1 OR " +
-                "        (SELECT ISNULL(SUM(mtResA + mtResX), 0) FROM MtSet WHERE MtSet.mtID = MtList.mtID) = 0) " +
+                " WHERE ((SELECT ISNULL(SUM(mtResA + mtResX), 0) FROM MtSet WHERE MtSet.mtID = MtList.mtID) = 0) " +
+                // "       AND (DAY(mtDateTime) >= DAY(CURRENT_TIMESTAMP) - 1) " +
                 "       AND grID = ? " +
                 "UNION " +
-                "SELECT MAX(stTimestamp) AS timestmap FROM StList WHERE grID = ? " +
+                "SELECT MAX(stTimestamp) AS timestamp FROM StList WHERE grID = ? " +
                 "ORDER BY timestamp DESC";
         try {
             stmt = prepareStatement(sql);
@@ -701,8 +701,8 @@ public class Database implements IDatabase {
         
         // WHERE condition as SELECT: testing for player numbers of MtDoubleList takes mucht (5s) longer than testing them in StDoubleList
         sql +=  " WHERE (cp.cpType = 2 OR cp.cpType = 3) AND (" +
-                " stA IN (SELECT stID FROM StDoubleList st WHERE st.grID = gr.grID AND ((plplNr % 10000) = ? OR (bdplNr % 10000) = ?)) OR " +
-                " stX IN (SELECT stID FROM StDoubleList st WHERE st.grID = gr.grID AND ((plplNr % 10000) = ? OR (bdplNr % 10000) = ?)) ) "
+                " (mt.plAplNr % 10000) = ? OR (mt.plBplNr % 10000) = ? OR " +
+                " (mt.plXplNr % 10000) = ? OR (mt.plYplNr % 10000) = ? ) " 
         ;
         
         PreparedStatement stmt = null;
@@ -742,13 +742,10 @@ public class Database implements IDatabase {
         
         String sql = IndividualMatch.getSelectString();
         sql +=  " WHERE " +
+                "  cp.cpType = 4 AND " +
                 "  ((plAplNr % 10000) = ? OR (plBplNr % 10000) = ? OR " +
-                "   (plXplNr % 10000) = ? OR (plYplNr % 10000) = ?) " +
-                " AND cp.cpType = 4 ";
-        
-        // Bessere Filterung
-        sql +=  "AND (tmAtmID IN (SELECT tmID FROM NtEntryList WHERE (plNr % 10000) = ?) OR " +
-                "tmXtmID IN (SELECT tmID FROM NtEntryList WHERE (plNr % 10000) = ?))";
+                "   (plXplNr % 10000) = ? OR (plYplNr % 10000) = ?) "
+                ;
         
         PreparedStatement stmt = null;
         ResultSet res = null;
@@ -759,8 +756,8 @@ public class Database implements IDatabase {
             stmt.setInt(2, plNr);
             stmt.setInt(3, plNr);
             stmt.setInt(4, plNr);
-            stmt.setInt(5, plNr);
-            stmt.setInt(6, plNr);
+            // stmt.setInt(5, plNr);
+            // stmt.setInt(6, plNr);
             
             res = stmt.executeQuery();
             
