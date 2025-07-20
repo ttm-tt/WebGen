@@ -74,6 +74,11 @@ span.cpname a {
     text-decoration: none;
 }
 
+/* Space between event and pdf link */
+li span a.pdf {
+    padding-left: 1ex;
+}
+
 /* Filter */
 div#filter .filter {
     margin-bottom: 0.5em;
