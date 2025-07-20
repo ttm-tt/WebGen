@@ -1673,6 +1673,10 @@
   EventHandler.on(document, EVENT_CLICK_DATA_API$4, SELECTOR_DATA_TOGGLE$4, function (event) {
     // preventDefault only for <a> elements (which change the URL) not inside the collapsible element
     if (event.target.tagName === 'A' || event.delegateTarget && event.delegateTarget.tagName === 'A') {
+      // ChT [
+      if (event.target.classList.contains('pdf'))
+        return;
+      // ChT ]
       event.preventDefault();
     }
     for (const element of SelectorEngine.getMultipleElementsFromSelector(this)) {
