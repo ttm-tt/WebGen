@@ -28,6 +28,8 @@ import de.webgen.xml.XmlReport;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -1761,7 +1763,12 @@ public class WebGen {
 
             try {
                 try {
-                    ftp.setRemoteHost(ftpHost);
+                    // accept URI having a port number and protocol prefix (ftp://, sftp://)
+                    URI uri = new URI(ftpHost.contains("://") ? ftpHost : "uri://"+ftpHost);
+                    ftp.setRemoteHost(uri.getHost());
+                    if (uri.getPort() != -1) {
+                        ftp.setRemotePort(uri.getPort());
+}
                     ftp.setUserName(ftpUser);
                     ftp.setPassword(ftpPwd);
 
@@ -1782,6 +1789,8 @@ public class WebGen {
                 } catch (FTPException | IOException t) {
                     Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, t);
                     return;
+                } catch (URISyntaxException ex) {
+                    System.getLogger(WebGen.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
                 }
 
                 Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Connected to server {0} to uploaad files modified after {1}", 
