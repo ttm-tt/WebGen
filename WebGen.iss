@@ -10,8 +10,8 @@ DefaultGroupName=TTM
 OutputDir=.\Output
 OutputBaseFilename=install
 ; Mindestens Windows 7
-MinVersion=6.1
-ArchitecturesInstallIn64BitMode=x64
+MinVersion=6.1sp1
+ArchitecturesInstallIn64BitMode=x64compatible
 
 ; Sign installer
 ; SignTool=MS /d $qWeb Page Generator$q $f
@@ -77,7 +77,7 @@ Root: HKLM; Subkey: "Software\JavaSoft\Prefs"; Flags: noerror
 
 [Icons]
 Name: "{group}\WebGen"; Filename: "{app}\lib\WebGen2.jar"; WorkingDir: "{app}"; IconFilename: "{app}\WebGen.ico";
-Name: "{userdesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{app}"; Tasks: desktopicon; IconFilename: "{app}\WebGen.ico";
+Name: "{autodesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{app}"; Tasks: desktopicon; IconFilename: "{app}\WebGen.ico";
 
 [Run]
 ; Alte Files von 3.x loeschen
@@ -149,7 +149,7 @@ begin
   begin
     Result := ExpandConstant('{app}');
   end
-  else if ( isAdminLoggedOn OR FileExists(ExpandConstant( '{commonappdata}\TTM\TT32.INI' )) ) then
+  else if ( isAdmin OR FileExists(ExpandConstant( '{commonappdata}\TTM\TT32.INI' )) ) then
   begin
     CreateDir(ExpandConstant('{commonappdata}\TTM'));
     Result := ExpandConstant('{commonappdata}\TTM');
