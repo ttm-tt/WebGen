@@ -110,7 +110,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jPanel16" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="171" max="32767" attributes="0"/>
+                      <EmptySpace pref="220" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -157,7 +157,7 @@
                                       </Group>
                                   </Group>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jTextFieldTitle" alignment="0" pref="336" max="32767" attributes="0"/>
+                                      <Component id="jTextFieldTitle" alignment="0" pref="348" max="32767" attributes="0"/>
                                       <Component id="jTextFieldDescription" alignment="0" max="32767" attributes="0"/>
                                       <Component id="jTextFieldTournamentUrl" alignment="0" max="32767" attributes="0"/>
                                       <Component id="jTextFieldNewsUrl" alignment="0" max="32767" attributes="0"/>
@@ -721,6 +721,10 @@
                                   <Component id="jLabel5" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="32767" attributes="0"/>
                               </Group>
+                              <Group type="102" attributes="0">
+                                  <Component id="jLabelBundleName" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                              </Group>
                           </Group>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jCheckBoxFtpDebug" linkSize="48" pref="305" max="32767" attributes="1"/>
@@ -728,14 +732,16 @@
                                   <Component id="jTextFieldDir" alignment="0" max="32767" attributes="2"/>
                                   <Component id="jTextFieldUser" alignment="0" max="32767" attributes="0"/>
                                   <Component id="jPasswordFieldPwd" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="jTextFieldBundleName" alignment="0" max="32767" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
                                       <Component id="jCheckBoxSftp" min="-2" max="-2" attributes="0"/>
+                                      <Component id="jCheckBoxBundle" min="-2" max="-2" attributes="0"/>
                                       <Component id="jCheckBoxPassiveMode" linkSize="48" alignment="0" pref="307" max="32767" attributes="1"/>
                                   </Group>
                                   <Component id="jTextFieldHost" max="32767" attributes="0"/>
                               </Group>
                           </Group>
-                          <EmptySpace pref="23" max="32767" attributes="0"/>
+                          <EmptySpace pref="24" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -762,12 +768,19 @@
                               <Component id="jLabel5" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="jPasswordFieldPwd" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabelBundleName" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jTextFieldBundleName" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <EmptySpace pref="10" max="32767" attributes="0"/>
                           <Component id="jCheckBoxFtpDebug" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jCheckBoxPassiveMode" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jCheckBoxSftp" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="jCheckBoxBundle" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -826,6 +839,21 @@
                   </Properties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCheckBoxSftpActionPerformed"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JLabel" name="jLabelBundleName">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Bundle name"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JTextField" name="jTextFieldBundleName">
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="jCheckBoxBundle">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Bundle upload"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jCheckBoxBundleActionPerformed"/>
                   </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="jCheckBoxFtpDebug">

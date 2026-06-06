@@ -50,7 +50,9 @@ public class ServerPanel extends javax.swing.JPanel {
         jTextFieldUser.setText(webGenerator.getFtpUser());
         jPasswordFieldPwd.setText(webGenerator.getFtpPassword());
         jCheckBoxPassiveMode.setSelected(webGenerator.getFtpPassive());
-        
+        jCheckBoxBundle.setSelected(webGenerator.getFtpBundle());
+        jTextFieldBundleName.setText(webGenerator.getFtpBundleName());
+
         try {
             Class.forName("at.co.ttm.ftp.FtpClient");
             jCheckBoxSftp.setSelected(webGenerator.getFtpSecure());
@@ -207,6 +209,9 @@ public class ServerPanel extends javax.swing.JPanel {
         jPasswordFieldPwd = new javax.swing.JPasswordField();
         jCheckBoxPassiveMode = new javax.swing.JCheckBox();
         jCheckBoxSftp = new javax.swing.JCheckBox();
+        jLabelBundleName = new javax.swing.JLabel();
+        jTextFieldBundleName = new javax.swing.JTextField();
+        jCheckBoxBundle = new javax.swing.JCheckBox();
         jCheckBoxFtpDebug = new javax.swing.JCheckBox();
         jProgressBar = new javax.swing.JProgressBar();
         jButtonView = new javax.swing.JButton();
@@ -304,7 +309,7 @@ public class ServerPanel extends javax.swing.JPanel {
                                 .addComponent(jLabel9)
                                 .addGap(61, 61, 61)))
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 336, Short.MAX_VALUE)
+                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
                             .addComponent(jTextFieldDescription)
                             .addComponent(jTextFieldTournamentUrl)
                             .addComponent(jTextFieldNewsUrl)
@@ -383,7 +388,7 @@ public class ServerPanel extends javax.swing.JPanel {
             .addGroup(jPanelSettingsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(171, Short.MAX_VALUE))
+                .addContainerGap(220, Short.MAX_VALUE))
         );
 
         jTabbedPane.addTab(bundle.getString("Settings"), jPanelSettings); // NOI18N
@@ -591,6 +596,15 @@ public class ServerPanel extends javax.swing.JPanel {
             }
         });
 
+        jLabelBundleName.setText("Bundle name");
+
+        jCheckBoxBundle.setText("Bundle upload");
+        jCheckBoxBundle.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jCheckBoxBundleActionPerformed(evt);
+            }
+        });
+
         jCheckBoxFtpDebug.setText(bundle.getString("Debug")); // NOI18N
         jCheckBoxFtpDebug.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -616,6 +630,9 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel4Layout.createSequentialGroup()
                         .addComponent(jLabel5)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanel4Layout.createSequentialGroup()
+                        .addComponent(jLabelBundleName)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jCheckBoxFtpDebug, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
@@ -623,11 +640,13 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addComponent(jTextFieldDir, javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jTextFieldUser, javax.swing.GroupLayout.Alignment.LEADING)
                         .addComponent(jPasswordFieldPwd, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jTextFieldBundleName, javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jCheckBoxSftp)
+                            .addComponent(jCheckBoxBundle)
                             .addComponent(jCheckBoxPassiveMode, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE))
                         .addComponent(jTextFieldHost)))
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jCheckBoxFtpDebug, jCheckBoxPassiveMode});
@@ -651,12 +670,18 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(jPasswordFieldPwd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelBundleName)
+                    .addComponent(jTextFieldBundleName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 10, Short.MAX_VALUE)
                 .addComponent(jCheckBoxFtpDebug)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBoxPassiveMode)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jCheckBoxSftp)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jCheckBoxBundle)
                 .addGap(10, 10, 10))
         );
 
@@ -744,6 +769,7 @@ public class ServerPanel extends javax.swing.JPanel {
             webGenerator.setFtpDirectory(jTextFieldDir.getText());
             webGenerator.setFtpUser(jTextFieldUser.getText().strip());
             webGenerator.setFtpPassword(jPasswordFieldPwd.getText());
+            webGenerator.setFtpBundleName(jTextFieldBundleName.getText());
             webGenerator.setTitle(jTextFieldTitle.getText());
             webGenerator.setDescription(jTextFieldDescription.getText());
             webGenerator.setTournamentUrl(jTextFieldTournamentUrl.getText());
@@ -966,6 +992,10 @@ public class ServerPanel extends javax.swing.JPanel {
         webGenerator.setFtpSecure(jCheckBoxSftp.isSelected());
     }//GEN-LAST:event_jCheckBoxSftpActionPerformed
 
+    private void jCheckBoxBundleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxBundleActionPerformed
+        webGenerator.setFtpBundle(jCheckBoxBundle.isSelected());
+    }//GEN-LAST:event_jCheckBoxBundleActionPerformed
+
     private void jRadioButtonFlagTypeNoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFlagTypeNoneActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
@@ -993,6 +1023,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JButton jButtonReportsEnable;
     private javax.swing.JButton jButtonStart;
     private javax.swing.JButton jButtonView;
+    private javax.swing.JCheckBox jCheckBoxBundle;
     private javax.swing.JCheckBox jCheckBoxFtpDebug;
     private javax.swing.JCheckBox jCheckBoxIncludePlayedGroups;
     private javax.swing.JCheckBox jCheckBoxLivtickerEnabled;
@@ -1014,6 +1045,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel jLabelBundleName;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel4;
@@ -1032,6 +1064,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JTabbedPane jTabbedPane;
     private javax.swing.JTable jTableGroups;
     private javax.swing.JTable jTableReports;
+    private javax.swing.JTextField jTextFieldBundleName;
     private javax.swing.JTextField jTextFieldDescription;
     private javax.swing.JTextField jTextFieldDir;
     private javax.swing.JTextField jTextFieldHost;

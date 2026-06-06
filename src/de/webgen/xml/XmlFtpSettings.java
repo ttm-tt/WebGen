@@ -14,7 +14,9 @@ public class XmlFtpSettings {
         pwd = el.getAttribute(ATTRIBUTE_FTPPWD);
         passive = Boolean.parseBoolean(el.getAttribute(ATTRIBUTE_FTPPASV));
         sftp = el.getAttribute(ATTRIBUTE_FTPPROT).equals("SFTP");
-        
+        bundle = Boolean.parseBoolean(el.getAttribute(ATTRIBUTE_FTPBUNDLE));
+        bundleName = el.getAttribute(ATTRIBUTE_FTPBUNDLENAME);
+
         try {
             ts = Timestamp.valueOf(el.getAttribute(ATTRIBUTE_TS));
         } catch (Exception ex) {
@@ -29,6 +31,8 @@ public class XmlFtpSettings {
         el.setAttribute(ATTRIBUTE_FTPPWD, pwd);
         el.setAttribute(ATTRIBUTE_FTPPASV, Boolean.toString(passive));
         el.setAttribute(ATTRIBUTE_FTPPROT, sftp ? "SFTP" : "PLAIN");
+        el.setAttribute(ATTRIBUTE_FTPBUNDLE, Boolean.toString(bundle));
+        el.setAttribute(ATTRIBUTE_FTPBUNDLENAME, bundleName);
         el.setAttribute(ATTRIBUTE_TS, ts.toString());
         
         return el;
@@ -40,13 +44,20 @@ public class XmlFtpSettings {
     public String pwd;
     public boolean passive;
     public boolean sftp;
+    // When true, all changed files are packed into a single ZIP archive
+    // (named bundleName) and only that archive is uploaded, instead of
+    // uploading every file individually. Extraction is handled server-side.
+    public boolean bundle;
+    public String bundleName = "";
     public Timestamp ts = new Timestamp(0);
-    
+
     private static final String ATTRIBUTE_FTPHOST = "HOST";
     private static final String ATTRIBUTE_FTPDIR = "DIR";
     private static final String ATTRIBUTE_FTPUSER = "USER";
     private static final String ATTRIBUTE_FTPPWD = "PASSWORD";
     private static final String ATTRIBUTE_FTPPASV = "PASV";
     private static final String ATTRIBUTE_FTPPROT = "PROT";
+    private static final String ATTRIBUTE_FTPBUNDLE = "BUNDLE";
+    private static final String ATTRIBUTE_FTPBUNDLENAME = "BUNDLENAME";
     private static final String ATTRIBUTE_TS = "TS";
 }

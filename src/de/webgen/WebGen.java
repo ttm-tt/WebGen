@@ -443,6 +443,22 @@ public class WebGen {
         return xmlProperties.getFtpSettings().sftp;
     }
 
+    public void setFtpBundle(boolean ftpBundle) {
+        xmlProperties.getFtpSettings().bundle = ftpBundle;
+    }
+
+    public boolean getFtpBundle() {
+        return xmlProperties.getFtpSettings().bundle;
+    }
+
+    public void setFtpBundleName(String ftpBundleName) {
+        xmlProperties.getFtpSettings().bundleName = ftpBundleName == null ? "" : ftpBundleName.strip();
+    }
+
+    public String getFtpBundleName() {
+        return xmlProperties.getFtpSettings().bundleName;
+    }
+
     public RefreshInterval getInterval() {
         int tmp = xmlProperties.getSettings().interval;
         if (tmp == 0)
@@ -1712,88 +1728,32 @@ public class WebGen {
 
         if (files[files.length - 1].lastModified() < ts.getTime())
             return;
-        
+
+        // Bundle mode: pack all changed files into a single archive and upload
+        // only that archive instead of every file individually.
+        if (getFtpBundle()) {
+            uploadBundle(files, ts, ftpHost, ftpUser, ftpPwd, ftpDir);
+            return;
+        }
+
         // Schleife bis alle Files hochgeladen wurden
         int retries = 5;
         
         do {
-            com.enterprisedt.net.ftp.FileTransferClientInterface ftp = null;
-            
+            com.enterprisedt.net.ftp.FileTransferClientInterface ftp;
+
             try {
-                ftp = (com.enterprisedt.net.ftp.FileTransferClientInterface) Class.forName("at.co.ttm.ftp.FtpClient").getConstructor(Boolean.TYPE).newInstance(getFtpSecure());
-            } catch (ClassNotFoundException ex) {
-                // We expect this when we can't use the commercial lib
-                Logger.getLogger(WebGen.class.getName()).log(Level.FINE, null, ex);                
-            } catch (Exception ex) {
-                // Anyting unexpected like the Spanish Inquistion
-                Logger.getLogger(WebGen.class.getName()).log(Level.WARNING, null, ex);                
-            }
-            
-            if (ftp == null) {
-                ftp = new com.enterprisedt.net.ftp.FileTransferClient() {
-                    @Override
-                    public synchronized void connect() throws FTPException, IOException {
-                        // UTF-8 Filenamen
-                        masterContext.setControlEncoding("UTF-8");
-
-                        super.connect();
-                    }                
-                };
-            }
-
-            if (ftpDebug) {
-                // Wenn Debugging eingeschalten ist, auch den Log-Level setzen.
-                // Eigentljch geschieht das fuer de.webgen in MainFrame, aber aus
-                // seltsamen Gruenden kommt es vor, dass er zurueckgesetzt wird.
-                // Oder es wird ueberhaupt ein anderer Logger verwendet ...
-                Logger.getLogger(WebGen.class.getName()).setLevel(Level.FINE);
-
-                ftp.setEventListener(new com.enterprisedt.net.ftp.EventAdapter() {
-                    @Override
-                    public void commandSent(String connId, String cmd) {
-                        Logger.getLogger(WebGen.class.getName()).log(Level.FINE, cmd);
-                    }
-
-                    @Override
-                    public void replyReceived(String connId, String reply) {
-                        Logger.getLogger(WebGen.class.getName()).log(Level.FINE, reply);
-                    }
-                });
+                ftp = connectFtp(ftpHost, ftpUser, ftpPwd, ftpDir);
+            } catch (FTPException | IOException t) {
+                Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, t);
+                return;
+            } catch (URISyntaxException ex) {
+                System.getLogger(WebGen.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+                return;
             }
 
             try {
-                try {
-                    // accept URI having a port number and protocol prefix (ftp://, sftp://)
-                    URI uri = new URI(ftpHost.contains("://") ? ftpHost : "uri://"+ftpHost);
-                    ftp.setRemoteHost(uri.getHost());
-                    if (uri.getPort() != -1) {
-                        ftp.setRemotePort(uri.getPort());
-}
-                    ftp.setUserName(ftpUser);
-                    ftp.setPassword(ftpPwd);
-
-                    if (getFtpPassive())
-                        ftp.getAdvancedFTPSettings().setConnectMode(com.enterprisedt.net.ftp.FTPConnectMode.PASV);
-
-                    ftp.setTimeout(120 * 1000);
-                    ftp.connect();                
-                    if (!ftpDir.isEmpty()) {
-                        try {                            
-                            ftp.changeDirectory(ftpDir);
-                        } catch (com.enterprisedt.net.ftp.FTPException e) {
-                            ftp.createDirectory(ftpDir);
-                            ftp.changeDirectory(ftpDir);
-                        }
-                    }
-
-                } catch (FTPException | IOException t) {
-                    Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, t);
-                    return;
-                } catch (URISyntaxException ex) {
-                    System.getLogger(WebGen.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
-                }
-
-                Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Connected to server {0} to uploaad files modified after {1}", 
+                Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Connected to server {0} to uploaad files modified after {1}",
                         new String[]{ftpHost, sdf.format(new java.util.Date(ts.getTime()))}
                 );
 
@@ -1812,21 +1772,7 @@ public class WebGen {
                         continue;
 
                     try {
-                        String prefix = "";
-                        if (files[i].getParent() != null) {
-                            if (files[i].getParent().endsWith(File.separator + "js"))
-                                prefix = "js";
-                            else if (files[i].getParent().endsWith(File.separator + "themes"))
-                                prefix = "themes";
-                            else if (files[i].getParent().endsWith(File.separator + "css"))
-                                prefix = "css";
-                            else if (files[i].getParent().endsWith(File.separator + "fonts"))
-                                prefix = "fonts";
-                            else if (files[i].getParent().endsWith(File.separator + "img"))
-                                prefix = "img";
-                            else if (files[i].getParent().endsWith(File.separator + "flags"))
-                                prefix = "flags";
-                        }
+                        String prefix = uploadPrefix(files[i]);
 
                         Logger.getLogger(WebGen.class.getName()).log(
                                 Level.INFO, "Upload file {0} with {1} bytes last modified at {2}",
@@ -1902,6 +1848,232 @@ public class WebGen {
         } while (retries > 0);
     }
 
+
+    /**
+     * Return the sub folder prefix ("js", "css", ...) a file belongs to, or an
+     * empty string for files in the root output folder.
+     */
+    private String uploadPrefix(File file) {
+        String parent = file.getParent();
+        if (parent == null)
+            return "";
+
+        for (String sub : new String[] {"js", "themes", "css", "fonts", "img", "flags"}) {
+            if (parent.endsWith(File.separator + sub))
+                return sub;
+        }
+
+        return "";
+    }
+
+    /**
+     * Create and connect an FTP client using the configured settings and change
+     * into the target directory, creating it if necessary.
+     */
+    private com.enterprisedt.net.ftp.FileTransferClientInterface connectFtp(
+            String ftpHost, String ftpUser, String ftpPwd, String ftpDir)
+            throws FTPException, IOException, URISyntaxException {
+        com.enterprisedt.net.ftp.FileTransferClientInterface ftp = null;
+
+        try {
+            ftp = (com.enterprisedt.net.ftp.FileTransferClientInterface) Class.forName("at.co.ttm.ftp.FtpClient").getConstructor(Boolean.TYPE).newInstance(getFtpSecure());
+        } catch (ClassNotFoundException ex) {
+            // We expect this when we can't use the commercial lib
+            Logger.getLogger(WebGen.class.getName()).log(Level.FINE, null, ex);
+        } catch (Exception ex) {
+            // Anyting unexpected like the Spanish Inquistion
+            Logger.getLogger(WebGen.class.getName()).log(Level.WARNING, null, ex);
+        }
+
+        if (ftp == null) {
+            ftp = new com.enterprisedt.net.ftp.FileTransferClient() {
+                @Override
+                public synchronized void connect() throws FTPException, IOException {
+                    // UTF-8 Filenamen
+                    masterContext.setControlEncoding("UTF-8");
+
+                    super.connect();
+                }
+            };
+        }
+
+        if (ftpDebug) {
+            Logger.getLogger(WebGen.class.getName()).setLevel(Level.FINE);
+
+            ftp.setEventListener(new com.enterprisedt.net.ftp.EventAdapter() {
+                @Override
+                public void commandSent(String connId, String cmd) {
+                    Logger.getLogger(WebGen.class.getName()).log(Level.FINE, cmd);
+                }
+
+                @Override
+                public void replyReceived(String connId, String reply) {
+                    Logger.getLogger(WebGen.class.getName()).log(Level.FINE, reply);
+                }
+            });
+        }
+
+        try {
+            // accept URI having a port number and protocol prefix (ftp://, sftp://)
+            URI uri = new URI(ftpHost.contains("://") ? ftpHost : "uri://" + ftpHost);
+            ftp.setRemoteHost(uri.getHost());
+            if (uri.getPort() != -1)
+                ftp.setRemotePort(uri.getPort());
+            ftp.setUserName(ftpUser);
+            ftp.setPassword(ftpPwd);
+
+            if (getFtpPassive())
+                ftp.getAdvancedFTPSettings().setConnectMode(com.enterprisedt.net.ftp.FTPConnectMode.PASV);
+
+            ftp.setTimeout(120 * 1000);
+            ftp.connect();
+
+            if (!ftpDir.isEmpty()) {
+                try {
+                    ftp.changeDirectory(ftpDir);
+                } catch (com.enterprisedt.net.ftp.FTPException e) {
+                    ftp.createDirectory(ftpDir);
+                    ftp.changeDirectory(ftpDir);
+                }
+            }
+        } catch (FTPException | IOException | URISyntaxException t) {
+            // Don't leak a half-open connection if anything fails after connect
+            try {
+                ftp.disconnect();
+            } catch (FTPException | IOException ignore) {
+                // Ignore
+            }
+            throw t;
+        }
+
+        return ftp;
+    }
+
+    /**
+     * Bundle upload: pack all changed files into a single ZIP archive and upload
+     * only that archive. The archive preserves the sub folder structure (js/,
+     * css/, ...) so it can be unpacked into the target directory on the server.
+     * The server side extraction of the archive is not performed by WebGen.
+     */
+    private void uploadBundle(File[] files, java.sql.Timestamp ts,
+            String ftpHost, String ftpUser, String ftpPwd, String ftpDir) {
+        String bundleName = getFtpBundleName();
+        if (bundleName.isEmpty())
+            bundleName = "webgen.zip";
+
+        File zipFile;
+        try {
+            zipFile = File.createTempFile("webgen", ".zip");
+        } catch (IOException ex) {
+            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
+            return;
+        }
+
+        int  count  = 0;
+        long newest = ts.getTime();
+
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(
+                new java.io.BufferedOutputStream(new java.io.FileOutputStream(zipFile)))) {
+
+            byte[] buf = new byte[8192];
+
+            for (File file : files) {
+                if (file.isDirectory())
+                    continue;
+
+                if (file.lastModified() < ts.getTime())
+                    continue;
+
+                String prefix = uploadPrefix(file);
+                String entryName = (prefix.isEmpty() ? "" : prefix + "/") + file.getName();
+
+                java.util.zip.ZipEntry entry = new java.util.zip.ZipEntry(entryName);
+                entry.setTime(file.lastModified());
+                zos.putNextEntry(entry);
+
+                try (java.io.FileInputStream fis = new java.io.FileInputStream(file)) {
+                    int len;
+                    while ((len = fis.read(buf)) > 0)
+                        zos.write(buf, 0, len);
+                }
+
+                zos.closeEntry();
+
+                if (file.lastModified() > newest)
+                    newest = file.lastModified();
+
+                count++;
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
+            zipFile.delete();
+            return;
+        }
+
+        if (count == 0) {
+            zipFile.delete();
+            return;
+        }
+
+        Logger.getLogger(WebGen.class.getName()).log(Level.INFO,
+                "Bundled {0} changed files ({1} bytes) into {2}",
+                new Object[]{count, zipFile.length(), bundleName});
+
+        com.enterprisedt.net.ftp.FileTransferClientInterface ftp = null;
+        boolean uploaded = false;
+
+        try {
+            ftp = connectFtp(ftpHost, ftpUser, ftpPwd, ftpDir);
+
+            Logger.getLogger(WebGen.class.getName()).log(Level.INFO,
+                    "Connected to server {0} to upload bundle {1}",
+                    new String[]{ftpHost, bundleName});
+
+            // Delay, sonst geht auf einigen Servern das folgende Upload nicht.
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                // Ignore
+            }
+
+            // Upload to a temporary name first and only rename it to the final
+            // name once the transfer is complete. This way a server side
+            // extractor sees the final archive appear atomically and never
+            // tries to unpack a half uploaded file.
+            String tempName = bundleName + ".temp";
+
+            ftp.uploadFile(zipFile.getPath(), tempName);
+
+            // rename() (RNTO) fails on some servers if the target exists
+            if (ftp.exists(bundleName))
+                ftp.deleteFile(bundleName);
+            ftp.rename(tempName, bundleName);
+
+            uploaded = true;
+        } catch (FTPException | IOException | URISyntaxException t) {
+            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, t);
+        } finally {
+            if (ftp != null) {
+                try {
+                    ftp.disconnect();
+                } catch (FTPException | IOException t) {
+                    // Ignore
+                    Logger.getLogger(WebGen.class.getName()).log(Level.FINE, null, t);
+                }
+            }
+
+            Logger.getLogger(WebGen.class.getName()).log(Level.INFO, "Disconnected from {0}", ftpHost);
+
+            zipFile.delete();
+        }
+
+        // Only advance the timestamp on success, otherwise the same files will
+        // be packed and retried on the next run.
+        if (uploaded) {
+            ts.setTime(newest + 1);
+            xmlProperties.getFtpSettings().ts = ts;
+        }
+    }
 
     private String encryptPassword(String pwd) {
         return PasswordCrypto.encryptPassword(pwd);
