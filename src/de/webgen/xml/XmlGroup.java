@@ -42,6 +42,7 @@ public class XmlGroup {
     public void read(Element el) {
         cpCategory = getAttribute(el, ATTRIBUTE_CPATEGORY);
         cpName = getAttribute(el, ATTRIBUTE_CPNAME);
+        grSortOrder = Integer.parseInt(getAttribute(el, ATTRIBUTE_GRSORT));
         grStage = getAttribute(el, ATTRIBUTE_GRSTAGE);
         grName = getAttribute(el, ATTRIBUTE_GRNAME);
         enabled = Boolean.parseBoolean(getAttribute(el, ATTRIBUTE_ENABLED));
@@ -67,6 +68,7 @@ public class XmlGroup {
     public Element write(Element el) {
         setAttribute(el, ATTRIBUTE_CPATEGORY, cpCategory);
         setAttribute(el, ATTRIBUTE_CPNAME, cpName);
+        setAttribute(el, ATTRIBUTE_GRSORT, Integer.toString(grSortOrder));
         setAttribute(el, ATTRIBUTE_GRSTAGE, grStage);
         setAttribute(el, ATTRIBUTE_GRNAME, grName);
         setAttribute(el, ATTRIBUTE_ENABLED, Boolean.toString(enabled));
