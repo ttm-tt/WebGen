@@ -1876,7 +1876,8 @@ public class WebGen {
         com.enterprisedt.net.ftp.FileTransferClientInterface ftp = null;
 
         try {
-            ftp = (com.enterprisedt.net.ftp.FileTransferClientInterface) Class.forName("at.co.ttm.ftp.FtpClient").getConstructor(Boolean.TYPE).newInstance(getFtpSecure());
+            ftp = (com.enterprisedt.net.ftp.FileTransferClientInterface) Class.forName(
+                    "at.co.ttm.ftp.FtpClient").getConstructor(Boolean.TYPE).newInstance(getFtpSecure());
         } catch (ClassNotFoundException ex) {
             // We expect this when we can't use the commercial lib
             Logger.getLogger(WebGen.class.getName()).log(Level.FINE, null, ex);
