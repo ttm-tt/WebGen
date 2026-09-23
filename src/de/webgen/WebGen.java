@@ -1156,19 +1156,25 @@ public class WebGen {
         java.util.Collections.sort(groups, new java.util.Comparator<Group>() {
             @Override
             public int compare(Group o1, Group o2) {
-                return o1.timestamp.compareTo(o2.timestamp);
+                if (o1.timestamp == null)
+                    return (o2.timestamp == null ? 0 : 1);
+                else if (o2.timestamp == null)
+                    return (o1.timestamp == null ? 0 : -1);  
+                else 
+                    return o1.timestamp.compareTo(o2.timestamp);
             }
         });
 
         for (Group gr : groups) {
             XmlGroup xmlGroup = xmlProperties.getGroup(gr);
 
-            if (gr.timestamp.compareTo(xmlGroup.ts) <= 0)
+            if (gr.timestamp != null && gr.timestamp.compareTo(xmlGroup.ts) <= 0)
                 continue;
 
             updateGroup(gr, xmlGroup.ts);
 
-            xmlGroup.ts = gr.timestamp;
+            if (gr.timestamp != null)
+                xmlGroup.ts = gr.timestamp;
         }
     }
 
