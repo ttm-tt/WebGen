@@ -19,7 +19,11 @@ public class PKOGenerator extends KOGenerator {
 
 
     @Override
-    public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
+    public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {        
+        // Should not happen, it would a group without matches
+        if (matchList.isEmpty() || matchList.get(0).isEmpty())
+            return "";
+        
         Group gr = matchList.get(0).get(0).gr;
         
         if (gr == null)

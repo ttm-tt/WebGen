@@ -20,12 +20,13 @@ public class KOGenerator extends Generator {
     @Override
     @SuppressWarnings("DeadBranch")
     public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
+        // Should not happen, it would a group without matches
+        if (matchList.isEmpty() || matchList.get(0).isEmpty())
+            return "";
+        
         StringBuilder buffer = new StringBuilder();
         
-        Group gr = null;
-        
-        if (!matchList.isEmpty() && !matchList.get(0).isEmpty())
-            gr = matchList.get(0).get(0).gr;
+        Group gr = matchList.get(0).get(0).gr;
         
         if (gr == null)
             return "";

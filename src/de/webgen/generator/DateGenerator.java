@@ -19,10 +19,8 @@ public class DateGenerator extends Generator {
     
     @Override
     public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
-        
-        if (matchList.isEmpty()) {
+        if (matchList.isEmpty() || matchList.get(0).isEmpty())
             return "";
-        }
         
         Timestamp date = matchList.get(0).get(0).mtDateTime;
         
