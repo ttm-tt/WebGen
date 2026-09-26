@@ -19,6 +19,7 @@ public class DateGenerator extends Generator {
     
     @Override
     public String generate(List<List<Match>> matchList, IDatabase database) throws SQLException {
+        // Checked by caller so it should not happen, it would a date without matches
         if (matchList.isEmpty() || matchList.get(0).isEmpty())
             return "";
         

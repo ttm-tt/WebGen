@@ -1193,6 +1193,14 @@ public class WebGen {
                     ts == null ? "<null>" : sdf.format(ts)});
 
         List<List<Match>> matchList = database.readMatches(group);
+        if (matchList.isEmpty() || matchList.get(0).isEmpty()) {
+            Logger.getLogger(WebGen.class.getName()).log(
+                    Level.INFO, "Skip group {0} with no matches",
+                    new String[]{group.getFileName()}
+            );
+            
+            return;
+        }
 
         String page = null;
 
@@ -1212,7 +1220,7 @@ public class WebGen {
             case Group.MOD_DKO :
                 throw new UnsupportedOperationException("Not supported yet.");
         }
-
+        
         try (FileWriter fw = new FileWriter(new File(path + File.separator + group.getFileName() + ".html"))) {
             fw.write(page);
         }
@@ -1440,21 +1448,28 @@ public class WebGen {
             matchList.clear();
             matchList.add(Arrays.asList(matches));
             
-            // Den juengsten Timestamp dieser Spiele suchen
-            Timestamp mtTS = new Timestamp(0);
-            for (Match mt : matches) {
-                if (mt.mtTimestamp != null && mtTS.before(mt.mtTimestamp))
-                    mtTS = mt.mtTimestamp;
+            if (!matchList.isEmpty() && !matchList.get(0).isEmpty()) {
+                // Den juengsten Timestamp dieser Spiele suchen
+                Timestamp mtTS = new Timestamp(0);
+                for (Match mt : matches) {
+                    if (mt.mtTimestamp != null && mtTS.before(mt.mtTimestamp))
+                        mtTS = mt.mtTimestamp;
+                }
+
+                // Generiere Seite fuer dieses Datum
+                String page = generator.generate(matchList, database);
+
+                try (FileWriter fw = new FileWriter(file)) {
+                    fw.write(page);
+                }
+
+                xmlDate.ts = mtTS;
+            } else {
+                Logger.getLogger(WebGen.class.getName()).log(
+                        Level.INFO, "Skip date {0} with no matches", 
+                        new String[]{xmlDate.name}
+                );
             }
-            
-            // Generiere Seite fuer dieses Datum
-            String page = generator.generate(matchList, database);
-            
-            try (FileWriter fw = new FileWriter(file)) {
-                fw.write(page);
-            }
-            
-            xmlDate.ts = mtTS;
         }
         
         generator = new PlayersMatchesGenerator();
