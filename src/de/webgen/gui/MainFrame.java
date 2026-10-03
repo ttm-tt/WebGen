@@ -824,19 +824,27 @@ public class MainFrame extends javax.swing.JFrame {
         initPaths();
 
         if (WebGen.iniFile == null) {
-            JOptionPane.showMessageDialog(null, MessageFormat.format(bundle.getString("File {0} not found"), "tt32.ini"), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, 
+                    MessageFormat.format((String) bundle.getString("File {0} not found"), "tt32.ini"), 
+                    bundle.getString("Error"), JOptionPane.ERROR_MESSAGE
+            );
             System.exit(1);
         }
 
         if (WebGen.templateDir == null) {
-            JOptionPane.showMessageDialog(null, MessageFormat.format(bundle.getString("Directory {0} not found"), "template"), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, 
+                    MessageFormat.format((String) bundle.getString("Directory {0} not found"), "template"), 
+                    bundle.getString("Error"), JOptionPane.ERROR_MESSAGE
+            );
             System.exit(1);
         }
 
         try {
             System.setProperty(org.ini4j.Config.KEY_PREFIX + org.ini4j.Config.PROP_ESCAPE, Boolean.FALSE.toString());
         } catch (Throwable t) {
-            JOptionPane.showMessageDialog(null, "Could not initialze org.ini4j: " + t.getLocalizedMessage(), bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);            
+            JOptionPane.showMessageDialog(null, 
+                    "Could not initialze org.ini4j: " + t.getLocalizedMessage(), 
+                    bundle.getString("Error"), JOptionPane.ERROR_MESSAGE);            
         }
         
         java.awt.EventQueue.invokeLater(new Runnable() {
