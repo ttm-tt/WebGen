@@ -26,6 +26,9 @@ public class RRGenerator extends Generator {
         
         Group gr = matchList.get(0).get(0).gr;
 
+        // Marker for cancelled players
+        String[] gaveups = new String[gr.grSize];
+        
         List<Groupposition> groupList = database.readGroupposition(gr);
 
         // Matchliste stuerzen
@@ -34,6 +37,7 @@ public class RRGenerator extends Generator {
 
         for (int i = 0; i < groupList.size(); i++) {
             groupModus.put(groupList.get(i).stID, groupList.get(i).stNr);
+            gaveups[i] = groupList.get(i).stGaveUp ? " gaveup" : "";
         }
 
         for (int round = 0; round < matchList.size(); round++) {
@@ -70,7 +74,7 @@ public class RRGenerator extends Generator {
         content.append("</th>");
 
         for (int i = 0; i < gr.grSize; i++) {
-            content.append("<th class=\"pos\" scope=\"col\">");
+            content.append("<th class=\"pos").append(gaveups[i]).append("\" (scope=\"col\">");
             content.append(i + 1);
             content.append("</th>");
         }
@@ -92,8 +96,8 @@ public class RRGenerator extends Generator {
         
         content.append("<tbody>").append(SEP);
         for (int i = 0; i < gr.grSize; i++) {
-            content.append("  <tr>");
-            content.append("<td class=\"pos\" scope=\"col\">");
+            content.append("  <tr class=\"").append(gaveups[i]) . append("\">");
+            content.append("<td class=\"pos").append(gaveups[i]).append("\" scope=\"col\">");
             content.append(i + 1);
             content.append("</td>");
             content.append("<td class=\"name\" scope=\"col\">");
@@ -112,7 +116,7 @@ public class RRGenerator extends Generator {
                     boolean swap = groupMatches[i][j] == null;
                     Match mt = swap ? groupMatches[j][i] : groupMatches[i][j];
 
-                    content.append("<td class=\"result\" scope=\"col\">");
+                    content.append("<td class=\"result").append(gaveups[j]).append("\" scope=\"col\">");
 
                     if (mt.mtWalkOverA && !swap || mt.mtWalkOverX && swap)
                         content.append("w/o");

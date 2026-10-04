@@ -22,6 +22,11 @@ table.rr.draw {
     border-width: 1px;  
 }
 
+/* Mark players who gave up thus do not count for final standing */
+.gaveup {
+    text-decoration: line-through;
+}
+
 /* Draw table: header name column (include td.pos and td.name) */
 .rr.draw th.name {
     width: 50%;

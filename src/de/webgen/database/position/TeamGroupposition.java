@@ -14,7 +14,7 @@ public class TeamGroupposition extends Groupposition {
 
     public static String getSelectString() {
         return
-            "SELECT st.tmID, tb.stID, st.stNr, tb.stPos, " +
+            "SELECT st.tmID, tb.stID, st.stNr, tb.stPos, st.stGaveup, st.stDisqu, " +
             "       tb.mtMatchPoints, tb.mtMatchCount, " +
             "       tb.mtPointsA, tb.mtPointsX, tb.mtMatchesA, tb.mtMatchesX, " +
             "       tb.mtSetsA, tb.mtSetsX, tb.mtBallsA, tb.mtBallsX, " +
@@ -40,6 +40,8 @@ public class TeamGroupposition extends Groupposition {
         stID = rs.getInt(++idx);
         stNr = rs.getInt(++idx);
         stPos = rs.getInt(++idx);
+        stGaveUp = rs.getBoolean(++idx);
+        stDisqu = rs.getBoolean(++idx);
 
         mtMatchPoints = rs.getInt(++idx);
         mtMatchCount = rs.getInt(++idx);

@@ -10,6 +10,8 @@ abstract public class Groupposition {
     public int stID;
     public int stNr;
     public int stPos;
+    public boolean stGaveUp;
+    public boolean stDisqu;
 
     public int mtMatchPoints;
     public int mtMatchCount;
