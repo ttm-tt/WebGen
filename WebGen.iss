@@ -81,10 +81,9 @@ Name: "{autodesktop}\WebGen"; Filename: "{app}\WebGen2.jar"; WorkingDir: "{app}"
 
 [Run]
 ; Alte Files von 3.x loeschen
-Filename: {sys}\cmd.exe; Parameters: /c del {app}\lib\WebGen.jar; Check: FileExists(ExpandConstant('{app}\lib\WebGen.jar'));
-Filename: {sys}\cmd.exe; Parameters: /c del /Q {code:GetIniDir}\Template\*; Check: FileExists(ExpandConstant('code:GetIniDir}\Template'));
-Filename: {sys}\cmd.exe; Parameters: /c rmdir {code:GetIniDir}\Template; Check: FileExists(ExpandConstant('code:GetIniDir}\Template'));
-
+Filename: {sys}\cmd.exe; Parameters: "/c del ""{app}\lib\WebGen.jar"""; Check: FileExists(ExpandConstant('{app}\lib\WebGen.jar'));
+Filename: {sys}\cmd.exe; Parameters: "/c del /Q ""{code:GetIniDir}\Template\*"""; Check: DirExists(ExpandConstant('{code:GetIniDir}\Template'));
+Filename: {sys}\cmd.exe; Parameters: "/c rmdir ""{code:GetIniDir}\Template"""; Check: DirExists(ExpandConstant('{code:GetIniDir}\Template'));
 
 [Code]
 (* looks for JDK or JRE version in Registry *)
