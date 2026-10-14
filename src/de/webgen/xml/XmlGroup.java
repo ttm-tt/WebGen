@@ -42,7 +42,8 @@ public class XmlGroup {
     public void read(Element el) {
         cpCategory = getAttribute(el, ATTRIBUTE_CPATEGORY);
         cpName = getAttribute(el, ATTRIBUTE_CPNAME);
-        grSortOrder = Integer.parseInt(getAttribute(el, ATTRIBUTE_GRSORT));
+        String sortOrder = getAttribute(el, ATTRIBUTE_GRSORT);
+        grSortOrder = sortOrder == null ? 0 : Integer.parseInt(sortOrder);
         grStage = getAttribute(el, ATTRIBUTE_GRSTAGE);
         grName = getAttribute(el, ATTRIBUTE_GRNAME);
         enabled = Boolean.parseBoolean(getAttribute(el, ATTRIBUTE_ENABLED));
