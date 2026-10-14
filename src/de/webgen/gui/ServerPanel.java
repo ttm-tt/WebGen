@@ -20,11 +20,18 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.awt.Desktop;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import javax.swing.text.html.StyleSheet;
+import javax.xml.XMLConstants;
+import javax.xml.transform.Templates;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 
 
 public class ServerPanel extends javax.swing.JPanel {
@@ -804,7 +811,32 @@ public class ServerPanel extends javax.swing.JPanel {
         try {
             try {
                 if (httpServer == null) {
-                    httpServer = HttpServer.create(new InetSocketAddress(0), 0, "/", new HttpHandler() {
+                    httpServer = HttpServer.create(new InetSocketAddress(0), 0);
+                    
+                    httpServer.createContext("/settings", exchange -> {
+                        try (exchange) {
+                            File xml = new File(webGenerator.getIndexXmlFile());
+                            File xsl = new File(WebGen.templateDir, "webgensettings.xsl");
+
+                            TransformerFactory tf = TransformerFactory.newInstance();
+                            tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                            Templates templates = tf.newTemplates(new StreamSource(xsl));
+
+                            ByteArrayOutputStream out = new ByteArrayOutputStream();
+                            // Read the file on every request, so you always see the current state
+                            templates.newTransformer().transform(new StreamSource(xml), new StreamResult(out));
+                            byte[] html = out.toByteArray();
+                            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                            exchange.sendResponseHeaders(200, html.length);
+                            exchange.getResponseBody().write(html);
+                        } catch (Exception e) {
+                            byte[] msg = ("Error: " + e.getMessage()).getBytes("UTF-8");
+                            exchange.sendResponseHeaders(500, msg.length);
+                            exchange.getResponseBody().write(msg);
+                        }
+                    });
+                    
+                    httpServer.createContext("/", new HttpHandler() {
                         @Override
                         public void handle(HttpExchange he) throws IOException {
                             if (!he.getRequestMethod().equals("GET")) {
