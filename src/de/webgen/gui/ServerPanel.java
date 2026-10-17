@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.Filter;
 import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -196,6 +197,12 @@ public class ServerPanel extends javax.swing.JPanel {
                return;            
         }
 
+        // Every request is written to <server dir>/access.log
+        Filter accessLog = createAccessLogFilter();
+
+        // index.xml and the access logs are only hidden if the server is reachable from other hosts
+        final boolean hideRestrictedFiles = !httpServer.getAddress().getAddress().isLoopbackAddress();
+
         if (httpServer.getAddress().getAddress().isLoopbackAddress()) {
             httpServer.createContext("/settings", exchange -> {
                 try (exchange) {
@@ -218,6 +225,22 @@ public class ServerPanel extends javax.swing.JPanel {
                     exchange.sendResponseHeaders(500, msg.length);
                     exchange.getResponseBody().write(msg);
                 }
+            }).getFilters().add(accessLog);
+
+            // Access log as readable HTML page; not logged itself, the auto-refresh would flood the log
+            httpServer.createContext("/logs", exchange -> {
+                try (exchange) {
+                    byte[] html = AccessLogPage.render(getAccessLogFile(), webGenerator.getServer(),
+                            exchange.getRequestURI().getRawQuery());
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.getResponseHeaders().set("Cache-Control", "no-store");
+                    exchange.sendResponseHeaders(200, html.length);
+                    exchange.getResponseBody().write(html);
+                } catch (Exception e) {
+                    byte[] msg = ("Error: " + e.getMessage()).getBytes(UTF8);
+                    exchange.sendResponseHeaders(500, msg.length);
+                    exchange.getResponseBody().write(msg);
+                }
             });
         }
 
@@ -236,11 +259,21 @@ public class ServerPanel extends javax.swing.JPanel {
                 // Don't escape
                 if (uri.contains("/../")) {
                     sendErrorResponse(he, 404, "Not found");
+
+                    return;
                 }
 
                 String path = new File(webGenerator.getIndexHtmlFile()).getParent();
 
                 File file = new File(path, uri);
+
+                // index.xml (settings incl. FTP account) and the access logs are in the same directory,
+                // but must not be downloadable from other hosts
+                if (hideRestrictedFiles && isRestrictedFile(file)) {
+                    sendErrorResponse(he, 404, "Not found");
+
+                    return;
+                }
 
                 if (!file.exists()) {
                     sendErrorResponse(he, 404, "Not found");
@@ -290,13 +323,123 @@ public class ServerPanel extends javax.swing.JPanel {
                     Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-        });
+        }).getFilters().add(accessLog);
 
         httpServer.start();
         jTextFieldPort.setText("" + httpServer.getAddress().getPort());
     }
     
     
+    // ---- Access log in Apache "combined" format ----
+    // 127.0.0.1 - - [17/Oct/2026:18:48:00 +0200] "GET /index.html HTTP/1.1" 200 2326 "-" "Mozilla/5.0 ..."
+
+    private static final java.time.format.DateTimeFormatter APACHE_TIME =
+            java.time.format.DateTimeFormatter.ofPattern("dd/MMM/yyyy:HH:mm:ss Z", java.util.Locale.ENGLISH);
+
+    private final Object accessLogLock = new Object();
+
+    // Files in the server directory which the web server must not deliver
+    private boolean isRestrictedFile(File file) throws IOException {
+        File canonical = file.getCanonicalFile();
+        if (!canonical.getParentFile().equals(getAccessLogFile().getCanonicalFile().getParentFile()))
+            return false;
+
+        String name = canonical.getName().toLowerCase(java.util.Locale.ROOT);
+        return name.equals("index.xml") || name.startsWith("access.log");
+    }
+
+    private File getAccessLogFile() {
+        return new File(new File(webGenerator.getIndexXmlFile()).getParentFile(), "access.log");
+    }
+
+    // Counts the bytes of the response body (%b)
+    private static class CountingOutputStream extends java.io.FilterOutputStream {
+        long count = 0;
+
+        CountingOutputStream(java.io.OutputStream out) {
+            super(out);
+        }
+
+        @Override
+        public void write(int b) throws IOException {
+            out.write(b);
+            count++;
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            out.write(b, off, len);
+            count += len;
+        }
+    }
+
+    private Filter createAccessLogFilter() {
+        return new Filter() {
+            @Override
+            public String description() {
+                return "Access log (Apache combined format)";
+            }
+
+            @Override
+            public void doFilter(HttpExchange exchange, Chain chain) throws IOException {
+                java.time.ZonedDateTime time = java.time.ZonedDateTime.now();
+                CountingOutputStream body = new CountingOutputStream(exchange.getResponseBody());
+                exchange.setStreams(null, body);
+
+                try {
+                    chain.doFilter(exchange);
+                } finally {
+                    writeAccessLog(exchange, time, body.count);
+                }
+            }
+        };
+    }
+
+    private void writeAccessLog(HttpExchange ex, java.time.ZonedDateTime time, long bytes) {
+        String user    = ex.getPrincipal() == null ? "-" : ex.getPrincipal().getUsername();
+        String referer = ex.getRequestHeaders().getFirst("Referer");
+        String agent   = ex.getRequestHeaders().getFirst("User-Agent");
+        int    status  = ex.getResponseCode();     // -1 if the handler failed before sending a response
+
+        // Browsers ask for /favicon.ico on their own; we usually don't have one, so don't log the failures
+        if (status == 404 && "/favicon.ico".equals(ex.getRequestURI().getPath()))
+            return;
+
+        String line = ex.getRemoteAddress().getAddress().getHostAddress()
+                + " - " + user
+                + " [" + APACHE_TIME.format(time) + "]"
+                + " \"" + ex.getRequestMethod() + " " + escapeLog(ex.getRequestURI().toString()) + " " + ex.getProtocol() + "\""
+                + " " + (status < 0 ? "-" : Integer.toString(status))
+                + " " + (bytes > 0 ? Long.toString(bytes) : "-")
+                + " \"" + (referer == null ? "-" : escapeLog(referer)) + "\""
+                + " \"" + (agent == null ? "-" : escapeLog(agent)) + "\""
+                + "\n";
+
+        synchronized (accessLogLock) {
+            try {
+                Files.writeString(getAccessLogFile().toPath(), line, UTF8,
+                        java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                Logger.getLogger(ServerPanel.class.getName()).log(Level.WARNING, "Cannot write access log", e);
+            }
+        }
+    }
+
+    // Like Apache: quotes and backslashes escaped, control characters as \xhh
+    private static String escapeLog(String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        for (char c : s.toCharArray()) {
+            if (c == '"' || c == '\\')
+                sb.append('\\').append(c);
+            else if (c < 0x20 || c == 0x7f)
+                sb.append(String.format("\\x%02x", (int) c));
+            else
+                sb.append(c);
+        }
+        return sb.toString();
+    }
+
+
     void stopHttp() {
         if (httpServer == null)
             return;
