@@ -14,7 +14,9 @@ import java.awt.Font;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.logging.Handler;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -23,10 +25,21 @@ import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import javax.swing.text.html.StyleSheet;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.util.List;
+import java.util.stream.Collectors;
+import javax.swing.JSpinner;
+import javax.swing.JFormattedTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerFactory;
@@ -42,11 +55,43 @@ public class ServerPanel extends javax.swing.JPanel {
     
     HttpServer httpServer;
 
+    // Logging: each panel shows the messages of its own WebGen and the general ones
+    private static final java.util.ResourceBundle logBundle = java.util.ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
+    private static final int MAX_LOG_ENTRIES = 100;
+    private Handler logHandler;
+
+    private static class LogEntry {
+        final LogRecord record;
+        final WebGen    server;    // null: general message, not from a WebGen thread
+
+        LogEntry(LogRecord record, WebGen server) {
+            this.record = record;
+            this.server = server;
+        }
+
+        @Override
+        public String toString() {
+            String date = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date(record.getMillis()));
+            String message;
+
+            if (record.getMessage() != null)
+                message = (new java.util.logging.SimpleFormatter()).formatMessage(record);
+            else if (record.getThrown() != null)
+                message = record.getThrown().getClass().getName() + ": " + record.getThrown().getLocalizedMessage();
+            else
+                message = record.toString();
+
+            return (server == null ? "All" : server.getServer()) + ": [" + date + "] " + message;
+        }
+    }
+
     /** Creates new form ServerPanel */
-    public ServerPanel(String server, String tournament, String path) {
+    public ServerPanel(String server, String tournament, String path) throws SocketException {
         this.webGenerator = new WebGen(server, tournament, path);
         
         initComponents();
+        installAnyFormatter(jSpinnerPort);
+        installLogging();
         
         jTableGroups.setModel(new GroupsTableModel());
         
@@ -109,7 +154,265 @@ public class ServerPanel extends javax.swing.JPanel {
                 }
             }
         }, 1000, 1000);
+        
+        List<String> list = NetworkInterface.networkInterfaces()
+            .filter(ni -> {
+                try { return ni.isUp() && !ni.isLoopback(); }
+                catch (SocketException e) { return false; }
+            })
+            .flatMap(NetworkInterface::inetAddresses)
+            .filter(addr -> !addr.isLoopbackAddress()
+                         && !addr.isAnyLocalAddress()
+                         && !addr.isLinkLocalAddress())
+            .map(InetAddress::getHostAddress)
+            .collect(Collectors.toList());
+        
+        for (String addr : list)
+            jComboBoxServer.addItem(addr);
+        
+        SwingUtilities.invokeLater(this::startHttp);        
     }
+    
+    
+    void startHttp() {
+        if (httpServer != null)
+            stopHttp();
+        
+        String ip = jComboBoxServer.getSelectedItem().toString();
+        if (ip.equals("localhost"))
+            ip = "127.0.0.1";
+        else if (ip.equals("any"))
+            ip = "0.0.0.0";
+        
+        int port = ((Number) jSpinnerPort.getValue()).intValue();
+        
+        try {
+            httpServer = HttpServer.create(new InetSocketAddress(ip, port), 0);
+        } catch (IOException ex) {
+               System.getLogger(ServerPanel.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+               httpServer = null;
+               jTextFieldPort.setText("");
+               
+               return;            
+        }
+
+        if (httpServer.getAddress().getAddress().isLoopbackAddress()) {
+            httpServer.createContext("/settings", exchange -> {
+                try (exchange) {
+                    File xml = new File(webGenerator.getIndexXmlFile());
+                    File xsl = new File(WebGen.templateDir, "webgensettings.xsl");
+
+                    TransformerFactory tf = TransformerFactory.newInstance();
+                    tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+                    Templates templates = tf.newTemplates(new StreamSource(xsl));
+
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+                    // Read the file on every request, so you always see the current state
+                    templates.newTransformer().transform(new StreamSource(xml), new StreamResult(out));
+                    byte[] html = out.toByteArray();
+                    exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
+                    exchange.sendResponseHeaders(200, html.length);
+                    exchange.getResponseBody().write(html);
+                } catch (Exception e) {
+                    byte[] msg = ("Error: " + e.getMessage()).getBytes("UTF-8");
+                    exchange.sendResponseHeaders(500, msg.length);
+                    exchange.getResponseBody().write(msg);
+                }
+            });
+        }
+
+        httpServer.createContext("/", new HttpHandler() {
+            @Override
+            public void handle(HttpExchange he) throws IOException {
+                if (!he.getRequestMethod().equals("GET")) {
+                    he.getResponseHeaders().add("Allow", "GET");
+                    sendErrorResponse(he, 405, "Method not allowed");
+
+                    return;
+                }
+
+                String uri = he.getRequestURI().getPath();
+
+                // Don't escape
+                if (uri.contains("/../")) {
+                    sendErrorResponse(he, 404, "Not found");
+                }
+
+                String path = new File(webGenerator.getIndexHtmlFile()).getParent();
+
+                File file = new File(path, uri);
+
+                if (!file.exists()) {
+                    sendErrorResponse(he, 404, "Not found");
+
+                    return;
+                } else if (file.isDirectory()) {
+
+                    File index = new File(file, "index.html");
+                    if (!index.exists()) {
+                        sendErrorResponse(he, 404, "Not found");
+
+                        return;
+                    }
+
+                    file = index;
+                }
+
+                String mime = null;
+
+                // Sometimes probeContentType will return text/plain for html and js files
+                if (file.getName().endsWith(".html"))
+                    mime = "text/html";
+                else if (file.getName().endsWith(".js"))
+                    mime = "text/javascript";
+                else
+                    mime = Files.probeContentType(file.toPath());
+
+                he.getResponseHeaders().add("Content-Type", mime == null ? "application/octet-stream" : mime);
+
+                he.sendResponseHeaders(200, file.length());
+                byte b[] = new byte[0x10000];
+                int  count;
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    while ( (count = fis.read(b)) >= 0 )
+                        he.getResponseBody().write(b, 0, count);
+                }
+                he.getResponseBody().close();
+            }
+
+            private void sendErrorResponse(HttpExchange he, int code, String message) {
+                try {
+                    byte[] response = message.getBytes(UTF8);
+                    he.sendResponseHeaders(code, response.length);
+                    he.getResponseBody().write(response);                                
+                    he.getResponseBody().close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        });
+
+        httpServer.start();
+        jTextFieldPort.setText("" + httpServer.getAddress().getPort());
+    }
+    
+    
+    void stopHttp() {
+        if (httpServer == null)
+            return;
+        
+        httpServer.stop(5);
+        httpServer = null;
+        
+        jTextFieldPort.setText("");
+    }
+    
+    
+    private void installLogging() {
+        jComboBoxLogging.setModel(new javax.swing.DefaultComboBoxModel<>());
+
+        jComboBoxLogging.setRenderer(new javax.swing.DefaultListCellRenderer() {
+            @Override
+            public java.awt.Component getListCellRendererComponent(javax.swing.JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                java.awt.Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof LogEntry)
+                    applyLevelStyle(c, ((LogEntry) value).record.getLevel());
+                return c;
+            }
+        });
+
+        logHandler = new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                if (record.getMessage() == null && record.getThrown() == null)
+                    return;
+
+                // Messages of other servers belong to their own tab
+                WebGen server = WebGen.threadIdMap.get(Thread.currentThread().getId());
+                if (server != null && server != webGenerator)
+                    return;
+
+                record.setResourceBundle(logBundle);
+                LogEntry entry = new LogEntry(record, server);
+
+                // publish() is called from any thread, Swing must be updated on the EDT
+                SwingUtilities.invokeLater(() -> addLogEntry(entry));
+            }
+
+            @Override
+            public void flush() {
+            }
+
+            @Override
+            public void close() throws SecurityException {
+            }
+        };
+
+        Logger.getLogger("").addHandler(logHandler);
+    }
+
+
+    private void addLogEntry(LogEntry entry) {
+        javax.swing.DefaultComboBoxModel model = (javax.swing.DefaultComboBoxModel) jComboBoxLogging.getModel();
+        model.insertElementAt(entry, 0);
+
+        while (model.getSize() > MAX_LOG_ENTRIES)
+            model.removeElementAt(model.getSize() - 1);
+
+        jComboBoxLogging.setSelectedIndex(0);
+        applyLevelStyle(jComboBoxLogging, entry.record.getLevel());
+    }
+
+
+    private static void applyLevelStyle(java.awt.Component c, Level level) {
+        if (Level.SEVERE.intValue() <= level.intValue()) {
+            c.setForeground(java.awt.Color.RED);
+            c.setFont(c.getFont().deriveFont(Font.PLAIN));
+        } else if (Level.FINE.intValue() >= level.intValue()) {
+            c.setForeground(java.awt.Color.DARK_GRAY);
+            c.setFont(c.getFont().deriveFont(Font.ITALIC));
+        } else {
+            c.setForeground(java.awt.Color.BLACK);
+            c.setFont(c.getFont().deriveFont(Font.PLAIN));
+        }
+    }
+
+
+    // Called when the panel is removed, e.g. when another tournament is opened
+    @Override
+    public void removeNotify() {
+        if (logHandler != null) {
+            Logger.getLogger("").removeHandler(logHandler);
+            logHandler = null;
+        }
+        super.removeNotify();
+    }
+
+
+
+    private void installAnyFormatter(JSpinner spinner) {
+        JFormattedTextField tf = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
+
+        NumberFormatter fmt = new NumberFormatter(new DecimalFormat("#0")) {
+            @Override
+            public String valueToString(Object value) throws ParseException {
+                if (value instanceof Number && ((Number) value).intValue() == 0) return "any";
+                return super.valueToString(value);
+            }
+            @Override
+            public Object stringToValue(String text) throws ParseException {
+                if (text == null || text.isBlank() || text.trim().equalsIgnoreCase("any")) return 0;
+                return super.stringToValue(text.trim());
+            }
+        };
+        fmt.setValueClass(Integer.class);
+        fmt.setMinimum(0);
+        fmt.setMaximum(65535);
+        fmt.setAllowsInvalid(true);        // otherwise typing the letters of "any" is blocked
+        fmt.setCommitsOnValidEdit(false);  // commit on Enter / focus loss, not per keystroke
+
+        tf.setFormatterFactory(new DefaultFormatterFactory(fmt));
+    }    
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -143,6 +446,11 @@ public class ServerPanel extends javax.swing.JPanel {
         jButtonLivetickerProperties = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         jComboBoxInterval = new javax.swing.JComboBox();
+        jLabel10 = new javax.swing.JLabel();
+        jComboBoxServer = new javax.swing.JComboBox<>();
+        jLabel11 = new javax.swing.JLabel();
+        jSpinnerPort = new javax.swing.JSpinner();
+        jTextFieldPort = new javax.swing.JTextField();
         jPanelGroups = new javax.swing.JPanel();
         jPanel20 = new javax.swing.JPanel();
         jComboBoxEvent = new javax.swing.JComboBox();
@@ -220,10 +528,14 @@ public class ServerPanel extends javax.swing.JPanel {
         jTextFieldBundleName = new javax.swing.JTextField();
         jCheckBoxBundle = new javax.swing.JCheckBox();
         jCheckBoxFtpDebug = new javax.swing.JCheckBox();
+        jPanel1 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        jComboBoxLogging = new javax.swing.JComboBox();
+        jButtonStart = new javax.swing.JButton();
         jProgressBar = new javax.swing.JProgressBar();
         jButtonView = new javax.swing.JButton();
-        jButtonStart = new javax.swing.JButton();
         jButtonOpen = new javax.swing.JButton();
+        jButtonClear = new javax.swing.JButton();
 
         setMinimumSize(new java.awt.Dimension(470, 500));
 
@@ -306,7 +618,7 @@ public class ServerPanel extends javax.swing.JPanel {
                                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(jPanel16Layout.createSequentialGroup()
                                                 .addComponent(jLabel15)
-                                                .addGap(0, 0, Short.MAX_VALUE))
+                                                .addGap(0, 98, Short.MAX_VALUE))
                                             .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                                 .addGroup(jPanel16Layout.createSequentialGroup()
@@ -316,17 +628,18 @@ public class ServerPanel extends javax.swing.JPanel {
                                 .addComponent(jLabel9)
                                 .addGap(61, 61, 61)))
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.DEFAULT_SIZE, 348, Short.MAX_VALUE)
-                            .addComponent(jTextFieldDescription)
+                            .addComponent(jTextFieldDescription, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
                             .addComponent(jTextFieldTournamentUrl)
                             .addComponent(jTextFieldNewsUrl)
-                            .addComponent(jTextFieldUserConfig)
                             .addGroup(jPanel16Layout.createSequentialGroup()
                                 .addComponent(jRadioButtonFlagTypeNone)
                                 .addGap(18, 18, 18)
                                 .addComponent(jRadioButtonFlagTypeNation)
                                 .addGap(18, 18, 18)
-                                .addComponent(jRadioButtonFlagTypeRegion))))
+                                .addComponent(jRadioButtonFlagTypeRegion)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jTextFieldTitle)
+                            .addComponent(jTextFieldUserConfig)))
                     .addGroup(jPanel16Layout.createSequentialGroup()
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel16)
@@ -381,21 +694,63 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jLabel10.setText("HTTP Server");
+
+        jComboBoxServer.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "localhost", "any" }));
+        jComboBoxServer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxServerActionPerformed(evt);
+            }
+        });
+
+        jLabel11.setText("Port");
+
+        jSpinnerPort.setModel(new javax.swing.SpinnerNumberModel(0, 0, 65535, 1));
+        jSpinnerPort.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                jSpinnerPortStateChanged(evt);
+            }
+        });
+
+        jTextFieldPort.setEditable(false);
+
         javax.swing.GroupLayout jPanelSettingsLayout = new javax.swing.GroupLayout(jPanelSettings);
         jPanelSettings.setLayout(jPanelSettingsLayout);
         jPanelSettingsLayout.setHorizontalGroup(
             jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSettingsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanelSettingsLayout.createSequentialGroup()
+                        .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(jPanelSettingsLayout.createSequentialGroup()
+                        .addGap(6, 6, 6)
+                        .addComponent(jLabel10)
+                        .addGap(27, 27, 27)
+                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         jPanelSettingsLayout.setVerticalGroup(
             jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanelSettingsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(220, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel10)
+                    .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel11)
+                        .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(113, Short.MAX_VALUE))
         );
 
         jTabbedPane.addTab(bundle.getString("Settings"), jPanelSettings); // NOI18N
@@ -459,7 +814,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jCheckBoxIncludePlayedGroups)
-                    .addComponent(jComboBoxEvent, 0, 419, Short.MAX_VALUE)
+                    .addComponent(jComboBoxEvent, 0, 426, Short.MAX_VALUE)
                     .addGroup(jPanel20Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -476,7 +831,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(jComboBoxEvent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 273, Short.MAX_VALUE)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)
                 .addGap(16, 16, 16)
                 .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
@@ -547,14 +902,14 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addComponent(jButtonReportsEnable)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonReportsDisable))
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanelListsLayout.setVerticalGroup(
             jPanelListsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelListsLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 149, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(jPanelListsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
@@ -653,7 +1008,7 @@ public class ServerPanel extends javax.swing.JPanel {
                             .addComponent(jCheckBoxBundle)
                             .addComponent(jCheckBoxPassiveMode, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE))
                         .addComponent(jTextFieldHost)))
-                .addContainerGap(24, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
         );
 
         jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jCheckBoxFtpDebug, jCheckBoxPassiveMode});
@@ -706,10 +1061,17 @@ public class ServerPanel extends javax.swing.JPanel {
             .addGroup(jPanelFtpLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(201, Short.MAX_VALUE))
+                .addContainerGap(122, Short.MAX_VALUE))
         );
 
         jTabbedPane.addTab(bundle.getString("Ftp"), jPanelFtp); // NOI18N
+
+        jButtonStart.setText(bundle.getString("Start")); // NOI18N
+        jButtonStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonStartActionPerformed(evt);
+            }
+        });
 
         jButtonView.setText(bundle.getString("View")); // NOI18N
         jButtonView.setToolTipText(bundle.getString("View with external browser")); // NOI18N
@@ -720,19 +1082,72 @@ public class ServerPanel extends javax.swing.JPanel {
             }
         });
 
-        jButtonStart.setText(bundle.getString("Start")); // NOI18N
-        jButtonStart.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButtonStartActionPerformed(evt);
-            }
-        });
-
         jButtonOpen.setText(bundle.getString("Open")); // NOI18N
         jButtonOpen.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButtonOpenActionPerformed(evt);
             }
         });
+
+        jButtonClear.setText(bundle.getString("Clear")); // NOI18N
+        jButtonClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonClearActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
+        jPanel3.setLayout(jPanel3Layout);
+        jPanel3Layout.setHorizontalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jButtonStart)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonView)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonOpen))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(jComboBoxLogging, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+        );
+        jPanel3Layout.setVerticalGroup(
+            jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButtonStart)
+                    .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jButtonView)
+                        .addComponent(jButtonOpen)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBoxLogging, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonClear))
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -741,15 +1156,8 @@ public class ServerPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButtonStart)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonView)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonOpen)))
+                    .addComponent(jTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -757,168 +1165,17 @@ public class ServerPanel extends javax.swing.JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jTabbedPane)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButtonView)
-                        .addComponent(jButtonOpen))
-                    .addComponent(jButtonStart)
-                    .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
         jTabbedPane.getAccessibleContext().setAccessibleName(bundle.getString("Settings")); // NOI18N
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButtonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStartActionPerformed
-        if (!webGenerator.isRunning()) {
-            webGenerator.setFtpHost(jTextFieldHost.getText());
-            webGenerator.setFtpDirectory(jTextFieldDir.getText());
-            webGenerator.setFtpUser(jTextFieldUser.getText().strip());
-            webGenerator.setFtpPassword(jPasswordFieldPwd.getText());
-            webGenerator.setFtpBundleName(jTextFieldBundleName.getText());
-            webGenerator.setTitle(jTextFieldTitle.getText());
-            webGenerator.setDescription(jTextFieldDescription.getText());
-            webGenerator.setTournamentUrl(jTextFieldTournamentUrl.getText());
-            webGenerator.setNewsUrl(jTextFieldNewsUrl.getText());
-            webGenerator.setUserConfig(jTextFieldUserConfig.getText());
-            webGenerator.setFlagType(FlagType.valueOf(buttonGroupFlags.getSelection().getActionCommand()));
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
-                if (webGenerator.isRunning()) {
-                    webGenerator.stop();
-                    jButtonStart.setText(bundle.getString("Start"));
-                    jProgressBar.setStringPainted(false);
-                } else {
-                    webGenerator.setInterval((RefreshInterval) jComboBoxInterval.getSelectedItem());
-                    if (webGenerator.start()) {
-                        jButtonStart.setText(bundle.getString("Stop"));
-                        jProgressBar.setStringPainted(true);
-                    }
-                }
-            }
-        }).start();
-    }//GEN-LAST:event_jButtonStartActionPerformed
-
     private void jCheckBoxFtpDebugActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxFtpDebugActionPerformed
         webGenerator.setFtpDebug(jCheckBoxFtpDebug.isSelected());
     }//GEN-LAST:event_jCheckBoxFtpDebugActionPerformed
-
-    private void jButtonViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewActionPerformed
-        try {
-            try {
-                if (httpServer == null) {
-                    httpServer = HttpServer.create(new InetSocketAddress(0), 0);
-                    
-                    httpServer.createContext("/settings", exchange -> {
-                        try (exchange) {
-                            File xml = new File(webGenerator.getIndexXmlFile());
-                            File xsl = new File(WebGen.templateDir, "webgensettings.xsl");
-
-                            TransformerFactory tf = TransformerFactory.newInstance();
-                            tf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-                            Templates templates = tf.newTemplates(new StreamSource(xsl));
-
-                            ByteArrayOutputStream out = new ByteArrayOutputStream();
-                            // Read the file on every request, so you always see the current state
-                            templates.newTransformer().transform(new StreamSource(xml), new StreamResult(out));
-                            byte[] html = out.toByteArray();
-                            exchange.getResponseHeaders().set("Content-Type", "text/html; charset=UTF-8");
-                            exchange.sendResponseHeaders(200, html.length);
-                            exchange.getResponseBody().write(html);
-                        } catch (Exception e) {
-                            byte[] msg = ("Error: " + e.getMessage()).getBytes("UTF-8");
-                            exchange.sendResponseHeaders(500, msg.length);
-                            exchange.getResponseBody().write(msg);
-                        }
-                    });
-                    
-                    httpServer.createContext("/", new HttpHandler() {
-                        @Override
-                        public void handle(HttpExchange he) throws IOException {
-                            if (!he.getRequestMethod().equals("GET")) {
-                                he.getResponseHeaders().add("Allow", "GET");
-                                sendErrorResponse(he, 405, "Method not allowed");
-
-                                return;
-                            }
-
-                            String uri = he.getRequestURI().getPath();
-
-                            // Don't escape
-                            if (uri.contains("/../")) {
-                                sendErrorResponse(he, 404, "Not found");
-                            }
-
-                            String path = new File(webGenerator.getIndexHtmlFile()).getParent();
-
-                            File file = new File(path, uri);
-
-                            if (!file.exists()) {
-                                sendErrorResponse(he, 404, "Not found");
-
-                                return;
-                            } else if (file.isDirectory()) {
-
-                                File index = new File(file, "index.html");
-                                if (!index.exists()) {
-                                    sendErrorResponse(he, 404, "Not found");
-
-                                    return;
-                                }
-
-                                file = index;
-                            }
-
-                            String mime = null;
-
-                            // Sometimes probeContentType will return text/plain for html and js files
-                            if (file.getName().endsWith(".html"))
-                                mime = "text/html";
-                            else if (file.getName().endsWith(".js"))
-                                mime = "text/javascript";
-                            else
-                                mime = Files.probeContentType(file.toPath());
-
-                            he.getResponseHeaders().add("Content-Type", mime == null ? "application/octet-stream" : mime);
-
-                            he.sendResponseHeaders(200, file.length());
-                            byte b[] = new byte[0x10000];
-                            int  count;
-                            try (FileInputStream fis = new FileInputStream(file)) {
-                                while ( (count = fis.read(b)) >= 0 )
-                                    he.getResponseBody().write(b, 0, count);
-                            }
-                            he.getResponseBody().close();
-                        }
-
-                        private void sendErrorResponse(HttpExchange he, int code, String message) {
-                            try {
-                                byte[] response = message.getBytes(UTF8);
-                                he.sendResponseHeaders(code, response.length);
-                                he.getResponseBody().write(response);                                
-                                he.getResponseBody().close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    });
-                
-                    httpServer.start();
-                }
-                java.awt.Desktop.getDesktop().browse(new java.net.URI("http://localhost:" + httpServer.getAddress().getPort() + "/index.html"));
-            } catch (IOException ex) {
-                Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
-                httpServer = null;
-            }
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-    }//GEN-LAST:event_jButtonViewActionPerformed
 
     private void jCheckBoxPassiveModeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxPassiveModeActionPerformed
         webGenerator.setFtpPassive(jCheckBoxPassiveMode.isSelected());
@@ -1032,6 +1289,30 @@ public class ServerPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
 
+    private void jComboBoxServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxServerActionPerformed
+        String ip = jComboBoxServer.getSelectedItem().toString();
+        if (ip.equals("localhost"))
+            ip = "127.0.0.1";
+        else if (ip.equals("any"))
+            ip = "0.0.0.0";
+        
+        if (httpServer != null)
+        {
+            if (httpServer.getAddress().getAddress().getHostAddress().equals(ip))
+                return;
+        }
+        
+        startHttp();
+    }//GEN-LAST:event_jComboBoxServerActionPerformed
+
+    private void jSpinnerPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerPortStateChanged
+        // No change if we value is any
+        if (((Number) jSpinnerPort.getValue()).intValue() == 0)
+            return;
+        
+        startHttp();
+    }//GEN-LAST:event_jSpinnerPortStateChanged
+
     private void jButtonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenActionPerformed
         if (Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
             try {
@@ -1043,9 +1324,65 @@ public class ServerPanel extends javax.swing.JPanel {
         }
     }//GEN-LAST:event_jButtonOpenActionPerformed
 
+    private void jButtonViewActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonViewActionPerformed
+        try {
+            if (httpServer == null) {
+                startHttp();
+            }
+            java.awt.Desktop.getDesktop().browse(
+                new java.net.URI("http://" +
+                    httpServer.getAddress().getAddress() + ":" +
+                    httpServer.getAddress().getPort() +
+                    "/index.html"));
+        } catch (IOException ex) {
+            Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException ex) {
+            System.getLogger(ServerPanel.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+        }
+    }//GEN-LAST:event_jButtonViewActionPerformed
+
+    private void jButtonStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonStartActionPerformed
+        if (!webGenerator.isRunning()) {
+            webGenerator.setFtpHost(jTextFieldHost.getText());
+            webGenerator.setFtpDirectory(jTextFieldDir.getText());
+            webGenerator.setFtpUser(jTextFieldUser.getText().strip());
+            webGenerator.setFtpPassword(jPasswordFieldPwd.getText());
+            webGenerator.setFtpBundleName(jTextFieldBundleName.getText());
+            webGenerator.setTitle(jTextFieldTitle.getText());
+            webGenerator.setDescription(jTextFieldDescription.getText());
+            webGenerator.setTournamentUrl(jTextFieldTournamentUrl.getText());
+            webGenerator.setNewsUrl(jTextFieldNewsUrl.getText());
+            webGenerator.setUserConfig(jTextFieldUserConfig.getText());
+            webGenerator.setFlagType(FlagType.valueOf(buttonGroupFlags.getSelection().getActionCommand()));
+        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
+                if (webGenerator.isRunning()) {
+                    webGenerator.stop();
+                    jButtonStart.setText(bundle.getString("Start"));
+                    jProgressBar.setStringPainted(false);
+                } else {
+                    webGenerator.setInterval((RefreshInterval) jComboBoxInterval.getSelectedItem());
+                    if (webGenerator.start()) {
+                        jButtonStart.setText(bundle.getString("Stop"));
+                        jProgressBar.setStringPainted(true);
+                    }
+                }
+            }
+        }).start();
+    }//GEN-LAST:event_jButtonStartActionPerformed
+
+    private void jButtonClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearActionPerformed
+        ((javax.swing.DefaultComboBoxModel) jComboBoxLogging.getModel()).removeAllElements();
+        applyLevelStyle(jComboBoxLogging, Level.INFO);
+    }//GEN-LAST:event_jButtonClearActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupFlags;
+    private javax.swing.JButton jButtonClear;
     private javax.swing.JButton jButtonGroupAuto;
     private javax.swing.JButton jButtonGroupDisable;
     private javax.swing.JButton jButtonGroupEnable;
@@ -1063,7 +1400,11 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBoxSftp;
     private javax.swing.JComboBox jComboBoxEvent;
     private javax.swing.JComboBox jComboBoxInterval;
+    private javax.swing.JComboBox jComboBoxLogging;
+    private javax.swing.JComboBox<String> jComboBoxServer;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
@@ -1078,8 +1419,10 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelBundleName;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel20;
+    private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanelFtp;
     private javax.swing.JPanel jPanelGroups;
@@ -1093,6 +1436,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JRadioButton jRadioButtonFlagTypeRegion;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JSpinner jSpinnerPort;
     private javax.swing.JTabbedPane jTabbedPane;
     private javax.swing.JTable jTableGroups;
     private javax.swing.JTable jTableReports;
@@ -1101,6 +1445,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JTextField jTextFieldDir;
     private javax.swing.JTextField jTextFieldHost;
     private javax.swing.JTextField jTextFieldNewsUrl;
+    private javax.swing.JTextField jTextFieldPort;
     private javax.swing.JTextField jTextFieldTitle;
     private javax.swing.JTextField jTextFieldTournamentUrl;
     private javax.swing.JTextField jTextFieldUser;

@@ -48,44 +48,6 @@ public class MainFrame extends javax.swing.JFrame {
             WebGen.templateDir = template.getPath();
     }
 
-    private class ComboBoxLogRecord  {
-        LogRecord record;
-        long      threadId;
-
-        public ComboBoxLogRecord(LogRecord record) {
-            this.record = record;
-            threadId = Thread.currentThread().getId();
-        }
-
-        @Override
-        public String toString() {
-            String date = java.text.DateFormat.getDateTimeInstance().format(new java.util.Date(record.getMillis()));
-            String message;
-
-            if (record.getMessage() != null)
-                message = (new java.util.logging.SimpleFormatter()).formatMessage(record);
-            else if (record.getThrown() != null)
-                message = record.getThrown().getClass().getName() + ": " + record.getThrown().getLocalizedMessage();
-            else
-                message = record.toString();
-            
-            String server = "";
-            
-            if (jServerPane.getTabCount() > 0) {
-                if (WebGen.threadIdMap.containsKey(threadId))
-                    server = WebGen.threadIdMap.get(threadId).getServer();
-                else
-                    server = "All";
-            } else {
-                server = "All";
-            }
-            
-            return server + ": [" + date + "] " + message;
-        }
-    }
-
-    final private List<ComboBoxLogRecord> logList = new java.util.ArrayList<>();
-    
     /** Creates new form MainFrame */
     public MainFrame() throws IOException {
         initComponents();
@@ -99,87 +61,8 @@ public class MainFrame extends javax.swing.JFrame {
         label.setHorizontalAlignment(javax.swing.JLabel.CENTER);
         jServerPane.add(bundle.getString("<new>"), label);
 
-        Logger.getLogger("").addHandler(new Handler() {
-
-            // synchronized, da merere gleichzeitig drauf zugreifen koennten
-            @Override
-            synchronized public void publish(LogRecord record) {
-                if (record.getMessage() == null && record.getThrown() == null)
-                    return;
-
-                record.setResourceBundle(bundle);
-                
-                synchronized (logList) {
-                    logList.add(0, new ComboBoxLogRecord(record));
-                
-                    while (logList.size() > 200)
-                        logList.remove(200);
-                }
-                
-                // Check ob es den aktuellen Tab betrifft, wenn nicht kann man hier aufhoeren
-                long threadId = Thread.currentThread().getId();
-                WebGen currentServer = WebGen.threadIdMap.get(threadId);
-                if (currentServer != null && jServerPane.indexOfTab(currentServer.getServer()) != jServerPane.getSelectedIndex())
-                    return;
-                                        
-                javax.swing.DefaultComboBoxModel model = (javax.swing.DefaultComboBoxModel) jComboBoxLogging.getModel();
-                model.insertElementAt(new ComboBoxLogRecord(record), 0);
-
-                while (model.getSize() > 100)
-                    model.removeElementAt(model.getSize() - 1);
-
-                jComboBoxLogging.setSelectedIndex(0);
-                
-                if (Level.SEVERE.intValue() <= record.getLevel().intValue()) {
-                    jComboBoxLogging.setForeground(java.awt.Color.RED);
-                    jComboBoxLogging.setFont(jComboBoxLogging.getFont().deriveFont(0));                            
-                } else if (Level.FINE.intValue() >= record.getLevel().intValue()) {
-                    jComboBoxLogging.setForeground(java.awt.Color.DARK_GRAY);
-                    jComboBoxLogging.setFont(jComboBoxLogging.getFont().deriveFont(java.awt.Font.ITALIC));                                                
-                } else {
-                    jComboBoxLogging.setForeground(java.awt.Color.BLACK);
-                    jComboBoxLogging.setFont(jComboBoxLogging.getFont().deriveFont(0));                                                
-                }
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() throws SecurityException {
-            }
-
-        });
-
 
         Logger.getLogger("de.webgen").setLevel(Level.FINE);
-
-        jComboBoxLogging.setRenderer(new javax.swing.DefaultListCellRenderer() {
-
-            @Override
-            public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-                if (value == null)
-                    return c;
-
-                LogRecord record = ((ComboBoxLogRecord) value).record;
-
-                if (Level.SEVERE.intValue() <= record.getLevel().intValue()) {
-                    c.setForeground(java.awt.Color.RED);
-                    c.setFont(c.getFont().deriveFont(0));
-                } else if (Level.FINE.intValue() >= record.getLevel().intValue()) {
-                    c.setForeground(java.awt.Color.DARK_GRAY);
-                    c.setFont(c.getFont().deriveFont(java.awt.Font.ITALIC));
-                } else {
-                    c.setForeground(java.awt.Color.BLACK);
-                    c.setFont(c.getFont().deriveFont(0));
-                }
-
-                return c;
-            }
-        });
 
         Ini ini = new Ini(WebGen.iniFile);
 
@@ -284,7 +167,6 @@ public class MainFrame extends javax.swing.JFrame {
         tournamentLabel = new javax.swing.JLabel();
         tournamentTextField = new javax.swing.JTextField();
         jServerPane = new javax.swing.JTabbedPane();
-        jComboBoxLogging = new javax.swing.JComboBox();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenuTournment = new javax.swing.JMenu();
         jMenuItemAdd = new javax.swing.JMenuItem();
@@ -499,19 +381,15 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jServerPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)
-                    .addComponent(jComboBoxLogging, javax.swing.GroupLayout.Alignment.LEADING, 0, 450, Short.MAX_VALUE))
+                .addComponent(jServerPane, javax.swing.GroupLayout.DEFAULT_SIZE, 450, Short.MAX_VALUE)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jServerPane, javax.swing.GroupLayout.DEFAULT_SIZE, 424, Short.MAX_VALUE)
-                .addGap(18, 18, 18)
-                .addComponent(jComboBoxLogging, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addComponent(jServerPane, javax.swing.GroupLayout.DEFAULT_SIZE, 423, Short.MAX_VALUE)
+                .addGap(47, 47, 47))
         );
 
         pack();
@@ -649,46 +527,7 @@ public class MainFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowClosing
 
     private void jServerPaneStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jServerPaneStateChanged
-        int idx = jServerPane.getSelectedIndex();
-        if (idx == -1)
-            return;
-        
-        String server = jServerPane.getTitleAt(idx);
-        
-        javax.swing.DefaultComboBoxModel model = (javax.swing.DefaultComboBoxModel) jComboBoxLogging.getModel();
-        model.removeAllElements();
-        
-        synchronized (logList) {
-            for (ComboBoxLogRecord record : logList) {
-                if (!WebGen.threadIdMap.containsKey(record.threadId))
-                    model.addElement(record);
-                else if (WebGen.threadIdMap.get(record.threadId).getServer().equals(server))
-                    model.addElement(record);
-            }
-        }
-        
-        while (model.getSize() > 100)
-            model.removeElementAt(model.getSize() - 1);
-
-        if (model.getSize() == 0)
-            return;
-        
-        jComboBoxLogging.setSelectedIndex(0);
-
-        ComboBoxLogRecord record = (ComboBoxLogRecord) model.getElementAt(0);
-        if (record == null)
-            return;
-        
-        if (Level.SEVERE.intValue() <= record.record.getLevel().intValue()) {
-            jComboBoxLogging.setForeground(java.awt.Color.RED);
-            jComboBoxLogging.setFont(jComboBoxLogging.getFont().deriveFont(0));                            
-        } else if (Level.FINE.intValue() >= record.record.getLevel().intValue()) {
-            jComboBoxLogging.setForeground(java.awt.Color.DARK_GRAY);
-            jComboBoxLogging.setFont(jComboBoxLogging.getFont().deriveFont(java.awt.Font.ITALIC));                                                
-        } else {
-            jComboBoxLogging.setForeground(java.awt.Color.BLACK);
-            jComboBoxLogging.setFont(jComboBoxLogging.getFont().deriveFont(0));                                                
-        }
+        // Logging is shown per server tab, see ServerPanel
     }//GEN-LAST:event_jServerPaneStateChanged
 
     private void jMenuItemAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItemAddActionPerformed
@@ -886,7 +725,6 @@ public class MainFrame extends javax.swing.JFrame {
     private javax.swing.JCheckBox authtypeCheckBox;
     private javax.swing.JLabel databaseLabel;
     private javax.swing.JTextField databaseTextField;
-    private javax.swing.JComboBox jComboBoxLogging;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenu jMenuHelp;
     private javax.swing.JMenuItem jMenuItemAbout;
