@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 import com.sun.net.httpserver.Filter;
 import java.awt.Desktop;
 import java.io.ByteArrayOutputStream;
@@ -121,6 +123,13 @@ public class ServerPanel extends javax.swing.JPanel {
         jTextFieldUserConfig.setText(webGenerator.getUserConfig());
         jCheckBoxLivtickerEnabled.setSelected(webGenerator.getLivetickerEnabled());
         jTextFieldNewsUrl.setText(webGenerator.getNewsUrl());
+        jTextFieldCertificate.setText(webGenerator.getCertificateFile());
+        markCertificateField();
+        jTextFieldCertificate.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override public void insertUpdate(javax.swing.event.DocumentEvent e)  { markCertificateField(); }
+            @Override public void removeUpdate(javax.swing.event.DocumentEvent e)  { markCertificateField(); }
+            @Override public void changedUpdate(javax.swing.event.DocumentEvent e) { markCertificateField(); }
+        });
         
         jRadioButtonFlagTypeNone.setActionCommand("None");
         jRadioButtonFlagTypeNation.setActionCommand("Nation");
@@ -175,6 +184,24 @@ public class ServerPanel extends javax.swing.JPanel {
     }
     
     
+    // The well-known HTTPS port uses TLS, all other ports plain HTTP
+    private static final int HTTPS_PORT = 443;
+
+    // URL of a page on the running server, for the browser on this computer
+    private String serverUrl(String path) {
+        InetAddress addr = httpServer.getAddress().getAddress();
+        // Bound to all interfaces or loopback: localhost, which is also in the certificate
+        String host = addr.isAnyLocalAddress() || addr.isLoopbackAddress() ? "localhost" : addr.getHostAddress();
+        if (host.contains(":"))
+            host = "[" + host + "]";       // IPv6
+
+        boolean https = httpServer instanceof HttpsServer;
+        int port = httpServer.getAddress().getPort();
+        boolean defaultPort = https ? port == 443 : port == 80;
+
+        return (https ? "https://" : "http://") + host + (defaultPort ? "" : ":" + port) + path;
+    }
+
     void startHttp() {
         if (httpServer != null)
             stopHttp();
@@ -188,9 +215,22 @@ public class ServerPanel extends javax.swing.JPanel {
         int port = ((Number) jSpinnerPort.getValue()).intValue();
         
         try {
-            httpServer = HttpServer.create(new InetSocketAddress(ip, port), 0);
-        } catch (IOException ex) {
-               System.getLogger(ServerPanel.class.getName()).log(System.Logger.Level.ERROR, (String) null, ex);
+            InetSocketAddress address = new InetSocketAddress(ip, port);
+            if (port == HTTPS_PORT) {
+                // HTTPS with the certificate from the settings. Load it before binding the port,
+                // so a missing or broken certificate doesn't leave a half started server
+                javax.net.ssl.SSLContext ssl = ServerKeystore.createSslContext(
+                        new File(webGenerator.getCertificateFile()),
+                        ServerKeystore.password(webGenerator.getDatabaseName()));
+                HttpsServer https = HttpsServer.create(address, 0);
+                https.setHttpsConfigurator(new HttpsConfigurator(ssl));
+                httpServer = https;
+            } else {
+                httpServer = HttpServer.create(address, 0);
+            }
+        } catch (IOException | java.security.GeneralSecurityException ex) {
+               Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE,
+                       "Cannot start " + (port == HTTPS_PORT ? "HTTPS" : "HTTP") + " server: " + ex.getMessage(), ex);
                httpServer = null;
                jTextFieldPort.setText("");
                
@@ -266,6 +306,22 @@ public class ServerPanel extends javax.swing.JPanel {
                 String path = new File(webGenerator.getIndexHtmlFile()).getParent();
 
                 File file = new File(path, uri);
+
+                // Only files inside the server directory: on Windows an encoded backslash ("..%5C")
+                // would otherwise get past the "/../" check above
+                File canonical = file.getCanonicalFile();
+                if (!canonical.toPath().startsWith(new File(path).getCanonicalFile().toPath())) {
+                    sendErrorResponse(he, 404, "Not found");
+
+                    return;
+                }
+
+                // Keys are never delivered, wherever they are
+                if (ServerKeystore.isKeystoreFile(canonical.getName())) {
+                    sendErrorResponse(he, 404, "Not found");
+
+                    return;
+                }
 
                 // index.xml (settings incl. FTP account) and the access logs are in the same directory,
                 // but must not be downloadable from other hosts
@@ -647,6 +703,10 @@ public class ServerPanel extends javax.swing.JPanel {
         jLabel11 = new javax.swing.JLabel();
         jSpinnerPort = new javax.swing.JSpinner();
         jTextFieldPort = new javax.swing.JTextField();
+        jLabelCertificate = new javax.swing.JLabel();
+        jTextFieldCertificate = new javax.swing.JTextField();
+        jButtonCertificate = new javax.swing.JButton();
+        jButtonGenerateCertificate = new javax.swing.JButton();
         jPanelGroups = new javax.swing.JPanel();
         jPanel20 = new javax.swing.JPanel();
         jComboBoxEvent = new javax.swing.JComboBox();
@@ -814,7 +874,7 @@ public class ServerPanel extends javax.swing.JPanel {
                                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(jPanel16Layout.createSequentialGroup()
                                                 .addComponent(jLabel15)
-                                                .addGap(0, 98, Short.MAX_VALUE))
+                                                .addGap(0, 52, Short.MAX_VALUE))
                                             .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                                 .addGroup(jPanel16Layout.createSequentialGroup()
@@ -824,23 +884,24 @@ public class ServerPanel extends javax.swing.JPanel {
                                 .addComponent(jLabel9)
                                 .addGap(61, 61, 61)))
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldDescription, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                            .addComponent(jTextFieldDescription)
                             .addComponent(jTextFieldTournamentUrl)
                             .addComponent(jTextFieldNewsUrl)
                             .addGroup(jPanel16Layout.createSequentialGroup()
+                                .addGap(129, 129, 129)
                                 .addComponent(jRadioButtonFlagTypeNone)
                                 .addGap(18, 18, 18)
                                 .addComponent(jRadioButtonFlagTypeNation)
                                 .addGap(18, 18, 18)
                                 .addComponent(jRadioButtonFlagTypeRegion)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jTextFieldTitle)
-                            .addComponent(jTextFieldUserConfig)))
+                            .addComponent(jTextFieldUserConfig, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(jPanel16Layout.createSequentialGroup()
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel16)
                             .addComponent(jLabel7))
-                        .addGap(41, 41, 41)
+                        .addGap(65, 65, 65)
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel16Layout.createSequentialGroup()
                                 .addComponent(jCheckBoxLivtickerEnabled)
@@ -911,6 +972,36 @@ public class ServerPanel extends javax.swing.JPanel {
         jTextFieldPort.setEditable(false);
         jTextFieldPort.setColumns(5);
 
+        jLabelCertificate.setText("Certificate");
+
+        jTextFieldCertificate.setToolTipText("Keystore (PKCS#12: .p12 / .pfx) with certificate and private key for HTTPS");
+        jTextFieldCertificate.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                jTextFieldCertificateFocusLost(evt);
+            }
+        });
+        jTextFieldCertificate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldCertificateActionPerformed(evt);
+            }
+        });
+
+        jButtonCertificate.setText("...");
+        jButtonCertificate.setToolTipText("Choose the keystore file");
+        jButtonCertificate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonCertificateActionPerformed(evt);
+            }
+        });
+
+        jButtonGenerateCertificate.setText("Generate");
+        jButtonGenerateCertificate.setToolTipText("Create a new key and self-signed certificate in this file");
+        jButtonGenerateCertificate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonGenerateCertificateActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanelSettingsLayout = new javax.swing.GroupLayout(jPanelSettings);
         jPanelSettings.setLayout(jPanelSettingsLayout);
         jPanelSettingsLayout.setHorizontalGroup(
@@ -919,20 +1010,31 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelSettingsLayout.createSequentialGroup()
-                        .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(jPanelSettingsLayout.createSequentialGroup()
+                        .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanelSettingsLayout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jLabelCertificate)
+                                .addGap(37, 37, 37)
+                                .addComponent(jTextFieldCertificate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButtonCertificate)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButtonGenerateCertificate, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
+                                .addGap(13, 13, 13)))
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSettingsLayout.createSequentialGroup()
                         .addGap(6, 6, 6)
                         .addComponent(jLabel10)
-                        .addGap(27, 27, 27)
+                        .addGap(49, 49, 49)
                         .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel11)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jTextFieldPort)
+                        .addGap(19, 19, 19))))
         );
         jPanelSettingsLayout.setVerticalGroup(
             jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -947,7 +1049,13 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addComponent(jLabel11)
                         .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(113, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelCertificate)
+                    .addComponent(jTextFieldCertificate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonCertificate)
+                    .addComponent(jButtonGenerateCertificate))
+                .addContainerGap(84, Short.MAX_VALUE))
         );
 
         jTabbedPane.addTab(bundle.getString("Settings"), jPanelSettings); // NOI18N
@@ -1527,11 +1635,9 @@ public class ServerPanel extends javax.swing.JPanel {
             if (httpServer == null) {
                 startHttp();
             }
-            java.awt.Desktop.getDesktop().browse(
-                new java.net.URI("http://" +
-                    httpServer.getAddress().getAddress() + ":" +
-                    httpServer.getAddress().getPort() +
-                    "/index.html"));
+            if (httpServer == null)
+                return;     // could not start, the reason is in the log
+            java.awt.Desktop.getDesktop().browse(new java.net.URI(serverUrl("/index.html")));
         } catch (IOException ex) {
             Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException ex) {
@@ -1578,9 +1684,116 @@ public class ServerPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonClearActionPerformed
 
 
+    private void jTextFieldCertificateFocusLost(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextFieldCertificateFocusLost
+        commitCertificateFile();
+    }//GEN-LAST:event_jTextFieldCertificateFocusLost
+
+    private void jTextFieldCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldCertificateActionPerformed
+        commitCertificateFile();
+    }//GEN-LAST:event_jTextFieldCertificateActionPerformed
+
+    private void jButtonCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCertificateActionPerformed
+        // Start in the directory of the current file, otherwise in the server directory
+        File current = new File(jTextFieldCertificate.getText().strip());
+        File dir = current.getParentFile() != null && current.getParentFile().isDirectory()
+                ? current.getParentFile()
+                : new File(webGenerator.getIndexXmlFile()).getParentFile();
+
+        javax.swing.JFileChooser chooser = new javax.swing.JFileChooser(dir);
+        chooser.setDialogTitle("Certificate (keystore) for HTTPS");
+        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
+                "Keystore (*.p12, *.pfx, *.jks)", "p12", "pfx", "jks"));
+        if (current.isFile())
+            chooser.setSelectedFile(current);
+
+        if (chooser.showOpenDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION)
+            return;
+
+        jTextFieldCertificate.setText(chooser.getSelectedFile().getAbsolutePath());
+        commitCertificateFile();
+    }//GEN-LAST:event_jButtonCertificateActionPerformed
+
+    // Takes the path from the text field into the settings and saves index.xml if it changed
+    private void commitCertificateFile() {
+        String file = jTextFieldCertificate.getText().strip();
+        markCertificateField();
+
+        boolean changed = !file.equals(webGenerator.getCertificateFile());
+        if (changed) {
+            webGenerator.setCertificateFile(file);
+            webGenerator.storeSettings();
+        }
+
+        // HTTPS uses the certificate: restart with a new one, or start if it failed before
+        // (e.g. the file was just generated)
+        if (((Number) jSpinnerPort.getValue()).intValue() == HTTPS_PORT && (changed || httpServer == null))
+            startHttp();
+    }
+
+    // Red text if a path is entered but the file doesn't exist; "Generate" only if there is no file yet
+    private void markCertificateField() {
+        String file = jTextFieldCertificate.getText().strip();
+        boolean missing = !file.isEmpty() && !new File(file).isFile();
+        jTextFieldCertificate.setForeground(missing ? java.awt.Color.RED : javax.swing.UIManager.getColor("TextField.foreground"));
+        jButtonGenerateCertificate.setEnabled(file.isEmpty() || !new File(file).exists());
+    }
+
+    // Suggestion if no file is set: <tournament directory>/<server>.p12, outside the directory the web server delivers
+    private File defaultCertificateFile() {
+        File serverDir = new File(webGenerator.getIndexXmlFile()).getAbsoluteFile().getParentFile();
+        File dir = serverDir.getParentFile() != null ? serverDir.getParentFile() : serverDir;
+        return new File(dir, webGenerator.getServer() + ".p12");
+    }
+
+    private void jButtonGenerateCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateCertificateActionPerformed
+        String path = jTextFieldCertificate.getText().strip();
+        if (path.isEmpty()) {
+            path = defaultCertificateFile().getPath();
+            jTextFieldCertificate.setText(path);
+        }
+
+        final File file = new File(path);
+        if (file.exists()) {
+            // Only new files; to replace a certificate delete or rename the old file first
+            markCertificateField();
+            return;
+        }
+
+        jButtonGenerateCertificate.setEnabled(false);
+        setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
+
+        // keytool needs about a second, so not on the Swing thread
+        new javax.swing.SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                ServerKeystore.generate(file, ServerKeystore.password(webGenerator.getDatabaseName()));
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                setCursor(null);
+                try {
+                    get();
+                    commitCertificateFile();
+                    Logger.getLogger(ServerPanel.class.getName()).log(Level.INFO, "Certificate generated: {0}", file.getPath());
+                } catch (Exception e) {
+                    Throwable cause = e instanceof java.util.concurrent.ExecutionException && e.getCause() != null ? e.getCause() : e;
+                    Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, "Cannot generate certificate", cause);
+                    javax.swing.JOptionPane.showMessageDialog(ServerPanel.this,
+                            "Cannot generate the certificate:\n" + cause.getMessage(),
+                            "Certificate", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+                markCertificateField();
+            }
+        }.execute();
+    }//GEN-LAST:event_jButtonGenerateCertificateActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupFlags;
+    private javax.swing.JButton jButtonCertificate;
     private javax.swing.JButton jButtonClear;
+    private javax.swing.JButton jButtonGenerateCertificate;
     private javax.swing.JButton jButtonGroupAuto;
     private javax.swing.JButton jButtonGroupDisable;
     private javax.swing.JButton jButtonGroupEnable;
@@ -1617,6 +1830,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelBundleName;
+    private javax.swing.JLabel jLabelCertificate;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel20;
@@ -1639,6 +1853,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JTable jTableGroups;
     private javax.swing.JTable jTableReports;
     private javax.swing.JTextField jTextFieldBundleName;
+    private javax.swing.JTextField jTextFieldCertificate;
     private javax.swing.JTextField jTextFieldDescription;
     private javax.swing.JTextField jTextFieldDir;
     private javax.swing.JTextField jTextFieldHost;

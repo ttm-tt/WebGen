@@ -533,6 +533,23 @@ public class WebGen {
         return props;
     }
 
+    // Keystore (PKCS#12) with the certificate for the HTTPS server, "" if not set
+    public void setCertificateFile(String file) {
+        xmlProperties.getSettings().certificate = file == null ? "" : file;
+    }
+
+    public String getCertificateFile() {
+        String file = xmlProperties.getSettings().certificate;
+        return file == null ? "" : file;
+    }
+
+    // Writes the settings to index.xml right away, e.g. after a change in the GUI
+    public void storeSettings() {
+        synchronized (xmlProperties) {
+            xmlProperties.store(getIndexXmlFile());
+        }
+    }
+
     public void setNewsUrl(String url) {
         xmlProperties.getSettings().news = url;
     }
@@ -552,6 +569,11 @@ public class WebGen {
     
     public String getTournament() {
         return tournament;
+    }
+
+    /** Name of the tournament database, "" if unknown. */
+    public String getDatabaseName() {
+        return database == null ? "" : database.getDatabaseName();
     }
     
     

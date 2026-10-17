@@ -26,6 +26,7 @@ public class XmlSettings {
         interval = Integer.decode(el.getAttribute(ATTRIBUTE_INTERVAL));
         flagType = FlagType.valueOf(getAttribute(el, ATTRIBUTE_FLAGTYPE, "None"));
         userConfig = el.getAttribute(ATTRIBUTE_USERCONFIG);
+        certificate = el.getAttribute(ATTRIBUTE_CERTIFICATE);
     }
     
     public Element write(Element el) {
@@ -39,6 +40,7 @@ public class XmlSettings {
         el.setAttribute(ATTRIBUTE_INTERVAL, Integer.toString(interval));
         el.setAttribute(ATTRIBUTE_FLAGTYPE, flagType.toString());
         el.setAttribute(ATTRIBUTE_USERCONFIG, userConfig);
+        el.setAttribute(ATTRIBUTE_CERTIFICATE, certificate == null ? "" : certificate);
         
         return el;
     }
@@ -48,6 +50,7 @@ public class XmlSettings {
     public String url;
     public String news;
     public String userConfig;
+    public String certificate = "";     // keystore (PKCS#12) with certificate and key for HTTPS
     public String ltSettings;
     public boolean ltEnabled;
     public boolean autoGroups;
@@ -64,4 +67,5 @@ public class XmlSettings {
     private static final String ATTRIBUTE_AUTOGROUPS = "AUTOGROUPS";
     private static final String ATTRIBUTE_FLAGTYPE = "FLAGTYPE";
     private static final String ATTRIBUTE_USERCONFIG = "USERCONFIG";
+    private static final String ATTRIBUTE_CERTIFICATE = "CERTIFICATE";
 }

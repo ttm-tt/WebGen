@@ -54,6 +54,7 @@ public class Database implements IDatabase {
         }
         
         String database[] = map.get("database").split("\\\\");
+        this.databaseName = database[0];
         
         StringBuilder buffer = new StringBuilder();
         buffer.append("jdbc:sqlserver://");
@@ -77,6 +78,13 @@ public class Database implements IDatabase {
         this.connectionString = buffer.toString();
     }
 
+
+    /** Name of the tournament database (without instance), e.g. for the HTTPS keystore password. */
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    private String databaseName = "";
 
     @Override
     public boolean testConnection() {
