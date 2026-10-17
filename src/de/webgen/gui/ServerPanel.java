@@ -90,7 +90,7 @@ public class ServerPanel extends javax.swing.JPanel {
         this.webGenerator = new WebGen(server, tournament, path);
         
         initComponents();
-        installAnyFormatter(jSpinnerPort);
+        installPortSpinner(jSpinnerPort);
         installLogging();
         
         jTableGroups.setModel(new GroupsTableModel());
@@ -390,29 +390,82 @@ public class ServerPanel extends javax.swing.JPanel {
 
 
 
-    private void installAnyFormatter(JSpinner spinner) {
+    // Allowed ports: 0 (any), the named well-known ports below 1024, and 1024..65535
+    private static final java.util.NavigableMap<Integer, String> NAMED_PORTS = new java.util.TreeMap<>(java.util.Map.of(
+            0,   "any",
+            80,  "http",
+            443, "https"));
+    private static final int FIRST_FREE_PORT = 1024;
+    private static final int LAST_PORT       = 65535;
+
+    private static boolean isAllowedPort(int port) {
+        return NAMED_PORTS.containsKey(port) || (port >= FIRST_FREE_PORT && port <= LAST_PORT);
+    }
+
+    // Number model whose arrows skip the ports that are not allowed: any -> http -> https -> 1024 -> 1025 ...
+    private static class PortSpinnerModel extends javax.swing.SpinnerNumberModel {
+        PortSpinnerModel(int port) {
+            super(port, 0, LAST_PORT, 1);
+        }
+
+        @Override
+        public Object getNextValue() {
+            int port = getNumber().intValue();
+            Integer named = NAMED_PORTS.higherKey(port);
+            if (port < FIRST_FREE_PORT)
+                return named != null && named < FIRST_FREE_PORT ? named : FIRST_FREE_PORT;
+            return port < LAST_PORT ? port + 1 : null;
+        }
+
+        @Override
+        public Object getPreviousValue() {
+            int port = getNumber().intValue();
+            if (port > FIRST_FREE_PORT)
+                return port - 1;
+            return NAMED_PORTS.lowerKey(port);      // null at "any": no further down
+        }
+    }
+
+    // Replaces the spinner's model and formatter: named ports are shown by name, other ports below 1024 are rejected
+    private void installPortSpinner(JSpinner spinner) {
+        int port = ((Number) spinner.getValue()).intValue();
+        spinner.setModel(new PortSpinnerModel(isAllowedPort(port) ? port : 0));
+
         JFormattedTextField tf = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
 
         NumberFormatter fmt = new NumberFormatter(new DecimalFormat("#0")) {
             @Override
             public String valueToString(Object value) throws ParseException {
-                if (value instanceof Number && ((Number) value).intValue() == 0) return "any";
+                if (value instanceof Number && NAMED_PORTS.containsKey(((Number) value).intValue()))
+                    return NAMED_PORTS.get(((Number) value).intValue());
                 return super.valueToString(value);
             }
+
             @Override
             public Object stringToValue(String text) throws ParseException {
-                if (text == null || text.isBlank() || text.trim().equalsIgnoreCase("any")) return 0;
-                return super.stringToValue(text.trim());
+                String t = text == null ? "" : text.trim();
+                if (t.isEmpty())
+                    return 0;
+                for (java.util.Map.Entry<Integer, String> e : NAMED_PORTS.entrySet())
+                    if (e.getValue().equalsIgnoreCase(t))
+                        return e.getKey();
+
+                Object value = super.stringToValue(t);
+                if (!isAllowedPort(((Number) value).intValue()))
+                    throw new ParseException("Port not allowed: " + t, 0);
+                return value;
             }
         };
         fmt.setValueClass(Integer.class);
         fmt.setMinimum(0);
-        fmt.setMaximum(65535);
-        fmt.setAllowsInvalid(true);        // otherwise typing the letters of "any" is blocked
+        fmt.setMaximum(LAST_PORT);
+        fmt.setAllowsInvalid(true);        // otherwise typing letters ("any", "http") is blocked
         fmt.setCommitsOnValidEdit(false);  // commit on Enter / focus loss, not per keystroke
 
         tf.setFormatterFactory(new DefaultFormatterFactory(fmt));
-    }    
+        tf.setColumns(5);
+        tf.setToolTipText("any, http (80), https (443) or 1024 - 65535");
+    }
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -713,6 +766,7 @@ public class ServerPanel extends javax.swing.JPanel {
         });
 
         jTextFieldPort.setEditable(false);
+        jTextFieldPort.setColumns(5);
 
         javax.swing.GroupLayout jPanelSettingsLayout = new javax.swing.GroupLayout(jPanelSettings);
         jPanelSettings.setLayout(jPanelSettingsLayout);
@@ -1306,8 +1360,9 @@ public class ServerPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jComboBoxServerActionPerformed
 
     private void jSpinnerPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerPortStateChanged
-        // No change if we value is any
-        if (((Number) jSpinnerPort.getValue()).intValue() == 0)
+        // No change if we value is any and port number is higher than n the free range
+        if ( (((Number) jSpinnerPort.getValue()).intValue() == 0) &&
+             (httpServer.getAddress().getPort() >= 49152) )
             return;
         
         startHttp();
