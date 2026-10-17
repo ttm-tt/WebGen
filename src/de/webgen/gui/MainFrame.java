@@ -55,13 +55,6 @@ public class MainFrame extends javax.swing.JFrame {
         jMenuItemOpen.setEnabled(haveTournaments());
         jMenuItemServer.setEnabled(tournament != null && !tournament.isEmpty());
         
-        javax.swing.JLabel label = new javax.swing.JLabel(bundle.getString("Open a tournament first"));
-        label.setFont(label.getFont().deriveFont(36.f));
-        label.setForeground(Color.GRAY);
-        label.setHorizontalAlignment(javax.swing.JLabel.CENTER);
-        jServerPane.add(bundle.getString("<new>"), label);
-
-
         Logger.getLogger("de.webgen").setLevel(Level.FINE);
 
         Ini ini = new Ini(WebGen.iniFile);
@@ -98,11 +91,8 @@ public class MainFrame extends javax.swing.JFrame {
             }
             
             if (jServerPane.getComponentCount() == 0) {
-                javax.swing.JLabel label = new javax.swing.JLabel(bundle.getString("Add a server first"));
-                label.setFont(label.getFont().deriveFont(36.f));
-                label.setForeground(Color.GRAY);
-                label.setHorizontalAlignment(javax.swing.JLabel.CENTER);
-                jServerPane.add(bundle.getString("<new>"), label);
+                // Clicking the text is a shortcut for Tournament / Add Server
+                jServerPane.add(bundle.getString("<new>"), createLinkPanel(bundle.getString("Add a server first"), jMenuItemServer));
             }
                 
             setTitle(MessageFormat.format(bundle.getString("WebGenerator - {0}"), tournament));
@@ -114,6 +104,12 @@ public class MainFrame extends javax.swing.JFrame {
             ini.remove("Open", "Last");
             ini.add("Open", "Last", this.tournament);
             ini.store();            
+        } else {
+            // No tournament open: shortcut to add one if none exists, otherwise to open one
+            if (haveTournaments())
+                jServerPane.add(bundle.getString("<new>"), createLinkPanel(bundle.getString("Open a tournament first"), jMenuItemOpen));
+            else
+                jServerPane.add(bundle.getString("<new>"), createLinkPanel(bundle.getString("Add a tournament first"), jMenuItemAdd));
         }
 
         pack();
@@ -121,6 +117,33 @@ public class MainFrame extends javax.swing.JFrame {
 
 
     //Legt einen neuen Server (Tab) an
+    // Big hint text, centered, that looks and works like a link: a click triggers the menu item.
+    // The label sits in a GridBagLayout panel, so only the text itself is clickable, not the whole page.
+    private javax.swing.JPanel createLinkPanel(String text, javax.swing.AbstractButton menuItem) {
+        javax.swing.JLabel label = new javax.swing.JLabel(text);
+
+        java.util.Map<java.awt.font.TextAttribute, Object> attrs = new java.util.HashMap<>(label.getFont().getAttributes());
+        attrs.put(java.awt.font.TextAttribute.SIZE, 36.f);
+        attrs.put(java.awt.font.TextAttribute.UNDERLINE, java.awt.font.TextAttribute.UNDERLINE_ON);
+        label.setFont(label.getFont().deriveFont(attrs));
+        label.setForeground(Color.GRAY);
+        label.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+        label.setToolTipText(menuItem.getText());
+
+        label.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent e) {
+                if (javax.swing.SwingUtilities.isLeftMouseButton(e) && menuItem.isEnabled())
+                    menuItem.doClick();
+            }
+        });
+
+        javax.swing.JPanel panel = new javax.swing.JPanel(new java.awt.GridBagLayout());
+        panel.add(label);
+        return panel;
+    }
+
+
     private void createServer(String server) {
         try {
             Ini ini = new Ini(WebGen.iniFile);
@@ -130,8 +153,8 @@ public class MainFrame extends javax.swing.JFrame {
                 return;
             }
             
-            // Wenn die erste ServerPane das Dummy ist (JLabel "<new>"), diese entfernen
-            if (jServerPane.getComponent(0) instanceof javax.swing.JLabel)
+            // Wenn die erste ServerPane das Dummy ist (Hinweis "<new>"), diese entfernen
+            if (jServerPane.getTabCount() > 0 && !(jServerPane.getComponent(0) instanceof ServerPanel))
                 jServerPane.remove(0);                
             
             jServerPane.add(server, new ServerPanel(server, tournament, dir.getPath()));
