@@ -957,7 +957,6 @@ public class ServerPanel extends javax.swing.JPanel {
         jTextFieldBundleName = new javax.swing.JTextField();
         jCheckBoxBundle = new javax.swing.JCheckBox();
         jCheckBoxFtpDebug = new javax.swing.JCheckBox();
-        jPanel1 = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jComboBoxLogging = new javax.swing.JComboBox();
         jButtonStart = new javax.swing.JButton();
@@ -1034,54 +1033,54 @@ public class ServerPanel extends javax.swing.JPanel {
             .addGroup(jPanel16Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel16Layout.createSequentialGroup()
+                    .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel16Layout.createSequentialGroup()
-                                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                        .addGap(10, 10, 10))
-                                    .addGroup(jPanel16Layout.createSequentialGroup()
-                                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(jPanel16Layout.createSequentialGroup()
-                                                .addComponent(jLabel15)
-                                                .addGap(0, 53, Short.MAX_VALUE))
-                                            .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                                 .addGroup(jPanel16Layout.createSequentialGroup()
-                                    .addComponent(jLabel8)
-                                    .addGap(30, 30, 30)))
+                                    .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                        .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 74, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGap(10, 10, 10))
+                                .addGroup(jPanel16Layout.createSequentialGroup()
+                                    .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(jPanel16Layout.createSequentialGroup()
+                                            .addComponent(jLabel15)
+                                            .addGap(0, 0, Short.MAX_VALUE))
+                                        .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                             .addGroup(jPanel16Layout.createSequentialGroup()
-                                .addComponent(jLabel9)
-                                .addGap(61, 61, 61)))
-                        .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldDescription)
-                            .addComponent(jTextFieldTournamentUrl)
-                            .addComponent(jTextFieldNewsUrl)
-                            .addGroup(jPanel16Layout.createSequentialGroup()
-                                .addGap(129, 129, 129)
-                                .addComponent(jRadioButtonFlagTypeNone)
-                                .addGap(18, 18, 18)
-                                .addComponent(jRadioButtonFlagTypeNation)
-                                .addGap(18, 18, 18)
-                                .addComponent(jRadioButtonFlagTypeRegion)
-                                .addGap(0, 1, Short.MAX_VALUE))
-                            .addComponent(jTextFieldUserConfig, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jTextFieldTitle, javax.swing.GroupLayout.Alignment.TRAILING)))
+                                .addComponent(jLabel8)
+                                .addGap(30, 30, 30)))
+                        .addGroup(jPanel16Layout.createSequentialGroup()
+                            .addComponent(jLabel9)
+                            .addGap(61, 61, 61)))
                     .addGroup(jPanel16Layout.createSequentialGroup()
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel16)
                             .addComponent(jLabel7))
-                        .addGap(65, 65, 65)
+                        .addGap(48, 48, 48)))
+                .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel16Layout.createSequentialGroup()
                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel16Layout.createSequentialGroup()
                                 .addComponent(jCheckBoxLivtickerEnabled)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(jButtonLivetickerProperties))
                             .addComponent(jComboBoxInterval, javax.swing.GroupLayout.PREFERRED_SIZE, 104, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jTextFieldDescription)
+                    .addComponent(jTextFieldTournamentUrl)
+                    .addComponent(jTextFieldNewsUrl)
+                    .addGroup(jPanel16Layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 128, Short.MAX_VALUE)
+                        .addComponent(jRadioButtonFlagTypeNone)
+                        .addGap(18, 18, 18)
+                        .addComponent(jRadioButtonFlagTypeNation)
+                        .addGap(18, 18, 18)
+                        .addComponent(jRadioButtonFlagTypeRegion)
+                        .addGap(0, 6, Short.MAX_VALUE))
+                    .addComponent(jTextFieldUserConfig, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jTextFieldTitle, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
         );
         jPanel16Layout.setVerticalGroup(
@@ -1186,28 +1185,28 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addGap(49, 49, 49)
+                        .addComponent(jComboBoxServer, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel17)
                             .addComponent(jLabelCertificate))
                         .addGap(59, 59, 59)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jTextFieldCertificate)
-                            .addComponent(jTextFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jTextFieldPassword)
+                            .addComponent(jTextFieldCertificate))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonCertificate)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButtonGenerateCertificate, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel10)
-                        .addGap(49, 49, 49)
-                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel11)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jTextFieldPort)))
-                .addContainerGap())
+                        .addComponent(jButtonCertificate)))
+                .addGap(12, 12, 12)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButtonGenerateCertificate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jTextFieldPort))
+                .addGap(14, 14, 14))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1240,10 +1239,8 @@ public class ServerPanel extends javax.swing.JPanel {
             .addGroup(jPanelSettingsLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanelSettingsLayout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanelSettingsLayout.setVerticalGroup(
@@ -1253,7 +1250,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(44, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane.addTab(bundle.getString("Settings"), jPanelSettings); // NOI18N
@@ -1317,7 +1314,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jCheckBoxIncludePlayedGroups)
-                    .addComponent(jComboBoxEvent, 0, 426, Short.MAX_VALUE)
+                    .addComponent(jComboBoxEvent, 0, 419, Short.MAX_VALUE)
                     .addGroup(jPanel20Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1405,7 +1402,7 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addComponent(jButtonReportsEnable)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonReportsDisable))
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 437, Short.MAX_VALUE))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanelListsLayout.setVerticalGroup(
@@ -1511,7 +1508,7 @@ public class ServerPanel extends javax.swing.JPanel {
                             .addComponent(jCheckBoxBundle)
                             .addComponent(jCheckBoxPassiveMode, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE))
                         .addComponent(jTextFieldHost)))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jPanel4Layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {jCheckBoxFtpDebug, jCheckBoxPassiveMode});
@@ -1608,16 +1605,16 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jButtonStart)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(11, 11, 11)
+                        .addComponent(jProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonView)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonOpen))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addComponent(jComboBoxLogging, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(jButtonView, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jComboBoxLogging, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButtonClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButtonOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1635,42 +1632,25 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap())
         );
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                 .addContainerGap())
+            .addGroup(layout.createSequentialGroup()
+                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jTabbedPane)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap())
+                .addGap(24, 24, 24)
+                .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         jTabbedPane.getAccessibleContext().setAccessibleName(bundle.getString("Settings")); // NOI18N
@@ -1706,41 +1686,6 @@ public class ServerPanel extends javax.swing.JPanel {
 
         model.fireTableDataChanged();
     }//GEN-LAST:event_jComboBoxEventActionPerformed
-
-    private void jComboBoxIntervalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxIntervalActionPerformed
-        RefreshInterval interval = (RefreshInterval) jComboBoxInterval.getModel().getSelectedItem();
-        jProgressBar.setMaximum(interval.getInterval());
-        webGenerator.setInterval(interval);
-    }//GEN-LAST:event_jComboBoxIntervalActionPerformed
-
-    private void jButtonLivetickerPropertiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLivetickerPropertiesActionPerformed
-        try {
-            com.google.gson.Gson gson = new com.google.gson.Gson();
-            WebGen.LivetickerProperties props = webGenerator.getLivetickerSettings();
-            if (props == null)
-                props = new WebGen.LivetickerProperties();
-            
-            PropertyPanel panel = new PropertyPanel();
-            panel.setObject(props, true, false);
-
-            int ret = javax.swing.JOptionPane.showConfirmDialog(                     
-                    this, panel, "Configuration", 
-                    javax.swing.JOptionPane.OK_CANCEL_OPTION,                     
-                    javax.swing.JOptionPane.PLAIN_MESSAGE);              
-
-            if (ret == javax.swing.JOptionPane.OK_OPTION) {                 
-                panel.updateObject(props);
-
-                webGenerator.setLivetickerSettings(props);
-            }   
-        } catch (Throwable t) {
-            System.err.println(t.toString());
-        }
-    }//GEN-LAST:event_jButtonLivetickerPropertiesActionPerformed
-
-    private void jCheckBoxLivtickerEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxLivtickerEnabledActionPerformed
-        webGenerator.setLivetickerEnabled(jCheckBoxLivtickerEnabled.isSelected());
-    }//GEN-LAST:event_jCheckBoxLivtickerEnabledActionPerformed
 
     private void jButtonGroupAutoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGroupAutoActionPerformed
         for (int row : jTableGroups.getSelectedRows()) {
@@ -1787,10 +1732,6 @@ public class ServerPanel extends javax.swing.JPanel {
     private void jCheckBoxBundleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxBundleActionPerformed
         webGenerator.setFtpBundle(jCheckBoxBundle.isSelected());
     }//GEN-LAST:event_jCheckBoxBundleActionPerformed
-
-    private void jRadioButtonFlagTypeNoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFlagTypeNoneActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
 
     private void jComboBoxServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxServerActionPerformed
         if (loadingHttpSettings)
@@ -2171,6 +2112,45 @@ public class ServerPanel extends javax.swing.JPanel {
         });
     }//GEN-LAST:event_jButtonGenerateCertificateActionPerformed
 
+    private void jComboBoxIntervalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxIntervalActionPerformed
+        RefreshInterval interval = (RefreshInterval) jComboBoxInterval.getModel().getSelectedItem();
+        jProgressBar.setMaximum(interval.getInterval());
+        webGenerator.setInterval(interval);
+    }//GEN-LAST:event_jComboBoxIntervalActionPerformed
+
+    private void jButtonLivetickerPropertiesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonLivetickerPropertiesActionPerformed
+        try {
+            com.google.gson.Gson gson = new com.google.gson.Gson();
+            WebGen.LivetickerProperties props = webGenerator.getLivetickerSettings();
+            if (props == null)
+            props = new WebGen.LivetickerProperties();
+
+            PropertyPanel panel = new PropertyPanel();
+            panel.setObject(props, true, false);
+
+            int ret = javax.swing.JOptionPane.showConfirmDialog(
+                this, panel, "Configuration",
+                javax.swing.JOptionPane.OK_CANCEL_OPTION,
+                javax.swing.JOptionPane.PLAIN_MESSAGE);
+
+            if (ret == javax.swing.JOptionPane.OK_OPTION) {
+                panel.updateObject(props);
+
+                webGenerator.setLivetickerSettings(props);
+            }
+        } catch (Throwable t) {
+            System.err.println(t.toString());
+        }
+    }//GEN-LAST:event_jButtonLivetickerPropertiesActionPerformed
+
+    private void jCheckBoxLivtickerEnabledActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBoxLivtickerEnabledActionPerformed
+        webGenerator.setLivetickerEnabled(jCheckBoxLivtickerEnabled.isSelected());
+    }//GEN-LAST:event_jCheckBoxLivtickerEnabledActionPerformed
+
+    private void jRadioButtonFlagTypeNoneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButtonFlagTypeNoneActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupFlags;
     private javax.swing.JButton jButtonCertificate;
@@ -2215,7 +2195,6 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JLabel jLabelBundleName;
     private javax.swing.JLabel jLabelCertificate;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel16;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
