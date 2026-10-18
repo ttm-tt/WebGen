@@ -625,7 +625,10 @@ public class WebGen {
         return this.path + File.separator + "index.xml";
     }
     
-    public static final Map<Long, WebGen> threadIdMap = new java.util.HashMap<>();
+    // Which server a thread works for, so log messages show up in the right tab.
+    // Concurrent: written by the generator threads, read by log handlers from any thread.
+    // Entries only exist while a thread works for a server (removed in finally)
+    public static final Map<Long, WebGen> threadIdMap = new java.util.concurrent.ConcurrentHashMap<>();
     
     /**
      * Generierung starten.
@@ -635,32 +638,36 @@ public class WebGen {
         if (timer != null)
             return true;
 
-        threadIdMap.put(Thread.currentThread().getId(), this);
-        
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "WebGen started");
-        
+        final long threadId = Thread.currentThread().getId();
+        threadIdMap.put(threadId, this);
         try {
-            // Create config.js, passiert nur beim Start
-            createConfigFile();
-            // In case state of reports have changed recreate it at start
-            createReportsFile();
-        } catch (IOException | SQLException ex) {
-            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        // newsLastModified zuruecksetzen, damit die immer bei einem Start gelesen werden
-        newsLastModified = 0;
-
-        timer = new Timer();
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "WebGen started");
         
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                WebGen.this.run();
+            try {
+                // Create config.js, passiert nur beim Start
+                createConfigFile();
+                // In case state of reports have changed recreate it at start
+                createReportsFile();
+            } catch (IOException | SQLException ex) {
+                Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }).start();
 
-        return true;
+            // newsLastModified zuruecksetzen, damit die immer bei einem Start gelesen werden
+            newsLastModified = 0;
+
+            timer = new Timer();
+        
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    WebGen.this.run();
+                }
+            }).start();
+
+            return true;
+        } finally {
+            threadIdMap.remove(threadId);      // the thread is done for this server
+        }
     }
 
     public void stop() {
@@ -670,9 +677,13 @@ public class WebGen {
         timer = null;
         timerTask = null;
         
-        threadIdMap.put(Thread.currentThread().getId(), this);
-        
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "WebGen stopped");
+        final long threadId = Thread.currentThread().getId();
+        threadIdMap.put(threadId, this);
+        try {
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "WebGen stopped");
+        } finally {
+            threadIdMap.remove(threadId);      // the thread is done for this server
+        }
     }
 
     public boolean isRunning() {
@@ -684,40 +695,44 @@ public class WebGen {
     }
 
     private void run() {
-        threadIdMap.put(Thread.currentThread().getId(), WebGen.this);
-        
+        final long threadId = Thread.currentThread().getId();
+        threadIdMap.put(threadId, WebGen.this);
         try {
-            createFiles();
+            try {
+                createFiles();
             
-            updateGroups();
-            updateDates();
-            updateReports();
-            updateNews();
+                updateGroups();
+                updateDates();
+                updateReports();
+                updateNews();
             
-            upload();
+                upload();
         
-            // Allfaellige Aenderugnen im XML-Doc sichern
-            synchronized (indexXmlLock) {
-                xmlProperties.store(getIndexXmlFile());
-            }
-            
-            database.closeConnection();            
-        } catch (IOException ex) {
-            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (SQLException ex) {
-            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (Throwable t) {
-            Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, t);
-        } 
-        
-        // timer kann hier schon wieder null sein, enn die Generierung gestoppt wurde
-        if (timer != null) {
-            timer.schedule( (timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    WebGen.this.run();
+                // Allfaellige Aenderugnen im XML-Doc sichern
+                synchronized (indexXmlLock) {
+                    xmlProperties.store(getIndexXmlFile());
                 }
-            }), getInterval().getInterval() * 1000);
+            
+                database.closeConnection();            
+            } catch (IOException ex) {
+                Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (SQLException ex) {
+                Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (Throwable t) {
+                Logger.getLogger(WebGen.class.getName()).log(Level.SEVERE, null, t);
+            } 
+        
+            // timer kann hier schon wieder null sein, enn die Generierung gestoppt wurde
+            if (timer != null) {
+                timer.schedule( (timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        WebGen.this.run();
+                    }
+                }), getInterval().getInterval() * 1000);
+            }
+        } finally {
+            threadIdMap.remove(threadId);      // the thread is done for this server
         }
     }
     
