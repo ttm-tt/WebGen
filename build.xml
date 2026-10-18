@@ -103,8 +103,35 @@
 
     <target name="-pre-init" depends="init-ivy"/>    
     
+    <!-- Fail the build if MainFrame.versionNumber and current.txt differ.
+         To disable the check, remove depends="-check-version" from -pre-compile below. -->
+    <target name="-check-version">
+        <loadfile property="version.file" srcFile="current.txt">
+            <filterchain>
+                <striplinebreaks/>
+                <tokenfilter><trim/></tokenfilter>
+            </filterchain>
+        </loadfile>
+        <loadfile property="version.source" srcFile="src/de/webgen/gui/MainFrame.java">
+            <filterchain>
+                <linecontainsregexp>
+                    <regexp pattern="versionNumber\s*=\s*&quot;"/>
+                </linecontainsregexp>
+                <replaceregex pattern=".*versionNumber\s*=\s*&quot;([^&quot;]*)&quot;.*" replace="\1"/>
+                <striplinebreaks/>
+                <tokenfilter><trim/></tokenfilter>
+            </filterchain>
+        </loadfile>
+        <fail message="Version mismatch: MainFrame.java has '${version.source}', current.txt has '${version.file}'">
+            <condition>
+                <not><equals arg1="${version.source}" arg2="${version.file}"/></not>
+            </condition>
+        </fail>
+        <echo message="Version ${version.source} (MainFrame.java and current.txt agree)"/>
+    </target>
+
     <!-- Automatically retrieve dependencies using ivy -->
-    <target name="-pre-compile">
+    <target name="-pre-compile" depends="-check-version">
         <ivy:retrieve />
         <ivy:dependencytree />
         <ivy:checkdepsupdate conf="compile" />
