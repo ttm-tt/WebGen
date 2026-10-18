@@ -1,4 +1,10 @@
-#define Version '26.10.02'
+#define VersionFile FileOpen(AddBackslash(SourcePath) + "current.txt")
+#if !VersionFile
+  #error Cannot open current.txt
+#endif
+#define Version Trim(FileRead(VersionFile))
+#expr FileClose(VersionFile)
+#undef VersionFile
 
 [Setup]
 AppName=WebGen
@@ -56,6 +62,7 @@ Source: "..\FtpClient\dist\FtpClient.jar"; DestDir: "{app}\lib"; Flags: ignoreve
 Source: "..\FtpClient\lib\edtftpj-pro.jar"; DestDir: "{app}\lib"; Flags: ignoreversion
 Source: ".\dist\WebGen.ico"; DestDir: "{app}"; Flags: ignoreversion 
 Source: ".\Template\*.html"; DestDir: "{code:GetIniDir}\WebGen\Template\"; Flags: ignoreversion
+Source: ".\Template\*.xsl"; DestDir: "{code:GetIniDir}\WebGen\Template\"; Flags: ignoreversion
 Source: ".\Template\css\*"; DestDir: "{code:GetIniDir}\WebGen\Template\css\"; Flags: ignoreversion
 Source: ".\Template\themes\*"; DestDir: "{code:GetIniDir}\WebGen\Template\themes\"; Flags: ignoreversion
 Source: ".\Template\fonts\*"; DestDir: "{code:GetIniDir}\WebGen\Template\fonts\"; Flags: ignoreversion
