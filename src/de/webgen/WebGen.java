@@ -574,10 +574,14 @@ public class WebGen {
 
     // Writes the settings to index.xml right away, e.g. after a change in the GUI
     public void storeSettings() {
-        synchronized (xmlProperties) {
+        synchronized (indexXmlLock) {
             xmlProperties.store(getIndexXmlFile());
         }
     }
+
+    // Serializes writing index.xml between the GUI and the generator thread.
+    // Its own final object, because xmlProperties is replaced in processIndexFile()
+    private final Object indexXmlLock = new Object();
 
     public void setNewsUrl(String url) {
         xmlProperties.getSettings().news = url;
@@ -693,7 +697,9 @@ public class WebGen {
             upload();
         
             // Allfaellige Aenderugnen im XML-Doc sichern
-            xmlProperties.store(getIndexXmlFile());        
+            synchronized (indexXmlLock) {
+                xmlProperties.store(getIndexXmlFile());
+            }
             
             database.closeConnection();            
         } catch (IOException ex) {
