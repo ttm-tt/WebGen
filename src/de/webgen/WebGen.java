@@ -1563,7 +1563,7 @@ public class WebGen {
             List<List<Match>> matches = new java.util.ArrayList<>();
             matches.add(new java.util.ArrayList<>());
             
-            Match[] matchList = database.readTeamMatches(tmID).toArray(new Match[0]);
+            Match[] matchList = database.readTeamMatches(tmID).toArray(Match[]::new);
             
             java.util.Arrays.sort(matchList, new java.util.Comparator<Match>() {
 
@@ -1637,7 +1637,7 @@ public class WebGen {
             List<List<Match>> matches = new java.util.ArrayList<>();
             matches.add(new java.util.ArrayList<>());
             
-            Match[] matchList = database.readPlayersMatches(plNr).toArray(new Match[0]);
+            Match[] matchList = database.readPlayersMatches(plNr).toArray(Match[]::new);
             
             java.util.Arrays.sort(matchList, new java.util.Comparator<Match>() {
 
