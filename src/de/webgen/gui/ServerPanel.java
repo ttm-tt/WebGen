@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import com.sun.net.httpserver.Filter;
@@ -34,15 +36,9 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.swing.JSpinner;
-import javax.swing.JFormattedTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.text.DefaultFormatterFactory;
-import javax.swing.text.NumberFormatter;
 import javax.xml.XMLConstants;
 import javax.xml.transform.Templates;
 import javax.xml.transform.TransformerFactory;
@@ -93,7 +89,7 @@ public class ServerPanel extends javax.swing.JPanel {
         this.webGenerator = new WebGen(server, tournament, path);
         
         initComponents();
-        installPortSpinner(jSpinnerPort);
+        installPortCombo();
         installLogging();
         
         jTableGroups.setModel(new GroupsTableModel());
@@ -123,7 +119,18 @@ public class ServerPanel extends javax.swing.JPanel {
         jTextFieldUserConfig.setText(webGenerator.getUserConfig());
         jCheckBoxLivtickerEnabled.setSelected(webGenerator.getLivetickerEnabled());
         jTextFieldNewsUrl.setText(webGenerator.getNewsUrl());
-        jTextFieldCertificate.setText(webGenerator.getCertificateFile());
+        // Not configured and "no certificate" both show an empty field
+        String certificate = webGenerator.getCertificateFile();
+        if (!certificate.isBlank()) {
+            String relative = relativeCertificatePath(certificate);
+            if (!relative.equals(certificate)) {
+                // e.g. F:\...\Server1\private.p12 -> private.p12
+                webGenerator.setCertificateFile(relative);
+                webGenerator.storeSettings();
+            }
+            certificate = relative;
+        }
+        jTextFieldCertificate.setText(certificate);
         markCertificateField();
         jTextFieldCertificate.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override public void insertUpdate(javax.swing.event.DocumentEvent e)  { markCertificateField(); }
@@ -180,10 +187,58 @@ public class ServerPanel extends javax.swing.JPanel {
         for (String addr : list)
             jComboBoxServer.addItem(addr);
         
+        loadHttpServerSetting();
+
+        // Password for /settings and /logs: not shown on start; an entered one stays visible while WebGen runs
+        jTextFieldPassword.setToolTipText("Password for /settings and /logs from other computers (any user name). "
+                + "Empty: keep the stored password");
+        jTextFieldPassword.addActionListener(e -> commitHttpPassword());
+        jTextFieldPassword.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusLost(java.awt.event.FocusEvent e) {
+                commitHttpPassword();
+            }
+        });
+
         SwingUtilities.invokeLater(this::startHttp);        
     }
     
     
+    // Basic authentication for /settings and /logs: any user name, the password from the panel.
+    // The password is read on every request, so a change applies without a restart.
+    // Without a password the pages don't exist for other hosts (404)
+    private class AdminAuthenticator extends BasicAuthenticator {
+        AdminAuthenticator(String realm) {
+            super(realm, UTF8);
+        }
+
+        @Override
+        public Result authenticate(HttpExchange exchange) {
+            if (webGenerator.getHttpPassword().isEmpty())
+                return new Failure(404);
+            return super.authenticate(exchange);
+        }
+
+        @Override
+        public boolean checkCredentials(String user, String password) {
+            String expected = webGenerator.getHttpPassword();
+            // Constant time comparison, so the response time doesn't reveal how much was right
+            return !expected.isEmpty() && java.security.MessageDigest.isEqual(
+                    expected.getBytes(UTF8), (password == null ? "" : password).getBytes(UTF8));
+        }
+    }
+
+    // Stores an entered password (encrypted) in index.xml; an empty field keeps the stored one
+    private void commitHttpPassword() {
+        String password = jTextFieldPassword.getText();
+        if (password.isEmpty() || password.equals(webGenerator.getHttpPassword()))
+            return;
+
+        webGenerator.setHttpPassword(password);
+        webGenerator.storeSettings();
+        Logger.getLogger(ServerPanel.class.getName()).log(Level.INFO, "Password for /settings and /logs changed");
+    }
+
     // The well-known HTTPS port uses TLS, all other ports plain HTTP
     private static final int HTTPS_PORT = 443;
 
@@ -212,7 +267,7 @@ public class ServerPanel extends javax.swing.JPanel {
         else if (ip.equals("any"))
             ip = "0.0.0.0";
         
-        int port = ((Number) jSpinnerPort.getValue()).intValue();
+        int port = currentPort;
         
         try {
             InetSocketAddress address = new InetSocketAddress(ip, port);
@@ -220,7 +275,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 // HTTPS with the certificate from the settings. Load it before binding the port,
                 // so a missing or broken certificate doesn't leave a half started server
                 javax.net.ssl.SSLContext ssl = ServerKeystore.createSslContext(
-                        new File(webGenerator.getCertificateFile()),
+                        resolveCertificateFile(webGenerator.getCertificateFile()),
                         ServerKeystore.password(webGenerator.getDatabaseName()));
                 HttpsServer https = HttpsServer.create(address, 0);
                 https.setHttpsConfigurator(new HttpsConfigurator(ssl));
@@ -243,8 +298,9 @@ public class ServerPanel extends javax.swing.JPanel {
         // index.xml and the access logs are only hidden if the server is reachable from other hosts
         final boolean hideRestrictedFiles = !httpServer.getAddress().getAddress().isLoopbackAddress();
 
-        if (httpServer.getAddress().getAddress().isLoopbackAddress()) {
-            httpServer.createContext("/settings", exchange -> {
+        // /settings and /logs: on localhost freely, from other hosts only with the password
+        {
+            HttpContext settingsContext = httpServer.createContext("/settings", exchange -> {
                 try (exchange) {
                     File xml = new File(webGenerator.getIndexXmlFile());
                     File xsl = new File(WebGen.templateDir, "webgensettings.xsl");
@@ -265,10 +321,11 @@ public class ServerPanel extends javax.swing.JPanel {
                     exchange.sendResponseHeaders(500, msg.length);
                     exchange.getResponseBody().write(msg);
                 }
-            }).getFilters().add(accessLog);
+            });
+            settingsContext.getFilters().add(accessLog);
 
             // Access log as readable HTML page; not logged itself, the auto-refresh would flood the log
-            httpServer.createContext("/logs", exchange -> {
+            HttpContext logsContext = httpServer.createContext("/logs", exchange -> {
                 try (exchange) {
                     byte[] html = AccessLogPage.render(getAccessLogFile(), webGenerator.getServer(),
                             exchange.getRequestURI().getRawQuery());
@@ -282,6 +339,12 @@ public class ServerPanel extends javax.swing.JPanel {
                     exchange.getResponseBody().write(msg);
                 }
             });
+
+            if (hideRestrictedFiles) {
+                AdminAuthenticator auth = new AdminAuthenticator("WebGen " + webGenerator.getServer());
+                settingsContext.setAuthenticator(auth);
+                logsContext.setAuthenticator(auth);
+            }
         }
 
         httpServer.createContext("/", new HttpHandler() {
@@ -589,81 +652,188 @@ public class ServerPanel extends javax.swing.JPanel {
 
 
 
-    // Allowed ports: 0 (any), the named well-known ports below 1024, and 1024..65535
-    private static final java.util.NavigableMap<Integer, String> NAMED_PORTS = new java.util.TreeMap<>(java.util.Map.of(
-            0,   "any",
-            80,  "http",
-            443, "https"));
-    private static final int FIRST_FREE_PORT = 1024;
-    private static final int LAST_PORT       = 65535;
+    // Ports offered in the port combo box, in this order; any other port number can be typed in
+    private static final java.util.LinkedHashMap<Integer, String> NAMED_PORTS = new java.util.LinkedHashMap<>();
+    static {
+        NAMED_PORTS.put(0,    "any");
+        NAMED_PORTS.put(80,   "http");
+        NAMED_PORTS.put(443,  "https");
+        NAMED_PORTS.put(8080, "http alt");
+    }
+    private static final int LAST_PORT = 65535;
 
-    private static boolean isAllowedPort(int port) {
-        return NAMED_PORTS.containsKey(port) || (port >= FIRST_FREE_PORT && port <= LAST_PORT);
+    private int     currentPort = 0;            // last valid choice in jComboBoxPort, 0 = any
+    private boolean loadingHttpSettings = false; // suppresses the action events while the settings are loaded
+
+    // ---- Address of the web server in index.xml: HTTPSERVER="ip:port" ----
+    //   "127.0.0.1:8080"  localhost        "0.0.0.0:443" or ":443"  all interfaces
+    //   "[2001:db8::1]:80" IPv6            port 0                   any free port
+
+    // Selects the stored address and port in the combo boxes
+    private void loadHttpServerSetting() {
+        String value = webGenerator.getHttpServer().strip();
+        if (value.isEmpty())
+            return;                                 // not set yet: localhost, any port
+
+        String ip = value;
+        String portText = "0";
+        if (value.startsWith("[")) {                // [IPv6]:port
+            int end = value.indexOf(']');
+            ip = end > 0 ? value.substring(1, end) : value.substring(1);
+            if (end > 0 && value.startsWith(":", end + 1))
+                portText = value.substring(end + 2);
+        } else if (value.indexOf(':') == value.lastIndexOf(':') && value.indexOf(':') >= 0) {
+            ip = value.substring(0, value.indexOf(':'));     // IPv4 or empty
+            portText = value.substring(value.indexOf(':') + 1);
+        }                                           // else: only an address (IPv6 without brackets or IPv4)
+
+        int port = parsePort(portText);
+        if (port < 0) {
+            Logger.getLogger(ServerPanel.class.getName()).log(Level.WARNING, "Invalid port in HTTPSERVER=\"{0}\", using any", value);
+            port = 0;
+        }
+
+        String item;
+        if (ip.isEmpty() || ip.equals("0.0.0.0") || ip.equals("::"))
+            item = "any";
+        else if (ip.equals("127.0.0.1") || ip.equals("::1") || ip.equalsIgnoreCase("localhost"))
+            item = "localhost";
+        else
+            item = ip;
+
+        loadingHttpSettings = true;
+        try {
+            boolean available = false;
+            for (int i = 0; i < jComboBoxServer.getItemCount(); i++)
+                available |= jComboBoxServer.getItemAt(i).equals(item);
+
+            if (available)
+                jComboBoxServer.setSelectedItem(item);
+            else
+                // e.g. a laptop in another network; the stored value stays until the user chooses another one
+                Logger.getLogger(ServerPanel.class.getName()).log(Level.WARNING,
+                        "Address {0} of the web server is not available on this computer, using localhost", ip);
+
+            currentPort = port;
+            showCurrentPort();
+        } finally {
+            loadingHttpSettings = false;
+        }
     }
 
-    // Number model whose arrows skip the ports that are not allowed: any -> http -> https -> 1024 -> 1025 ...
-    private static class PortSpinnerModel extends javax.swing.SpinnerNumberModel {
-        PortSpinnerModel(int port) {
-            super(port, 0, LAST_PORT, 1);
-        }
+    // Stores the current address and port in index.xml, if they changed
+    private void storeHttpServerSetting() {
+        String ip = bindAddress();
+        if (ip.contains(":"))
+            ip = "[" + ip + "]";                    // IPv6
+        String value = ip + ":" + currentPort;
 
-        @Override
-        public Object getNextValue() {
-            int port = getNumber().intValue();
-            Integer named = NAMED_PORTS.higherKey(port);
-            if (port < FIRST_FREE_PORT)
-                return named != null && named < FIRST_FREE_PORT ? named : FIRST_FREE_PORT;
-            return port < LAST_PORT ? port + 1 : null;
+        if (!value.equals(webGenerator.getHttpServer())) {
+            webGenerator.setHttpServer(value);
+            webGenerator.storeSettings();
         }
+    }
+    private boolean updatingPortList = false;   // suppresses the action events while the list is rebuilt
 
-        @Override
-        public Object getPreviousValue() {
-            int port = getNumber().intValue();
-            if (port > FIRST_FREE_PORT)
-                return port - 1;
-            return NAMED_PORTS.lowerKey(port);      // null at "any": no further down
+    // Name of a port for the combo box: "http" for 80, otherwise the number
+    private static String portLabel(int port) {
+        return NAMED_PORTS.getOrDefault(port, Integer.toString(port));
+    }
+
+    // Port from the text in the combo box: a name ("http", any case) or a number 0..65535; -1 if invalid
+    private static int parsePort(String text) {
+        String t = text == null ? "" : text.strip();
+        for (java.util.Map.Entry<Integer, String> e : NAMED_PORTS.entrySet())
+            if (e.getValue().equalsIgnoreCase(t))
+                return e.getKey();
+        try {
+            int port = Integer.parseInt(t);
+            return port >= 0 && port <= LAST_PORT ? port : -1;
+        } catch (NumberFormatException e) {
+            return -1;
         }
     }
 
-    // Replaces the spinner's model and formatter: named ports are shown by name, other ports below 1024 are rejected
-    private void installPortSpinner(JSpinner spinner) {
-        int port = ((Number) spinner.getValue()).intValue();
-        spinner.setModel(new PortSpinnerModel(isAllowedPort(port) ? port : 0));
+    // Address the server binds to, from the server combo box
+    private String bindAddress() {
+        String ip = jComboBoxServer.getSelectedItem().toString();
+        if (ip.equals("localhost"))
+            return "127.0.0.1";
+        if (ip.equals("any"))
+            return "0.0.0.0";
+        return ip;
+    }
 
-        JFormattedTextField tf = ((JSpinner.DefaultEditor) spinner.getEditor()).getTextField();
+    // Can the server bind to this port on the selected address? Our own running server doesn't count.
+    // Tested by binding a socket the same way the server does, so it also covers
+    // ports reserved by Windows or missing privileges on Linux (< 1024)
+    private boolean isPortFree(int port) {
+        if (port == 0)
+            return true;
+        if (httpServer != null && httpServer.getAddress().getPort() == port)
+            return true;
 
-        NumberFormatter fmt = new NumberFormatter(new DecimalFormat("#0")) {
+        try (java.net.ServerSocket socket = new java.net.ServerSocket()) {
+            socket.bind(new InetSocketAddress(bindAddress(), port));
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    // Port combo box: list rebuilt each time it opens, so ports taken by other programs are left out
+    private void installPortCombo() {
+        fillPortList();
+        jComboBoxPort.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
             @Override
-            public String valueToString(Object value) throws ParseException {
-                if (value instanceof Number && NAMED_PORTS.containsKey(((Number) value).intValue()))
-                    return NAMED_PORTS.get(((Number) value).intValue());
-                return super.valueToString(value);
+            public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
+                fillPortList();
             }
 
             @Override
-            public Object stringToValue(String text) throws ParseException {
-                String t = text == null ? "" : text.trim();
-                if (t.isEmpty())
-                    return 0;
-                for (java.util.Map.Entry<Integer, String> e : NAMED_PORTS.entrySet())
-                    if (e.getValue().equalsIgnoreCase(t))
-                        return e.getKey();
-
-                Object value = super.stringToValue(t);
-                if (!isAllowedPort(((Number) value).intValue()))
-                    throw new ParseException("Port not allowed: " + t, 0);
-                return value;
+            public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {
             }
-        };
-        fmt.setValueClass(Integer.class);
-        fmt.setMinimum(0);
-        fmt.setMaximum(LAST_PORT);
-        fmt.setAllowsInvalid(true);        // otherwise typing letters ("any", "http") is blocked
-        fmt.setCommitsOnValidEdit(false);  // commit on Enter / focus loss, not per keystroke
 
-        tf.setFormatterFactory(new DefaultFormatterFactory(fmt));
-        tf.setColumns(5);
-        tf.setToolTipText("any, http (80), https (443) or 1024 - 65535");
+            @Override
+            public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {
+            }
+        });
+
+        StringBuilder tip = new StringBuilder();
+        for (java.util.Map.Entry<Integer, String> e : NAMED_PORTS.entrySet())
+            tip.append(e.getKey() == 0 ? e.getValue() : e.getValue() + " (" + e.getKey() + ")").append(", ");
+        jComboBoxPort.setToolTipText(tip + "or type a port number (0 - " + LAST_PORT + ")");
+    }
+
+    // any, the named ports not used by another program, and an empty entry to type an own port number
+    private void fillPortList() {
+        updatingPortList = true;
+        try {
+            javax.swing.DefaultComboBoxModel<String> model = new javax.swing.DefaultComboBoxModel<>();
+            // Configured without certificate: https is not offered (typing it asks to create one)
+            boolean noHttps = webGenerator.isCertificateConfigured() && webGenerator.getCertificateFile().isBlank();
+            for (java.util.Map.Entry<Integer, String> e : NAMED_PORTS.entrySet()) {
+                if (e.getKey() == HTTPS_PORT && noHttps && currentPort != HTTPS_PORT)
+                    continue;
+                if (e.getKey() == currentPort || isPortFree(e.getKey()))
+                    model.addElement(e.getValue());
+            }
+            model.addElement("");
+            jComboBoxPort.setModel(model);
+            jComboBoxPort.setSelectedItem(portLabel(currentPort));
+        } finally {
+            updatingPortList = false;
+        }
+    }
+
+    // Shows the current port again, e.g. after an invalid input
+    private void showCurrentPort() {
+        updatingPortList = true;
+        try {
+            jComboBoxPort.setSelectedItem(portLabel(currentPort));
+        } finally {
+            updatingPortList = false;
+        }
     }
 
     /** This method is called from within the constructor to
@@ -698,15 +868,18 @@ public class ServerPanel extends javax.swing.JPanel {
         jButtonLivetickerProperties = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         jComboBoxInterval = new javax.swing.JComboBox();
+        jPanel2 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
         jComboBoxServer = new javax.swing.JComboBox<>();
         jLabel11 = new javax.swing.JLabel();
-        jSpinnerPort = new javax.swing.JSpinner();
+        jComboBoxPort = new javax.swing.JComboBox<>();
         jTextFieldPort = new javax.swing.JTextField();
         jLabelCertificate = new javax.swing.JLabel();
         jTextFieldCertificate = new javax.swing.JTextField();
         jButtonCertificate = new javax.swing.JButton();
         jButtonGenerateCertificate = new javax.swing.JButton();
+        jLabel17 = new javax.swing.JLabel();
+        jTextFieldPassword = new javax.swing.JTextField();
         jPanelGroups = new javax.swing.JPanel();
         jPanel20 = new javax.swing.JPanel();
         jComboBoxEvent = new javax.swing.JComboBox();
@@ -874,7 +1047,7 @@ public class ServerPanel extends javax.swing.JPanel {
                                         .addGroup(jPanel16Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                             .addGroup(jPanel16Layout.createSequentialGroup()
                                                 .addComponent(jLabel15)
-                                                .addGap(0, 52, Short.MAX_VALUE))
+                                                .addGap(0, 53, Short.MAX_VALUE))
                                             .addComponent(jLabel12, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
                                 .addGroup(jPanel16Layout.createSequentialGroup()
@@ -894,7 +1067,7 @@ public class ServerPanel extends javax.swing.JPanel {
                                 .addComponent(jRadioButtonFlagTypeNation)
                                 .addGap(18, 18, 18)
                                 .addComponent(jRadioButtonFlagTypeRegion)
-                                .addGap(0, 0, Short.MAX_VALUE))
+                                .addGap(0, 1, Short.MAX_VALUE))
                             .addComponent(jTextFieldUserConfig, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jTextFieldTitle, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(jPanel16Layout.createSequentialGroup()
@@ -962,10 +1135,11 @@ public class ServerPanel extends javax.swing.JPanel {
 
         jLabel11.setText("Port");
 
-        jSpinnerPort.setModel(new javax.swing.SpinnerNumberModel(0, 0, 65535, 1));
-        jSpinnerPort.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                jSpinnerPortStateChanged(evt);
+        jComboBoxPort.setEditable(true);
+        jComboBoxPort.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "any", "http", "https", "http alt", "" }));
+        jComboBoxPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBoxPortActionPerformed(evt);
             }
         });
 
@@ -1002,6 +1176,63 @@ public class ServerPanel extends javax.swing.JPanel {
             }
         });
 
+        jLabel17.setText("Password");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel17)
+                            .addComponent(jLabelCertificate))
+                        .addGap(59, 59, 59)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jTextFieldCertificate)
+                            .addComponent(jTextFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButtonCertificate)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButtonGenerateCertificate, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel10)
+                        .addGap(49, 49, 49)
+                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel11)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jTextFieldPort)))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel10)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel11)
+                        .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabelCertificate)
+                    .addComponent(jTextFieldCertificate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonCertificate)
+                    .addComponent(jButtonGenerateCertificate))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jTextFieldPassword, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel17))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout jPanelSettingsLayout = new javax.swing.GroupLayout(jPanelSettings);
         jPanelSettings.setLayout(jPanelSettingsLayout);
         jPanelSettingsLayout.setHorizontalGroup(
@@ -1010,31 +1241,10 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanelSettingsLayout.createSequentialGroup()
-                        .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanelSettingsLayout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(jLabelCertificate)
-                                .addGap(37, 37, 37)
-                                .addComponent(jTextFieldCertificate, javax.swing.GroupLayout.PREFERRED_SIZE, 220, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButtonCertificate)
-                                .addGap(18, 18, 18)
-                                .addComponent(jButtonGenerateCertificate, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
-                                .addGap(13, 13, 13)))
-                        .addContainerGap())
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanelSettingsLayout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(jLabel10)
-                        .addGap(49, 49, 49)
-                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, 103, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jLabel11)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jTextFieldPort)
-                        .addGap(19, 19, 19))))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jPanel16, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanelSettingsLayout.setVerticalGroup(
             jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1042,20 +1252,8 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .addComponent(jPanel16, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel10)
-                    .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel11)
-                        .addComponent(jSpinnerPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanelSettingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabelCertificate)
-                    .addComponent(jTextFieldCertificate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonCertificate)
-                    .addComponent(jButtonGenerateCertificate))
-                .addContainerGap(84, Short.MAX_VALUE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         jTabbedPane.addTab(bundle.getString("Settings"), jPanelSettings); // NOI18N
@@ -1595,6 +1793,11 @@ public class ServerPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
 
     private void jComboBoxServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxServerActionPerformed
+        if (loadingHttpSettings)
+            return;
+
+        storeHttpServerSetting();
+
         String ip = jComboBoxServer.getSelectedItem().toString();
         if (ip.equals("localhost"))
             ip = "127.0.0.1";
@@ -1610,14 +1813,56 @@ public class ServerPanel extends javax.swing.JPanel {
         startHttp();
     }//GEN-LAST:event_jComboBoxServerActionPerformed
 
-    private void jSpinnerPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_jSpinnerPortStateChanged
-        // No change if we value is any and port number is higher than n the free range
-        if ( (((Number) jSpinnerPort.getValue()).intValue() == 0) &&
-             (httpServer.getAddress().getPort() >= 49152) )
+    private void jComboBoxPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBoxPortActionPerformed
+        if (updatingPortList)
             return;
-        
+
+        Object item = jComboBoxPort.getSelectedItem();
+        String text = item == null ? "" : item.toString().strip();
+
+        // The empty entry: the user is going to type a port number
+        if (text.isEmpty())
+            return;
+
+        int port = parsePort(text);
+        if (port < 0) {
+            java.awt.Toolkit.getDefaultToolkit().beep();
+            showCurrentPort();
+            return;
+        }
+
+        // While the certificate question is open (focus changes fire this event again)
+        if (checkingCertificate)
+            return;
+
+        if (port != currentPort && !isPortFree(port)) {
+            Logger.getLogger(ServerPanel.class.getName()).log(Level.WARNING,
+                    "Port {0} is used by another program", Integer.toString(port));
+            java.awt.Toolkit.getDefaultToolkit().beep();
+            showCurrentPort();
+            return;
+        }
+
+        // HTTPS needs a usable certificate; if there is none, ask to create one
+        if (port == HTTPS_PORT && (port != currentPort || httpServer == null) && !checkCertificateForHttps()) {
+            showCurrentPort();
+            return;
+        }
+
+        boolean changed = port != currentPort;
+        currentPort = port;
+        showCurrentPort();          // e.g. "80" is shown as "http"
+        storeHttpServerSetting();
+
+        if (!changed && httpServer != null)
+            return;
+
+        // No change if the value is any and the server already runs on a port of the dynamic range
+        if (port == 0 && httpServer != null && httpServer.getAddress().getPort() >= 49152)
+            return;
+
         startHttp();
-    }//GEN-LAST:event_jSpinnerPortStateChanged
+    }//GEN-LAST:event_jComboBoxPortActionPerformed
 
     private void jButtonOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonOpenActionPerformed
         if (Desktop.getDesktop().isSupported(Desktop.Action.OPEN)) {
@@ -1694,22 +1939,22 @@ public class ServerPanel extends javax.swing.JPanel {
 
     private void jButtonCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonCertificateActionPerformed
         // Start in the directory of the current file, otherwise in the server directory
-        File current = new File(jTextFieldCertificate.getText().strip());
-        File dir = current.getParentFile() != null && current.getParentFile().isDirectory()
+        File current = resolveCertificateFile(jTextFieldCertificate.getText());
+        File dir = current != null && current.getParentFile() != null && current.getParentFile().isDirectory()
                 ? current.getParentFile()
-                : new File(webGenerator.getIndexXmlFile()).getParentFile();
+                : serverDirectory();
 
         javax.swing.JFileChooser chooser = new javax.swing.JFileChooser(dir);
         chooser.setDialogTitle("Certificate (keystore) for HTTPS");
         chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter(
                 "Keystore (*.p12, *.pfx, *.jks)", "p12", "pfx", "jks"));
-        if (current.isFile())
+        if (current != null && current.isFile())
             chooser.setSelectedFile(current);
 
         if (chooser.showOpenDialog(this) != javax.swing.JFileChooser.APPROVE_OPTION)
             return;
 
-        jTextFieldCertificate.setText(chooser.getSelectedFile().getAbsolutePath());
+        jTextFieldCertificate.setText(relativeCertificatePath(chooser.getSelectedFile().getAbsolutePath()));
         commitCertificateFile();
     }//GEN-LAST:event_jButtonCertificateActionPerformed
 
@@ -1718,7 +1963,8 @@ public class ServerPanel extends javax.swing.JPanel {
         String file = jTextFieldCertificate.getText().strip();
         markCertificateField();
 
-        boolean changed = !file.equals(webGenerator.getCertificateFile());
+        // An empty field is stored as "" (no certificate), so it differs from "not configured"
+        boolean changed = !webGenerator.isCertificateConfigured() || !file.equals(webGenerator.getCertificateFile());
         if (changed) {
             webGenerator.setCertificateFile(file);
             webGenerator.storeSettings();
@@ -1726,47 +1972,65 @@ public class ServerPanel extends javax.swing.JPanel {
 
         // HTTPS uses the certificate: restart with a new one, or start if it failed before
         // (e.g. the file was just generated)
-        if (((Number) jSpinnerPort.getValue()).intValue() == HTTPS_PORT && (changed || httpServer == null))
+        if (currentPort == HTTPS_PORT && (changed || httpServer == null))
             startHttp();
     }
 
-    // Red text if a path is entered but the file doesn't exist; "Generate" only if there is no file yet
+    // Red text if a path is entered but the file doesn't exist
     private void markCertificateField() {
-        String file = jTextFieldCertificate.getText().strip();
-        boolean missing = !file.isEmpty() && !new File(file).isFile();
+        File file = resolveCertificateFile(jTextFieldCertificate.getText());
+        boolean missing = file != null && !file.isFile();
         jTextFieldCertificate.setForeground(missing ? java.awt.Color.RED : javax.swing.UIManager.getColor("TextField.foreground"));
-        jButtonGenerateCertificate.setEnabled(file.isEmpty() || !new File(file).exists());
     }
 
     // Suggestion if no file is set: <tournament directory>/<server>.p12, outside the directory the web server delivers
-    private File defaultCertificateFile() {
-        File serverDir = new File(webGenerator.getIndexXmlFile()).getAbsoluteFile().getParentFile();
-        File dir = serverDir.getParentFile() != null ? serverDir.getParentFile() : serverDir;
-        return new File(dir, webGenerator.getServer() + ".p12");
+    // Directory of index.xml / index.html, the root of the web server
+    private File serverDirectory() {
+        return new File(webGenerator.getIndexXmlFile()).getAbsoluteFile().getParentFile();
     }
 
-    private void jButtonGenerateCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateCertificateActionPerformed
-        String path = jTextFieldCertificate.getText().strip();
-        if (path.isEmpty()) {
-            path = defaultCertificateFile().getPath();
-            jTextFieldCertificate.setText(path);
-        }
+    // Certificate path from the settings: absolute (also UNC, \\computer\share\...) as is,
+    // relative to the server directory; null if empty
+    private File resolveCertificateFile(String path) {
+        String p = path == null ? "" : path.strip();
+        if (p.isEmpty())
+            return null;
+        File file = new File(p);
+        return file.isAbsolute() ? file : new File(serverDirectory(), p);
+    }
 
-        final File file = new File(path);
-        if (file.exists()) {
-            // Only new files; to replace a certificate delete or rename the old file first
-            markCertificateField();
-            return;
-        }
+    // Path to store: files inside the server directory relative to it ("private.p12"), others absolute
+    private String relativeCertificatePath(String path) {
+        File file = resolveCertificateFile(path);
+        if (file == null)
+            return "";
+        java.nio.file.Path dir  = serverDirectory().toPath().normalize();
+        java.nio.file.Path full = file.toPath().toAbsolutePath().normalize();
+        if (full.startsWith(dir) && !full.equals(dir))
+            return dir.relativize(full).toString();
+        return path.strip();
+    }
 
+    // Creates the certificate in the background (keytool needs about a second) and runs onSuccess afterwards.
+    // replace: an existing file is replaced, but only if the new one could be created
+    private void generateCertificate(final File file, final boolean replace, final Runnable onSuccess) {
         jButtonGenerateCertificate.setEnabled(false);
         setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.WAIT_CURSOR));
 
-        // keytool needs about a second, so not on the Swing thread
         new javax.swing.SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-                ServerKeystore.generate(file, ServerKeystore.password(webGenerator.getDatabaseName()));
+                String password = ServerKeystore.password(webGenerator.getDatabaseName());
+                if (!replace || !file.exists()) {
+                    ServerKeystore.generate(file, password);
+                } else {
+                    // Generate next to the old file and replace it only if that worked,
+                    // so a failure doesn't leave the server without a certificate
+                    File tmp = new File(file.getAbsoluteFile().getParentFile(), file.getName() + ".new.p12");
+                    java.nio.file.Files.deleteIfExists(tmp.toPath());
+                    ServerKeystore.generate(tmp, password);
+                    java.nio.file.Files.move(tmp.toPath(), file.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
                 return null;
             }
 
@@ -1775,8 +2039,8 @@ public class ServerPanel extends javax.swing.JPanel {
                 setCursor(null);
                 try {
                     get();
-                    commitCertificateFile();
                     Logger.getLogger(ServerPanel.class.getName()).log(Level.INFO, "Certificate generated: {0}", file.getPath());
+                    onSuccess.run();
                 } catch (Exception e) {
                     Throwable cause = e instanceof java.util.concurrent.ExecutionException && e.getCause() != null ? e.getCause() : e;
                     Logger.getLogger(ServerPanel.class.getName()).log(Level.SEVERE, "Cannot generate certificate", cause);
@@ -1784,9 +2048,127 @@ public class ServerPanel extends javax.swing.JPanel {
                             "Cannot generate the certificate:\n" + cause.getMessage(),
                             "Certificate", javax.swing.JOptionPane.ERROR_MESSAGE);
                 }
+                jButtonGenerateCertificate.setEnabled(true);
                 markCertificateField();
             }
         }.execute();
+    }
+
+    // ---- HTTPS needs a certificate ----
+
+    private static final String DEFAULT_CERTIFICATE = "private.p12";   // in the server directory
+
+    private boolean checkingCertificate = false;    // a dialog is open, ignore further port events
+
+    // Why the certificate can't be used, or null if it can: missing, unreadable or not openable
+    private String certificateProblem(String path) {
+        File file = resolveCertificateFile(path);
+        if (file == null)
+            return "HTTPS needs a certificate, but none is configured.";
+        if (!file.exists())
+            return "The certificate file " + path + " does not exist.";
+        if (!file.isFile() || !file.canRead())
+            return "The certificate file " + path + " cannot be read.";
+        try {
+            ServerKeystore.createSslContext(file, ServerKeystore.password(webGenerator.getDatabaseName()));
+            return null;
+        } catch (Exception e) {
+            return "The certificate file " + path + " cannot be used:\n" + e.getMessage();
+        }
+    }
+
+    // Called before switching to https. true: the certificate is fine, go ahead.
+    // false: stay on the current port; if the user agreed, a certificate is created and
+    // the server switches to https afterwards
+    private boolean checkCertificateForHttps() {
+        String problem = certificateProblem(webGenerator.getCertificateFile());
+        if (problem == null)
+            return true;
+
+        boolean none = webGenerator.getCertificateFile().isBlank();
+        File target = resolveCertificateFile(DEFAULT_CERTIFICATE);
+        boolean targetUsable = certificateProblem(DEFAULT_CERTIFICATE) == null;
+        boolean replaceTarget = target.exists() && !targetUsable;
+
+        String question = none
+                ? "Shall a new certificate " + DEFAULT_CERTIFICATE + " be created?"
+                : "Shall a new certificate " + DEFAULT_CERTIFICATE + " be configured?";
+        if (replaceTarget)
+            question += "\n(The existing file " + DEFAULT_CERTIFICATE + " will be replaced.)";
+
+        int answer;
+        checkingCertificate = true;
+        try {
+            answer = javax.swing.JOptionPane.showConfirmDialog(this, problem + "\n\n" + question,
+                    "HTTPS certificate", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.QUESTION_MESSAGE);
+        } finally {
+            checkingCertificate = false;
+        }
+
+        if (answer != javax.swing.JOptionPane.YES_OPTION) {
+            if (none) {
+                // Deliberately no certificate: https is no longer offered in the port list
+                useCertificate("");
+            }
+            return false;
+        }
+
+        // An existing, valid private.p12 is simply used; otherwise a new one is created
+        if (targetUsable) {
+            useCertificate(DEFAULT_CERTIFICATE);
+            switchToHttps();
+        } else {
+            generateCertificate(target, replaceTarget, () -> {
+                useCertificate(DEFAULT_CERTIFICATE);
+                switchToHttps();
+            });
+        }
+        return false;
+    }
+
+    // Puts the certificate path into the field and the settings ("" = none)
+    private void useCertificate(String path) {
+        jTextFieldCertificate.setText(path);
+        if (!webGenerator.isCertificateConfigured() || !path.equals(webGenerator.getCertificateFile())) {
+            webGenerator.setCertificateFile(path);
+            webGenerator.storeSettings();
+        }
+        markCertificateField();
+    }
+
+    // Selects https and (re)starts the server with it
+    private void switchToHttps() {
+        currentPort = HTTPS_PORT;
+        showCurrentPort();
+        storeHttpServerSetting();
+        startHttp();
+    }
+
+    private void jButtonGenerateCertificateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonGenerateCertificateActionPerformed
+        String path = jTextFieldCertificate.getText().strip();
+        if (path.isEmpty()) {
+            path = DEFAULT_CERTIFICATE;
+            jTextFieldCertificate.setText(path);
+        }
+
+        final File file = resolveCertificateFile(path);
+        final boolean replace = file.exists();
+        if (replace) {
+            int answer = javax.swing.JOptionPane.showConfirmDialog(this,
+                    "Do you want to overwrite the file " + path + "?\n\n"
+                    + "Browsers that accepted the old certificate will show the security warning again.",
+                    "Certificate", javax.swing.JOptionPane.YES_NO_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE);
+            if (answer != javax.swing.JOptionPane.YES_OPTION)
+                return;
+        }
+
+        generateCertificate(file, replace, () -> {
+            // A running HTTPS server still uses the old certificate: restart it
+            boolean restart = replace && currentPort == HTTPS_PORT && httpServer != null;
+            commitCertificateFile();
+            if (restart)
+                startHttp();
+        });
     }//GEN-LAST:event_jButtonGenerateCertificateActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1812,6 +2194,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JComboBox jComboBoxEvent;
     private javax.swing.JComboBox jComboBoxInterval;
     private javax.swing.JComboBox jComboBoxLogging;
+    private javax.swing.JComboBox<String> jComboBoxPort;
     private javax.swing.JComboBox<String> jComboBoxServer;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
@@ -1821,6 +2204,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -1833,6 +2217,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JLabel jLabelCertificate;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel16;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;
@@ -1848,7 +2233,6 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JRadioButton jRadioButtonFlagTypeRegion;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane6;
-    private javax.swing.JSpinner jSpinnerPort;
     private javax.swing.JTabbedPane jTabbedPane;
     private javax.swing.JTable jTableGroups;
     private javax.swing.JTable jTableReports;
@@ -1858,6 +2242,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JTextField jTextFieldDir;
     private javax.swing.JTextField jTextFieldHost;
     private javax.swing.JTextField jTextFieldNewsUrl;
+    private javax.swing.JTextField jTextFieldPassword;
     private javax.swing.JTextField jTextFieldPort;
     private javax.swing.JTextField jTextFieldTitle;
     private javax.swing.JTextField jTextFieldTournamentUrl;

@@ -26,7 +26,10 @@ public class XmlSettings {
         interval = Integer.decode(el.getAttribute(ATTRIBUTE_INTERVAL));
         flagType = FlagType.valueOf(getAttribute(el, ATTRIBUTE_FLAGTYPE, "None"));
         userConfig = el.getAttribute(ATTRIBUTE_USERCONFIG);
-        certificate = el.getAttribute(ATTRIBUTE_CERTIFICATE);
+        // Missing attribute (null): not configured yet; empty: no certificate, no HTTPS
+        certificate = el.hasAttribute(ATTRIBUTE_CERTIFICATE) ? el.getAttribute(ATTRIBUTE_CERTIFICATE) : null;
+        httpServer = el.getAttribute(ATTRIBUTE_HTTPSERVER);
+        httpPassword = el.getAttribute(ATTRIBUTE_HTTPPASSWORD);
     }
     
     public Element write(Element el) {
@@ -40,7 +43,15 @@ public class XmlSettings {
         el.setAttribute(ATTRIBUTE_INTERVAL, Integer.toString(interval));
         el.setAttribute(ATTRIBUTE_FLAGTYPE, flagType.toString());
         el.setAttribute(ATTRIBUTE_USERCONFIG, userConfig);
-        el.setAttribute(ATTRIBUTE_CERTIFICATE, certificate == null ? "" : certificate);
+        if (certificate != null)
+            el.setAttribute(ATTRIBUTE_CERTIFICATE, certificate);
+        else
+            el.removeAttribute(ATTRIBUTE_CERTIFICATE);
+        el.setAttribute(ATTRIBUTE_HTTPSERVER, httpServer == null ? "" : httpServer);
+        if (httpPassword != null && !httpPassword.isEmpty())
+            el.setAttribute(ATTRIBUTE_HTTPPASSWORD, httpPassword);
+        else
+            el.removeAttribute(ATTRIBUTE_HTTPPASSWORD);
         
         return el;
     }
@@ -50,7 +61,9 @@ public class XmlSettings {
     public String url;
     public String news;
     public String userConfig;
-    public String certificate = "";     // keystore (PKCS#12) with certificate and key for HTTPS
+    public String certificate = null;   // keystore (PKCS#12) for HTTPS; null: not configured, "": none
+    public String httpServer = "";      // "ip:port" of the built-in web server, e.g. "0.0.0.0:8080"
+    public String httpPassword = "";    // password for /settings and /logs from other hosts, encrypted
     public String ltSettings;
     public boolean ltEnabled;
     public boolean autoGroups;
@@ -68,4 +81,6 @@ public class XmlSettings {
     private static final String ATTRIBUTE_FLAGTYPE = "FLAGTYPE";
     private static final String ATTRIBUTE_USERCONFIG = "USERCONFIG";
     private static final String ATTRIBUTE_CERTIFICATE = "CERTIFICATE";
+    private static final String ATTRIBUTE_HTTPSERVER = "HTTPSERVER";
+    private static final String ATTRIBUTE_HTTPPASSWORD = "HTTPPASSWORD";
 }

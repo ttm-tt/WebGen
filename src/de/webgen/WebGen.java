@@ -533,14 +533,43 @@ public class WebGen {
         return props;
     }
 
-    // Keystore (PKCS#12) with the certificate for the HTTPS server, "" if not set
+    // Keystore (PKCS#12) with the certificate for the HTTPS server, relative to the server directory
+    // or absolute; "" if there is none. Whether it was configured at all: isCertificateConfigured()
+    public String getCertificateFile() {
+        String file = xmlProperties.getSettings().certificate;
+        return file == null ? "" : file;
+    }
+
+    // Sets the certificate ("" = deliberately none); afterwards it counts as configured
     public void setCertificateFile(String file) {
         xmlProperties.getSettings().certificate = file == null ? "" : file;
     }
 
-    public String getCertificateFile() {
-        String file = xmlProperties.getSettings().certificate;
-        return file == null ? "" : file;
+    // false: never configured (no CERTIFICATE attribute in index.xml);
+    // true:  configured, either with a file or deliberately without one (CERTIFICATE="")
+    public boolean isCertificateConfigured() {
+        return xmlProperties.getSettings().certificate != null;
+    }
+
+    // Address of the built-in web server as "ip:port", "" if not set
+    public void setHttpServer(String value) {
+        xmlProperties.getSettings().httpServer = value == null ? "" : value;
+    }
+
+    public String getHttpServer() {
+        String value = xmlProperties.getSettings().httpServer;
+        return value == null ? "" : value;
+    }
+
+    // Password for /settings and /logs when the web server is reachable from other hosts,
+    // stored encrypted like the FTP password; "" if none
+    public void setHttpPassword(String password) {
+        xmlProperties.getSettings().httpPassword = encryptPassword(password == null ? "" : password);
+    }
+
+    public String getHttpPassword() {
+        String pwd = decryptPassword(xmlProperties.getSettings().httpPassword);
+        return pwd == null ? "" : pwd;
     }
 
     // Writes the settings to index.xml right away, e.g. after a change in the GUI

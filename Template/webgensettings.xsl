@@ -113,8 +113,13 @@
           <th><xsl:value-of select="name()"/></th>
           <td>
             <xsl:choose>
-              <!-- never show the password, even if it is encrypted -->
-              <xsl:when test="name() = 'PASSWORD'">••••••</xsl:when>
+              <!-- never show passwords, even if encrypted; only whether one is set -->
+              <xsl:when test="name() = 'PASSWORD' or name() = 'HTTPPASSWORD'">
+                <xsl:choose>
+                  <xsl:when test="string(.) != ''">******</xsl:when>
+                  <xsl:otherwise><span class="empty">(empty)</span></xsl:otherwise>
+                </xsl:choose>
+              </xsl:when>
               <xsl:when test="name() = 'TS'"><span class="ts"><xsl:value-of select="."/></span></xsl:when>
               <xsl:otherwise>
                 <xsl:call-template name="value"><xsl:with-param name="v" select="."/></xsl:call-template>
