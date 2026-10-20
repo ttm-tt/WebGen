@@ -57,6 +57,9 @@ public class ServerPanel extends javax.swing.JPanel {
     // Logging: each panel shows the messages of its own WebGen and the general ones
     private static final java.util.ResourceBundle logBundle = java.util.ResourceBundle.getBundle("de/webgen/gui/resources/WebGen"); // NOI18N
     private static final int MAX_LOG_ENTRIES = 100;
+
+    // All received entries, newest first; jComboBoxLogging only shows those passing jComboBoxFilterLog
+    private final java.util.LinkedList<LogEntry> logEntries = new java.util.LinkedList<>();
     private Handler logHandler;
 
     private static class LogEntry {
@@ -611,18 +614,54 @@ public class ServerPanel extends javax.swing.JPanel {
         };
 
         Logger.getLogger("").addHandler(logHandler);
+
+        // Display filter: 1st entry everything, 2nd INFO and above, 3rd WARNING and above
+        jComboBoxFilterLog.addActionListener(e -> showLogEntries());
+    }
+
+    // Lowest level shown with the current filter
+    private Level logFilterLevel() {
+        switch (jComboBoxFilterLog.getSelectedIndex()) {
+            case 1:  return Level.INFO;
+            case 2:  return Level.WARNING;
+            default: return Level.ALL;
+        }
+    }
+
+    // Fills the log combo box with the stored entries that pass the filter, newest first
+    private void showLogEntries() {
+        int min = logFilterLevel().intValue();
+        javax.swing.DefaultComboBoxModel<Object> model = new javax.swing.DefaultComboBoxModel<>();
+        for (LogEntry e : logEntries)
+            if (e.record.getLevel().intValue() >= min)
+                model.addElement(e);
+        jComboBoxLogging.setModel(model);
+
+        if (model.getSize() > 0) {
+            jComboBoxLogging.setSelectedIndex(0);
+            applyLevelStyle(jComboBoxLogging, ((LogEntry) model.getElementAt(0)).record.getLevel());
+        } else {
+            applyLevelStyle(jComboBoxLogging, Level.INFO);
+        }
     }
 
 
+    // Stores every entry; only the display depends on the filter
     private void addLogEntry(LogEntry entry) {
+        logEntries.addFirst(entry);
+        while (logEntries.size() > MAX_LOG_ENTRIES)
+            logEntries.removeLast();
+
         javax.swing.DefaultComboBoxModel model = (javax.swing.DefaultComboBoxModel) jComboBoxLogging.getModel();
-        model.insertElementAt(entry, 0);
+        if (entry.record.getLevel().intValue() >= logFilterLevel().intValue()) {
+            model.insertElementAt(entry, 0);
+            jComboBoxLogging.setSelectedIndex(0);
+            applyLevelStyle(jComboBoxLogging, entry.record.getLevel());
+        }
 
-        while (model.getSize() > MAX_LOG_ENTRIES)
+        // Entries dropped from the store disappear from the display as well
+        while (model.getSize() > 0 && !logEntries.contains(model.getElementAt(model.getSize() - 1)))
             model.removeElementAt(model.getSize() - 1);
-
-        jComboBoxLogging.setSelectedIndex(0);
-        applyLevelStyle(jComboBoxLogging, entry.record.getLevel());
     }
 
 
@@ -964,6 +1003,7 @@ public class ServerPanel extends javax.swing.JPanel {
         jButtonView = new javax.swing.JButton();
         jButtonOpen = new javax.swing.JButton();
         jButtonClear = new javax.swing.JButton();
+        jComboBoxFilterLog = new javax.swing.JComboBox<>();
 
         setMinimumSize(new java.awt.Dimension(470, 500));
 
@@ -1072,13 +1112,13 @@ public class ServerPanel extends javax.swing.JPanel {
                     .addComponent(jTextFieldTournamentUrl)
                     .addComponent(jTextFieldNewsUrl)
                     .addGroup(jPanel16Layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 128, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 133, Short.MAX_VALUE)
                         .addComponent(jRadioButtonFlagTypeNone)
                         .addGap(18, 18, 18)
                         .addComponent(jRadioButtonFlagTypeNation)
                         .addGap(18, 18, 18)
                         .addComponent(jRadioButtonFlagTypeRegion)
-                        .addGap(0, 6, Short.MAX_VALUE))
+                        .addGap(0, 17, Short.MAX_VALUE))
                     .addComponent(jTextFieldUserConfig, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jTextFieldTitle, javax.swing.GroupLayout.Alignment.TRAILING))
                 .addContainerGap())
@@ -1144,6 +1184,11 @@ public class ServerPanel extends javax.swing.JPanel {
 
         jTextFieldPort.setEditable(false);
         jTextFieldPort.setColumns(5);
+        jTextFieldPort.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldPortActionPerformed(evt);
+            }
+        });
 
         jLabelCertificate.setText("Certificate");
 
@@ -1177,6 +1222,12 @@ public class ServerPanel extends javax.swing.JPanel {
 
         jLabel17.setText("Password");
 
+        jTextFieldPassword.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextFieldPasswordActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -1186,36 +1237,37 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel10)
-                        .addGap(49, 49, 49)
-                        .addComponent(jComboBoxServer, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(34, 34, 34)
+                        .addComponent(jComboBoxServer, 0, 116, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
                         .addComponent(jLabel11)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel17)
                             .addComponent(jLabelCertificate))
-                        .addGap(59, 59, 59)
+                        .addGap(45, 45, 45)
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jTextFieldPassword)
-                            .addComponent(jTextFieldCertificate))
+                            .addComponent(jTextFieldCertificate)
+                            .addComponent(jTextFieldPassword, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonCertificate)))
-                .addGap(12, 12, 12)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButtonGenerateCertificate, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jTextFieldPort))
-                .addGap(14, 14, 14))
+                .addGap(18, 18, 18)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButtonGenerateCertificate))
+                .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel10)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel10)
+                        .addComponent(jComboBoxServer, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jLabel11)
                         .addComponent(jComboBoxPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jTextFieldPort, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
@@ -1314,7 +1366,7 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addGroup(jPanel20Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jCheckBoxIncludePlayedGroups)
-                    .addComponent(jComboBoxEvent, 0, 419, Short.MAX_VALUE)
+                    .addComponent(jComboBoxEvent, 0, 434, Short.MAX_VALUE)
                     .addGroup(jPanel20Layout.createSequentialGroup()
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1402,7 +1454,7 @@ public class ServerPanel extends javax.swing.JPanel {
                         .addComponent(jButtonReportsEnable)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButtonReportsDisable))
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE))
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 445, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanelListsLayout.setVerticalGroup(
@@ -1596,25 +1648,29 @@ public class ServerPanel extends javax.swing.JPanel {
             }
         });
 
+        jComboBoxFilterLog.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "All", "Info", "Error" }));
+
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
         jPanel3Layout.setHorizontalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addComponent(jButtonStart)
                         .addGap(11, 11, 11)
-                        .addComponent(jProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, 219, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButtonView, javax.swing.GroupLayout.PREFERRED_SIZE, 60, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 219, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jComboBoxLogging, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jComboBoxFilterLog, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButtonView, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jButtonClear, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jButtonOpen, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(12, 12, 12))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1628,7 +1684,8 @@ public class ServerPanel extends javax.swing.JPanel {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBoxLogging, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonClear))
+                    .addComponent(jButtonClear)
+                    .addComponent(jComboBoxFilterLog, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -1638,7 +1695,7 @@ public class ServerPanel extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                .addComponent(jTabbedPane)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1865,6 +1922,7 @@ public class ServerPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_jButtonStartActionPerformed
 
     private void jButtonClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonClearActionPerformed
+        logEntries.clear();
         ((javax.swing.DefaultComboBoxModel) jComboBoxLogging.getModel()).removeAllElements();
         applyLevelStyle(jComboBoxLogging, Level.INFO);
     }//GEN-LAST:event_jButtonClearActionPerformed
@@ -2151,6 +2209,14 @@ public class ServerPanel extends javax.swing.JPanel {
         // TODO add your handling code here:
     }//GEN-LAST:event_jRadioButtonFlagTypeNoneActionPerformed
 
+    private void jTextFieldPasswordActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldPasswordActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldPasswordActionPerformed
+
+    private void jTextFieldPortActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldPortActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextFieldPortActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.ButtonGroup buttonGroupFlags;
     private javax.swing.JButton jButtonCertificate;
@@ -2172,6 +2238,7 @@ public class ServerPanel extends javax.swing.JPanel {
     private javax.swing.JCheckBox jCheckBoxPassiveMode;
     private javax.swing.JCheckBox jCheckBoxSftp;
     private javax.swing.JComboBox jComboBoxEvent;
+    private javax.swing.JComboBox<String> jComboBoxFilterLog;
     private javax.swing.JComboBox jComboBoxInterval;
     private javax.swing.JComboBox jComboBoxLogging;
     private javax.swing.JComboBox<String> jComboBoxPort;
