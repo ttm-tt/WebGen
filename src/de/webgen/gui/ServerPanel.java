@@ -22,7 +22,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.BasicAuthenticator;
+import com.joseprio.httpserver.DigestAuthenticator;
 import com.sun.net.httpserver.HttpsConfigurator;
 import com.sun.net.httpserver.HttpsServer;
 import com.sun.net.httpserver.Filter;
@@ -204,12 +204,13 @@ public class ServerPanel extends javax.swing.JPanel {
     }
     
     
-    // Basic authentication for /settings and /logs: any user name, the password from the panel.
+    // HTTP Digest authentication for /settings and /logs: any user name, the password from the panel.
+    // Digest never sends the password itself, so it is also usable over plain HTTP.
     // The password is read on every request, so a change applies without a restart.
     // Without a password the pages don't exist for other hosts (404)
-    private class AdminAuthenticator extends BasicAuthenticator {
+    private class AdminAuthenticator extends DigestAuthenticator {
         AdminAuthenticator(String realm) {
-            super(realm, UTF8);
+            super(realm);
         }
 
         @Override
@@ -219,12 +220,11 @@ public class ServerPanel extends javax.swing.JPanel {
             return super.authenticate(exchange);
         }
 
+        // HA1 = MD5(user:realm:password) for whatever user name the browser sends,
+        // so only the password counts
         @Override
-        public boolean checkCredentials(String user, String password) {
-            String expected = webGenerator.getHttpPassword();
-            // Constant time comparison, so the response time doesn't reveal how much was right
-            return !expected.isEmpty() && java.security.MessageDigest.isEqual(
-                    expected.getBytes(UTF8), (password == null ? "" : password).getBytes(UTF8));
+        public String gethAuthToken(String username) {
+            return calculateAuthToken(username == null ? "" : username, webGenerator.getHttpPassword());
         }
     }
 
